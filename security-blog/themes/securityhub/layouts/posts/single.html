@@ -1,0 +1,56 @@
+{{ define "main" }}
+<div class="content-with-toc">
+    {{ partial "toc-sidebar.html" . }}
+
+    <article class="single-post">
+        <header class="post-header">
+            <div class="post-meta-badge">
+                {{ if eq .Params.category "research" }}
+                    <span class="research-badge">🔬 Research</span>
+                {{ else if eq .Params.category "analysis" }}
+                    <span class="analysis-badge">🔍 Analysis</span>
+                {{ else if eq .Params.category "tutorial" }}
+                    <span class="tutorial-badge">📚 Tutorial</span>
+                {{ else }}
+                    <span class="general-badge">🔐 Security</span>
+                {{ end }}
+            </div>
+
+            <h1 class="post-title-single">{{ .Title }}</h1>
+
+            <div class="post-meta-single">
+                <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+                {{ if .ReadingTime }}
+                <span> • </span>
+                <span>{{ .ReadingTime }} min read</span>
+                {{ end }}
+                {{ if .Params.tags }}
+                <span> • </span>
+                <div class="inline-tags">
+                    {{ range .Params.tags }}
+                    <span class="inline-tag">#{{ . }}</span>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </div>
+        </header>
+
+        <div class="post-body" id="post-content">
+            {{ .Content }}
+        </div>
+
+        {{ if .Params.tags }}
+        <footer class="post-footer">
+            <div class="post-tags">
+                <h4>Tags</h4>
+                <div class="tag-list">
+                    {{ range .Params.tags }}
+                    <span class="tag">#{{ . }}</span>
+                    {{ end }}
+                </div>
+            </div>
+        </footer>
+        {{ end }}
+    </article>
+</div>
+{{ end }}

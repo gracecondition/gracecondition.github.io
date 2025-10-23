@@ -1,0 +1,16 @@
+baseURL = 'http://localhost:1313/'
+languageCode = 'en-us'
+title = 'gracecondition'
+theme = 'securityhub'
+
+[params]
+  description = "OS internals, binary exploitation, and low-level security research"
+
+  [params.hero]
+    title = "gracecondition"
+    subtitle = "Deep dives into OS internals, binary exploitation, and low-level security research"
+
+  # Social links (optional)
+  # twitter = "https://twitter.com/yourusername"
+  # github = "https://github.com/yourusername"
+  # linkedin = "https://linkedin.com/in/yourusername"

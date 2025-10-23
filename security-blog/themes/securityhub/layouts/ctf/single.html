@@ -1,0 +1,67 @@
+{{ define "main" }}
+<div class="content-with-toc">
+    {{ partial "toc-sidebar.html" . }}
+
+    <article class="single-post ctf-writeup">
+        <header class="post-header ctf-header">
+            <div class="ctf-meta">
+                <span class="ctf-badge">🚩 CTF Writeup</span>
+                {{ if .Params.ctf_name }}
+                <span class="ctf-name">{{ .Params.ctf_name }}</span>
+                {{ end }}
+            </div>
+
+            <h1 class="post-title-single">{{ .Title }}</h1>
+
+            <div class="ctf-challenge-info">
+                <div class="challenge-stats">
+                    {{ if .Params.challenge_category }}
+                    <div class="stat-item">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value category-{{ .Params.challenge_category }}">{{ .Params.challenge_category | upper }}</span>
+                    </div>
+                    {{ end }}
+                    {{ if .Params.challenge_points }}
+                    <div class="stat-item">
+                        <span class="stat-label">Points:</span>
+                        <span class="stat-value">{{ .Params.challenge_points }}</span>
+                    </div>
+                    {{ end }}
+                    {{ if .Params.challenge_solves }}
+                    <div class="stat-item">
+                        <span class="stat-label">Solves:</span>
+                        <span class="stat-value">{{ .Params.challenge_solves }}</span>
+                    </div>
+                    {{ end }}
+                    {{ if eq (.Params.tags | jsonify) ("[\"first-blood\"]" | jsonify) }}
+                    <div class="stat-item">
+                        <span class="first-blood-badge">🩸 First Blood</span>
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="post-meta-single">
+                    <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+                    {{ if .ReadingTime }}
+                    <span> • </span>
+                    <span>{{ .ReadingTime }} min read</span>
+                    {{ end }}
+                </div>
+            </div>
+        </header>
+
+        <div class="post-body ctf-content" id="post-content">
+            {{ .Content }}
+        </div>
+
+        <footer class="post-footer">
+            {{ if .Parent }}
+            <div class="ctf-nav">
+                <a href="{{ .Parent.Permalink }}" class="back-to-ctf">
+                    ← Back to {{ .Parent.Title }}
+                </a>
+            </div>
+            {{ end }}
+        </footer>
+    </article>
+</div>
+{{ end }}

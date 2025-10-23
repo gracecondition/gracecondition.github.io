@@ -1,0 +1,137 @@
+<aside class="sidebar">
+    <div class="sidebar-content">
+        <!-- BULLETPROOF SEARCH -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">🔍 Search</h3>
+            <div class="search-container-robust">
+                <input type="text" id="search-input-robust" class="search-input-robust" placeholder="Type to search..." autocomplete="off">
+                <button id="search-clear-robust" class="search-clear-robust">×</button>
+            </div>
+
+            <!-- SEARCH RESULTS (HIDDEN BY DEFAULT) -->
+            <div id="search-results-robust" class="search-results-robust" style="display: none;">
+                <div class="search-results-header-robust">
+                    <span id="search-count-robust"></span>
+                </div>
+                <div class="search-results-scrollable">
+                    <div id="search-list-robust">
+                        <!-- Results will be populated here when searching -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Categories</h3>
+            <div class="category-filters">
+                <button class="category-filter active" data-category="all">All Posts</button>
+                <button class="category-filter" data-category="research">🔬 Research</button>
+                <button class="category-filter" data-category="analysis">🔍 Analysis</button>
+                <button class="category-filter" data-category="tutorial">📚 Tutorial</button>
+                <button class="category-filter" data-category="ctf">🚩 CTF</button>
+            </div>
+        </div>
+
+        <!-- Recent Posts Section -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Recent Posts</h3>
+            <div class="recent-posts">
+                {{ range first 5 (where .Site.RegularPages "Type" "in" (slice "posts" "articles")) }}
+                <article class="recent-post-item" data-category="{{ .Params.category | default "security" }}">
+                    <a href="{{ .Permalink }}" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-{{ .Params.category | default "security" }}">
+                                {{ if eq .Params.category "ctf" }}🚩
+                                {{ else if eq .Params.category "research" }}🔬
+                                {{ else if eq .Params.category "analysis" }}🔍
+                                {{ else if eq .Params.category "tutorial" }}📚
+                                {{ else }}🔐{{ end }}
+                            </span>
+                            <time class="recent-post-date">{{ .Date.Format "Jan 2" }}</time>
+                        </div>
+                        <h4 class="recent-post-title">{{ .Title | truncate 60 }}</h4>
+                        <p class="recent-post-excerpt">{{ .Summary | truncate 80 }}</p>
+                    </a>
+                </article>
+                {{ end }}
+            </div>
+        </div>
+
+        <!-- CTF Competitions Section -->
+        {{ $ctfPages := where .Site.RegularPages "Section" "ctf" }}
+        {{ if $ctfPages }}
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">CTF Competitions</h3>
+            <div class="ctf-competitions">
+                {{ range first 5 (where .Site.Sections "Section" "ctf") }}
+                <article class="ctf-competition-item">
+                    <a href="{{ .Permalink }}" class="ctf-competition-link">
+                        <div class="ctf-competition-meta">
+                            <span class="ctf-badge-small">🚩</span>
+                            {{ if .Params.ctf_date }}
+                            <time class="ctf-date-small">{{ .Params.ctf_date }}</time>
+                            {{ end }}
+                        </div>
+                        <h4 class="ctf-competition-name">{{ .Title }}</h4>
+                        {{ if .Params.placement }}
+                        <span class="ctf-placement-small">{{ .Params.placement }} place</span>
+                        {{ end }}
+                    </a>
+                </article>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+
+        <!-- All Posts by Category -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">All Posts</h3>
+            <div class="posts-by-category">
+                {{ $posts := where .Site.RegularPages "Type" "in" (slice "posts" "articles") }}
+                {{ range $posts.GroupByParam "category" }}
+                <div class="category-group">
+                    <h4 class="category-group-title">
+                        {{ if eq .Key "ctf" }}🚩 CTF
+                        {{ else if eq .Key "research" }}🔬 Research
+                        {{ else if eq .Key "analysis" }}🔍 Analysis
+                        {{ else if eq .Key "tutorial" }}📚 Tutorial
+                        {{ else }}🔐 {{ .Key | title }}{{ end }}
+                        <span class="post-count">({{ len .Pages }})</span>
+                    </h4>
+                    <ul class="category-post-list">
+                        {{ range first 8 .Pages }}
+                        <li class="category-post-item" data-category="{{ .Params.category | default "security" }}">
+                            <a href="{{ .Permalink }}" class="category-post-link">
+                                <span class="category-post-title">{{ .Title | truncate 50 }}</span>
+                                <time class="category-post-date">{{ .Date.Format "Jan 2" }}</time>
+                            </a>
+                        </li>
+                        {{ end }}
+                        {{ if gt (len .Pages) 8 }}
+                        <li class="show-more-item">
+                            <button class="show-more-btn" data-category="{{ .Key }}">
+                                Show {{ sub (len .Pages) 8 }} more...
+                            </button>
+                        </li>
+                        {{ end }}
+                    </ul>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <!-- Tags Section -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Popular Tags</h3>
+            <div class="tag-cloud">
+                {{ range first 20 .Site.Taxonomies.tags.ByCount }}
+                <a href="{{ .Page.Permalink }}" class="tag-link" data-count="{{ .Count }}">
+                    #{{ .Page.Title }}
+                    <span class="tag-count">{{ .Count }}</span>
+                </a>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</aside>

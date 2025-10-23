@@ -1,0 +1,124 @@
+<aside class="toc-sidebar">
+    <div class="toc-content">
+        <!-- Table of Contents -->
+        <div class="toc-section">
+            <h3 class="toc-title">📖 Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                <!-- Will be populated by JavaScript -->
+                <div class="toc-loading">Generating table of contents...</div>
+            </nav>
+        </div>
+
+        <!-- Article Info -->
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Article Info</h4>
+            <div class="article-info">
+                <div class="info-item">
+                    <span class="info-label">Published:</span>
+                    <time class="info-value">{{ .Date.Format "Jan 2, 2006" }}</time>
+                </div>
+                {{ if .ReadingTime }}
+                <div class="info-item">
+                    <span class="info-label">Read time:</span>
+                    <span class="info-value">{{ .ReadingTime }} min</span>
+                </div>
+                {{ end }}
+                {{ if .WordCount }}
+                <div class="info-item">
+                    <span class="info-label">Words:</span>
+                    <span class="info-value">{{ .WordCount }}</span>
+                </div>
+                {{ end }}
+                {{ if .Params.category }}
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value category-{{ .Params.category }}">{{ .Params.category | title }}</span>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <!-- CTF Challenge Info (if applicable) -->
+        {{ if .Params.challenge_category }}
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Challenge Details</h4>
+            <div class="challenge-info">
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value challenge-category category-{{ .Params.challenge_category }}">{{ .Params.challenge_category | upper }}</span>
+                </div>
+                {{ if .Params.challenge_points }}
+                <div class="info-item">
+                    <span class="info-label">Points:</span>
+                    <span class="info-value">{{ .Params.challenge_points }}</span>
+                </div>
+                {{ end }}
+                {{ if .Params.challenge_solves }}
+                <div class="info-item">
+                    <span class="info-label">Solves:</span>
+                    <span class="info-value">{{ .Params.challenge_solves }}</span>
+                </div>
+                {{ end }}
+                {{ if .Params.ctf_name }}
+                <div class="info-item">
+                    <span class="info-label">CTF:</span>
+                    <span class="info-value">{{ .Params.ctf_name }}</span>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+
+        <!-- Tags -->
+        {{ if .Params.tags }}
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Tags</h4>
+            <div class="toc-tags">
+                {{ range .Params.tags }}
+                <a href="/tags/{{ . | urlize }}/" class="toc-tag">#{{ . }}</a>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+
+        <!-- Reading Progress -->
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-percentage">0%</span>
+                    <span class="progress-label">completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Posts -->
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Related</h4>
+            <div class="related-posts">
+                {{ $related := .Site.RegularPages.Related . | first 3 }}
+                {{ range $related }}
+                <article class="related-post">
+                    <a href="{{ .Permalink }}" class="related-post-link">
+                        <span class="related-post-icon">
+                            {{ if eq .Params.category "ctf" }}🚩
+                            {{ else if eq .Params.category "research" }}🔬
+                            {{ else if eq .Params.category "analysis" }}🔍
+                            {{ else if eq .Params.category "tutorial" }}📚
+                            {{ else }}🔐{{ end }}
+                        </span>
+                        <div class="related-post-content">
+                            <h5 class="related-post-title">{{ .Title | truncate 45 }}</h5>
+                            <time class="related-post-date">{{ .Date.Format "Jan 2" }}</time>
+                        </div>
+                    </a>
+                </article>
+                {{ end }}
+            </div>
+        </div>
+
+    </div>
+</aside>

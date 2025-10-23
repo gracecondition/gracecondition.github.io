@@ -1,0 +1,39 @@
+{{ define "main" }}
+<div class="content-with-toc">
+    {{ partial "toc-sidebar.html" . }}
+
+    <article class="single-post">
+        <header class="post-header">
+            <h1 class="post-title-single">{{ .Title }}</h1>
+            <div class="post-meta-single">
+                <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+                {{ if .Params.category }}
+                <span> • </span>
+                <span class="post-category">{{ .Params.category | title }}</span>
+                {{ end }}
+                {{ if .ReadingTime }}
+                <span> • </span>
+                <span>{{ .ReadingTime }} min read</span>
+                {{ end }}
+            </div>
+        </header>
+
+        <div class="post-body" id="post-content">
+            {{ .Content }}
+        </div>
+
+        {{ if .Params.tags }}
+        <footer class="post-footer">
+            <div class="post-tags">
+                <h4>Tags</h4>
+                <div class="tag-list">
+                    {{ range .Params.tags }}
+                    <span class="tag">#{{ . }}</span>
+                    {{ end }}
+                </div>
+            </div>
+        </footer>
+        {{ end }}
+    </article>
+</div>
+{{ end }}

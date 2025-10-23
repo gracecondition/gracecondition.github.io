@@ -1,0 +1,76 @@
+{{ define "main" }}
+<section class="hero-section diagonal-gradient-bg">
+    <div class="hero-content">
+        <h1 class="hero-title">{{ .Site.Params.hero.title | default "Security Research & Analysis" }}</h1>
+        <p class="hero-subtitle">{{ .Site.Params.hero.subtitle | default "Exploring cybersecurity through research, analysis, and hands-on techniques" }}</p>
+        <a href="/posts/" class="cta-button">Explore Research</a>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="section-container">
+        <h2 class="section-title">Latest Posts</h2>
+        <div class="posts-grid">
+            {{ range first 6 (where .Site.RegularPages "Type" "in" (slice "posts" "articles" "ctf")) }}
+            <article class="post-card">
+                <a href="{{ .Permalink }}">
+                    <div class="post-image post-image-{{ .Params.category | default "security" }}" {{ if .Params.image }}style="background-image: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('{{ .Params.image }}'); background-size: cover; background-position: center;"{{ end }}>
+                        <span class="post-icon">
+                            {{ if eq .Params.category "ctf" }}🚩
+                            {{ else if eq .Params.category "research" }}🔬
+                            {{ else if eq .Params.category "analysis" }}🔍
+                            {{ else if eq .Params.category "tutorial" }}📚
+                            {{ else if eq .Params.category "writeup" }}📝
+                            {{ else }}🔐{{ end }}
+                        </span>
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">{{ .Title }}</h3>
+                        <p class="post-excerpt">{{ .Summary | truncate 120 }}</p>
+                        <div class="post-meta">
+                            <span class="post-date">{{ .Date.Format "Jan 2, 2006" }}</span>
+                            <span class="post-category">{{ .Params.category | default "security" }}</span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {{ end }}
+        </div>
+    </div>
+</section>
+
+<section class="content-section" style="background-color: var(--background-secondary);">
+    <div class="section-container">
+        <h2 class="section-title">Research Areas</h2>
+        <div class="posts-grid">
+            <div class="post-card">
+                <div class="post-image post-image-research">
+                    <span class="post-icon">🛡️</span>
+                </div>
+                <div class="post-content">
+                    <h3 class="post-title">Vulnerability Research</h3>
+                    <p class="post-excerpt">Deep dives into security vulnerabilities, exploitation techniques, and mitigation strategies.</p>
+                </div>
+            </div>
+            <div class="post-card">
+                <div class="post-image post-image-ctf">
+                    <span class="post-icon">🚩</span>
+                </div>
+                <div class="post-content">
+                    <h3 class="post-title">CTF Challenges</h3>
+                    <p class="post-excerpt">Detailed walkthroughs and solutions for Capture The Flag competitions and challenges.</p>
+                </div>
+            </div>
+            <div class="post-card">
+                <div class="post-image post-image-analysis">
+                    <span class="post-icon">🔍</span>
+                </div>
+                <div class="post-content">
+                    <h3 class="post-title">Malware Analysis</h3>
+                    <p class="post-excerpt">Reverse engineering and analysis of malicious software and attack vectors.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{ end }}

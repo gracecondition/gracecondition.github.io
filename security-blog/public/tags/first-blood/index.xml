@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>first-blood on gracecondition</title>
+    <link>http://localhost:1313/tags/first-blood/</link>
+    <description>Recent content in first-blood on gracecondition</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 12 Aug 2024 15:45:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/first-blood/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kernel-nightmare</title>
+      <link>http://localhost:1313/ctf/defcon-31/kernel-nightmare/</link>
+      <pubDate>Mon, 12 Aug 2024 15:45:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/ctf/defcon-31/kernel-nightmare/</guid>
+      <description>Linux kernel module exploitation challenge requiring privilege escalation through race condition exploitation.</description>
+    </item>
+    
+    <item>
+      <title>heap-heaven</title>
+      <link>http://localhost:1313/ctf/defcon-31/heap-heaven/</link>
+      <pubDate>Mon, 12 Aug 2024 10:30:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/ctf/defcon-31/heap-heaven/</guid>
+      <description>Advanced heap exploitation challenge involving tcache poisoning and arbitrary write primitive.</description>
+    </item>
+    
+  </channel>
+</rss>

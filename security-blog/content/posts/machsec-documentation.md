@@ -3,13 +3,13 @@ title: "machsec - detecting XNU binary mitigations"
 date: 2025-10-10T14:00:00Z
 category: "analysis"
 tags: ["example", "analysis"]
-summary: "This article explains my new mitigtion detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU"
+summary: "This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU"
 ---
 # What is machsec?
 Machsec is a custom tool I wrote to identify security mitigations on MachO binaries on iOS/macOS.
-The idea came to mind when i realized there is no "checksec" equivalent for these platforms,
+The idea came to mind when I realized there is no "checksec" equivalent for these platforms,
 not one that can detect the unique mitigations that are present on these operating systems.
-Since the mitigations are super unique, and dont exist in any other operating system.
+Since the mitigations are super unique, and don't exist in any other operating system.
 Writing a tool from scratch was necessary.
 Detecting mitigations present in a binary are a crucial step in understanding what kind
 of exploits need to be found and abused in order to gain arbitrary code execution in them.
@@ -24,31 +24,31 @@ Mitigations usually come in 3 flavors:
 * Compiler level (Inserting canaries into the stackframe)
 * Hardware level + operating system level+compiler level (SMAP/SMEP, PAC)
 
-Most operating systems implement the basic common mitigations that are ubiqiutous,
+Most operating systems implement the basic common mitigations that are ubiquitous,
 But macOS and iOS are by far the most mitigation rich operating systems out there.
 
 I will now attempt to break down almost every single major mitigation on XNU systems,
 Mostly mitigations that exist on the Compiler Level / Hardware level.
 ## Stack Canaries 
 ### What are stack canaries?
-Stack canaries is one of the most common mitigations you are going to find on an operating system.
+Stack canaries are one of the most common mitigations you are going to find on an operating system.
 Stack canaries started becoming a thing after the phrack article "Smashing the stack for fun and profit",
-where the famous technique "stacksmashing" was popularized, also known by its over name, a stack overflow.
+where the famous technique "stacksmashing" was popularized, also known by its other name, a stack overflow.
 To understand what stack canaries are, it is integral to have a firm grasp on assembly language and how a modern computer works.
 I highly recommend reading up on how assembly language works, and returning to this article afterwards, in order for things here
 to make sense.
 But put simply,
 Every function you implement and use in any modern low level programming language, will set up a memory region for itself,
 called the "Stack".
-Its a Last-in-first-out sort of data structure, where data like variables amongst other interesting things is stored for
+It's a Last-in-first-out sort of data structure, where data like variables amongst other interesting things is stored for
 functions to make use of.
 One of those interesting things is something called the instruction pointer.
-I wont go into much detail into what an instruction pointer is,
-but basically, its the memory address location of where to go after the function has finished running,
-more specifically, its the address of the function that previously called that function.
-For example, lets imagine the following:
+I won't go into much detail into what an instruction pointer is,
+but basically, it's the memory address location of where to go after the function has finished running,
+more specifically, it's the address of the function that previously called that function.
+For example, let's imagine the following:
 ``function main --(calls)--> function printf()``
-If theres more logic in main after the printf, printf would need to know how to return to main.
+If there's more logic in main after the printf, printf would need to know how to return to main.
 In the stackframe of printf, the instruction pointer to go back to main is present.
 The stack layout of a program's function might look something like this (the stackframe):
 
@@ -62,12 +62,12 @@ instruction pointer = 0x80000 <-- we want to control this
 ---- <- $sp (stack pointer)
 ```
 A stack buffer overflow occurs when we read way too much data and start overwriting adjacent variables.
-The instruction pointer is just techinically another variable on the stack. If were not careful when writing to the
+The instruction pointer is just technically another variable on the stack. If we're not careful when writing to the
 stack, we could accidentally run it over.
 The stack canary is there to be intentionally the target of abuse.
-Lets take a look at this stack frame after a buffer overflow attack (usually a bunch of A's):
+Let's take a look at this stack frame after a buffer overflow attack (usually a bunch of A's):
 ```asm
----- <- $bp (base pointer of stack
+---- <- $bp (base pointer of stack)
 int i = 'AAAAAAAAAAAAAAAAAAAAAAA' 
 int j = 'AAAAAAAAAAAAAAAAAAAAAAA' 
 stack canary = 'AAAAAAAAAA' <--- stack canary hit! abort! abort!
@@ -77,10 +77,10 @@ instruction pointer = 0x80000 <-- we want to control this
 In the actual code of the program, the compiler will insert an additional function
 before the function returns (reads from the instruction pointer) to check if the canary on the
 stack matches the value of the canary in ``.rodata``, a region of memory in the binary
-that the attacker can never write to, since its read only.
-Lets compare what the code a developer would see, versus, what would actually get executed
+that the attacker can never write to, since it's read only.
+Let's compare what the code a developer would see, versus, what would actually get executed
 on a lower level.
-Heres our code:
+Here's our code:
 ```c
 #include <stdio.h>
 
@@ -92,12 +92,12 @@ int main()
     return 0;
 }
 ```
-As you can see, pretty clear and cut.
+As you can see, pretty clear-cut.
 The control flow logic would go like this
 ``main() --> fgets() --> printf() --> return/end()``
-Lets take a look at whats actually happening:
+Let's take a look at what's actually happening:
 {{< figure src="/images/ida_canary.png" width="80%" >}}
-As you can see, a program that should  be clear and cut, now has branches, conditional
+As you can see, a program that should be clear-cut, now has branches, conditional
 checks, and a call to ``__stack_chk_fail``.
 The flow looks a little something like this:
 ```asm
@@ -130,7 +130,7 @@ You can either check the binary for the functions that handle the canary verific
     }
 ```
 This will of course not be possible since the symbols (names of functions) vanish
-when the program is stripped and statically linked("packing all of the libraries
+when the program is stripped and statically linked (packing all of the libraries
 of the program together into one binary).
 
 #### Method 2
@@ -160,11 +160,11 @@ Or you can look for data that looks like the canary getting moved around:
 
 
 ```
-Since the canary is a very unique data type that resides in a particual 
-area of memory, its easy to fingerprint its movement around in the program,
+Since the canary is a very unique data type that resides in a particular
+area of memory, it's easy to fingerprint its movement around in the program,
 without even having access to function symbols.
 99% of the time, if a datatype that looks like a canary is being moved
-around, its a canary.
+around, it's a canary.
 #### Optional method 3
 ```c
         // ARM64 stack canary detection for iOS devices
@@ -187,37 +187,37 @@ around, its a canary.
         }
     }
 ```
-Arm has special mnemonics for calling and reading canaries, since its a more modern
+Arm has special mnemonics for calling and reading canaries, since it's a more modern
 architecture built with security in mind.
-usually when you see these mnemonics, interacting with registers
-that are desginated for storing canaries, its probably a canary being handled.
+Usually when you see these mnemonics, interacting with registers
+that are designated for storing canaries, it's probably a canary being handled.
 
 ## PIE
 ### What is PIE
-PIE, or position independant executable,
+PIE, or position independent executable,
 is another mitigation commonly found on most operating systems.
 The idea is to randomize where program functions are located in memory, during runtime.
 This is done to prevent an attacker that might have a stack buffer overflow primitive, 
 from having the ability to easily modify the control flow of the program
-to suddenly redirect exeuciton to another function.
+to suddenly redirect execution to another function.
 This is done via randomization, making it so that the attacker either has to 
-leak what the address of a function hes interested in is, or via guessing which is
+leak what the address of a function he's interested in is, or via guessing which is
 VERY HARD to do.
 
-Heres what a program with and without pie looks like
+Here's what a program with and without PIE looks like
 {{< figure src="/images/after_pie.png" width="80%" >}}
-Where 0x40080 is the address before pie, and will always be
+Where 0x40080 is the address before PIE, and will always be
 0x40080.
-And 0x00080 is the address after pie,
+And 0x00080 is the address after PIE,
 where the first few zeros will be randomized at runtime.
 The offset is the 80.
 
 ### Detecting PIE
-Detecting PIE is done via parsing the headers of the machO
+Detecting PIE is done via parsing the headers of the Mach-O
 binary.
-The headers of the binary are essentially metada about the binary.
+The headers of the binary are essentially metadata about the binary.
 The metadata being stuff like:
-* binary type (ELF/MachO)
+* binary type (ELF/Mach-O)
 * binary architecture (arm/x86)
 * which mitigations are enabled (PIE, or NX)
 Just by parsing the headers, we can glean a bunch
@@ -267,14 +267,14 @@ bool detect_pie(struct DetectionResults *res, macho_t *macho) {
 ```
 ## No eXecute (NX)
 ### Whats NX?
-NX or no execute is another mitigation, where we mark the 
-stack/heap reigion as a non executable area of memory.
-The reason this is done, is becauase
+NX or no execute is another mitigation, where we mark the
+stack/heap region as a non executable area of memory.
+The reason this is done, is because
 attackers used to be able to for example,
 abuse a buffer overflow to write a bunch of malicious program logic
 (straight up native assembly to the stack) and then just tell the program
-to execute the data in the stack memory reigion.
-The NX mitigation just straight up marks the entire memory reigion as a read/write memory
+to execute the data in the stack memory region.
+The NX mitigation just straight up marks the entire memory region as a read/write memory
 region ONLY, meaning attackers can no longer place malicious assembly code on the stack, redirect
 execution to it, and expect it to run.
 ### Detecting NX
@@ -288,7 +288,7 @@ In order to detect NX, machsec does the following for the heap and the stack:
     - Checks if VM_PROT_EXECUTE bit is set in initprot
     - Assumes NX enabled if no explicit stack segment (modern macOS default)
 
-And heres how its implemented in the code of machsec, for the stack and the heap respectivley.
+And here's how it's implemented in the code of machsec, for the stack and the heap respectively.
 Stack:
 ```c
 
@@ -431,22 +431,22 @@ Just need to read the initprot section of the machO binary.
 ---
 ## FORTIFY
 ### What is fortify?
-Foritfy is a compiler flag to replace common memory unsafe functions
+Fortify is a compiler flag to replace common memory unsafe functions
 with functions that have bounds checking.
 This mitigation is purely compiler level, and was created by the GNU compiler
 later adopted by clang.
 The main functions it targets are stuff like ``memcpy()`` and ``memmove()``.
-Its a relativley weak mitigation, but still something to be aware of.
+It's a relatively weak mitigation, but still something to be aware of.
 ### How to detect fortify
 This mitigation modifies the way the functions work, which means the way
 the code looks at the assembly level is also different from a binary that was
-compiled withthout this mitigation.
+compiled without this mitigation.
 {{< figure src="/images/foritfy.png" width="80%" >}}
 As you can see, the memory unsafe functions like memcpy are now called
 ``__memcpy_chk()``. Essentially meaning the memcpy function was replaced
 on the linking level with a more secure version.
 If we just look for these symbols, we can detect this mitigation.
-And heres what the code for the detection mechanism looks like:
+And here's what the code for the detection mechanism looks like:
 ```c
 bool detect_fortify(struct DetectionResults *res, macho_t *macho) {
     struct symtab_command *symtab = macho_get_symtab(macho);
@@ -563,13 +563,13 @@ exploit primitive.
 It works in much the same way as the previously discussed mitigations, and can be enabled
 with a compiler flag.
 However, the tradeoff to using this mitigation is huge since it adds a bunch of checks and functions to the
-program, which significatly reduces the performance of the program.
+program, which significantly reduces the performance of the program.
 ### Detecting ASAN
 Detecting ASAN works in much the same way as the previously discussed mitigations
-Heres what a binary with the asan checks looks like:
+Here's what a binary with the asan checks looks like:
 {{< figure src="/images/asan.png" width="80%" >}}
 As you can see, a bunch of asan functions get added.
-And heres how the code detects asan:
+And here's how the code detects asan:
 ```c
 bool detect_asan(struct DetectionResults *res, macho_t *macho) {
 
@@ -603,16 +603,16 @@ bool detect_asan(struct DetectionResults *res, macho_t *macho) {
 ```
 ## CFI (Control Flow Integrity)
 ### What is CFI?
-CFI is an attempt at ensuring a programs proper control flow via in program checks much like 
+CFI is an attempt at ensuring a program's proper control flow via in-program checks much like 
 the functions we have seen inserted into programs as part of other mitigations like UBSAN, ASAN
 and canaries.
-This is the most **costly** software mitigation of them all, since it will massivley increase the binary
-size, and the performance pentalty is huge.
-Unfortunatley, this mitigation mostly applies to Linux/ELF binaries, since modern macos/xnu machines
+This is the most **costly** software mitigation of them all, since it will massively increase the binary
+size, and the performance penalty is huge.
+Unfortunately, this mitigation mostly applies to Linux/ELF binaries, since modern macOS/xnu machines
 just use PAC, which is a hardware based implementation of control flow integrity, which I will discuss later in the post.
 ### Detecting CFI
 Detecting CFI works much like detecting the other previous instrumentation based mitigations, we just read the symbols
-from the binary... and were done.
+from the binary... and we're done.
 ```c
 bool detect_cfi(struct DetectionResults *res, macho_t *macho) {
     // CFI is less common on macOS, check for symbols
@@ -648,7 +648,7 @@ bool detect_cfi(struct DetectionResults *res, macho_t *macho) {
 ### What is symbol stripping
 Symbol stripping is not a mitigation per se, but a redaction of information that makes life for
 reverse engineers harder.
-When you give a function a name in a piece of code, the compiler doesnt really care/need the function
+When you give a function a name in a piece of code, the compiler doesn't really care/need the function
 name in order to use the function, just a memory address of where that function is.
 We humans however really need function names since they help us understand what the function does
 at a glance without having to read the fun code.
@@ -658,7 +658,7 @@ generated obviously depend on your decompiler of choice.
 ### Detecting symbol stripping
 We detect symbol stripping via detecting if there are no symbols present, which is quite funny since most
 mitigations we look for something that exists in the binary, but this one, we look for the nonpresence of something.
-You can tell how many symbols are in a binary, aswell as how many symbols are in the binary total, by just reading
+You can tell how many symbols are in a binary, as well as how many symbols are in the binary total, by just reading
 the binary headers and metadata
 ```c
 bool detect_symbols(struct DetectionResults *res, macho_t *macho) {
@@ -721,18 +721,18 @@ to make the stack region and the heap region of the program to intersect thus co
 the integral data that lives on the stack, stuff like function pointers, variables, etc.
 ### Detecting stack clashing
 Detecting stack clashing, like most mitigations, is just a bunch of instrumentation the
-compiler adds, a bunch of functions to check that the stack region hasnt intersected into
+compiler adds, a bunch of functions to check that the stack region hasn't intersected into
 the heap region.
-Since its not really a thing on macOS/xnu, we can just assume that if canaries are present,
+Since it's not really a thing on macOS/xnu, we can just assume that if canaries are present,
 that check is also probably present.
 
 ## Heap cookies
 ### What are heap cookies?
 Heap cookies are the same thing as stack canaries, but in the heap.
-They check that heap chuncks havent been overflown.
+They check that heap chunks haven't been overflown.
 ### Detecting heap cookies
 Detecting heap cookies can be done by checking the symbols in the binary.
-Heres how to detect them:
+Here's how to detect them:
 ```c
 bool detect_heap_cookies(struct DetectionResults *res, macho_t *macho) {
     struct symtab_command *symtab = macho_get_symtab(macho);
@@ -804,8 +804,8 @@ bool detect_integer_overflow(struct DetectionResults *res, macho_t *macho) {
 In general, sandboxing is creating a restricted environment where a binary has limited
 access to the underlying operating system.
 In the case of XNU and mitigations, this mitigation does a couple of things:
-* Filter syscalls (A bit like seccomp on linux) using a kernel feature called seatbelt
-* Check entitlements (what is the binary allowed to access, what kind of hardware etc...)
+* Filter syscalls (A bit like seccomp on Linux) using a kernel feature called seatbelt
+* Check entitlements (what is the binary allowed to access, what kind of hardware, etc.)
 * Apply a sandboxing profile based on the entitlements and the syscalls being filtered.
 ### Detecting sandboxing
 We can detect sandboxing either via the symbols present, by checking if the binary is signed, which is also
@@ -909,14 +909,14 @@ unique to macOS, some of them even unique to only iOS
 The hardened runtime is another mitigation set in place by XNU, set to mitigate against
 library injection at runtime, debugging, injection of any unsigned code at runtime,
 dynamic instrumentation, and the like, on a per process basis.
-aswell as adding some unique runtime mitigations.
-Heres a breakdown of some of the things it will do:
-* ``CS_RESTRICT``, a machO header in the binary, part of the codesigning section of the binary metadata.
-blocks ``task_for_pid()``, essentially making the program not attachable by debugger, unless they have the right entitlements
-*  ``cs_kill`` kernel kills the process if ay any point during runtime signatures do not match
+as well as adding some unique runtime mitigations.
+Here's a breakdown of some of the things it will do:
+* ``CS_RESTRICT``, a Mach-O header in the binary, part of the codesigning section of the binary metadata.
+blocks ``task_for_pid()``, essentially making the program not attachable by a debugger, unless they have the right entitlements
+*  ``cs_kill`` kernel kills the process if at any point during runtime signatures do not match
 * Library validation checks that all binaries are signed and have not been modified.
-* JIT Restricition - Just In Time compilation requries a memory region to be writeable & executable, which is a security risk. This mitigation will not allow ``mmap()``ing a memory region thats both write and execute, unless a specfici entitlement is set: ``com.apple.security.cs.allow-jit``
-* Debugging - blocks ptrace() unless there is a specfic entitlement:
+* JIT Restriction - Just In Time compilation requires a memory region to be writeable & executable, which is a security risk. This mitigation will not allow ``mmap()``ing a memory region that's both write and execute, unless a specific entitlement is set: ``com.apple.security.cs.allow-jit``
+* Debugging - blocks ptrace() unless there is a specific entitlement:
 ``com.apple.security.get-task-allow``
 ### What is SIP (System Integrity Protection)
 SIP is a suite of these mitigations, that ensures the operating
@@ -928,12 +928,12 @@ And is a must if you want to do any sort of offensive security like
 dynamically instrumenting a program with FRIDA,
 run a cracked program with the license validation libraries patched, etc.
 ### Binary Encryption (AMFI)
-Apple Mobile File Inegrity or AMFI 
+Apple Mobile File Integrity or AMFI 
 Is another mitigation that exists on XNU, specifically on iOS.
 The mitigation consists of two components working in tandem:
 * amfid (System Daemon)
 * kernel module (AppleMobileFileIntegrity.kext)
-Together these two preform the following functions
+Together these two perform the following functions
 * Decrypt encrypted binaries:
 Binaries have their ``__TEXT`` section encrypted, need to have the
 section decrypted to run properly. 
@@ -948,8 +948,8 @@ amfid verifies cert chains, provisioning profiles, etc.
 
 
 ### Detecting SIP/Hardened runtime
-Detecting if SIP is enabled on the operating system level is out of the scope, of machsec, but its safe to assume every XNU based operating system will have it enabled by default.
-However, not all binaries will have a hardened runtime enabled, so we can definetly check for that in the binary.
+Detecting if SIP is enabled on the operating system level is out of the scope of machsec, but it's safe to assume every XNU based operating system will have it enabled by default.
+However, not all binaries will have a hardened runtime enabled, so we can definitely check for that in the binary.
 We can check for the headers in the binary, which tell the kernel how to handle the binary. The same information that helps the kernel, helps us.
 ```c
 bool detect_hardened_runtime(struct DetectionResults *res, macho_t *macho) { // Check for LC_CODE_SIGNATURE load command (both macOS and iOS)
@@ -1011,7 +1011,7 @@ The following are NOT signed:
 * Dynamically allocated memory
 
 ### Detecting code signing
-Its once again as simple as just parsing the binary headers.
+It's once again as simple as just parsing the binary headers.
 ```c
 bool detect_code_signing(struct DetectionResults *res, macho_t *macho) {
     struct load_command *code_sig = macho_find_command(macho, LC_CODE_SIGNATURE);
@@ -1032,16 +1032,16 @@ bool detect_code_signing(struct DetectionResults *res, macho_t *macho) {
 
 ## PAC (ARM Exclusive)
 ### What is PAC?
-PAC or pointer authentication codes is a unique mitigation only available on ARM hardware.  
-Its a mitigation that signs control-flow pointers (function pointers and return addresses) cryptographically, thus making control flow hijacking very hard.  
+PAC or pointer authentication codes is a unique mitigation only available on ARM hardware.
+It's a mitigation that signs control-flow pointers (function pointers and return addresses) cryptographically, thus making control flow hijacking very hard.  
 Since at the end of the day, most memory corruption attacks want to hijack the control flow of the program, this is one of the most powerful mitigations available to us on ARM-based platforms, which happen to be what Apple uses for their phones and recently, laptops.
 
 ### How does PAC Work?
 PAC works by adding the following:  
-* Custom Instructions to ARM assembly which preform the pointer auth.  
+* Custom Instructions to ARM assembly which perform the pointer auth.  
 * Custom accelerator circuits into the processor to assist in the cryptographic calculations necessary for PAC to work. This helps the security feature not be a burden on performance.  
 * Custom Registers to the CPU, where keys are stored. Each register is 128 bits in size and inaccessible to user code.  
-* Custom Encryption - Uses a new method of hasing called QARMA designed specifically to be more fast, less secure.
+* Custom Encryption - Uses a new method of hashing called QARMA designed specifically to be more fast, less secure.
 
 PAC works by utilizing the unused bits of pointer addresses (no computer ever has 2^64, or 16 exabytes of memory).  
 So by default, pointers look a little something like this:
@@ -1076,14 +1076,14 @@ Since C allows you to do things like pointer arithmetic and interact with pointe
 Thus, only pointers that are generally not going to be messed around with by a C program, things like instruction pointers, we can safely sign them, since they are not going to be modified intentionally by program logic.
 
 ### Detecting PAC
-Heres a picture of what PAC looks like in a program (``/bin/ls``).
+Here's a picture of what PAC looks like in a program (``/bin/ls``).
 {{< figure src="/images/pac.png" width="80%" >}}
 As you can see, we get new cool arm instructions like
 *  PACZIA (Sign pointer with context of "0")
 *  AUTIBSP (Auth Pointer using key B)
 
 So the detection mechanism just needs to detect the new instructions.
-Or if the dissassembler hasnt been updated with handling these new instrucitons, we can just resort back to symbols.
+Or if the disassembler hasn't been updated with handling these new instructions, we can just resort back to symbols.
 ```c
 bool detect_pac(struct DetectionResults *res, macho_t *macho) {
     // PAC (Pointer Authentication Code) is available on ARM64 devices
@@ -1219,8 +1219,8 @@ STRB w1, [x0]
 The `STRB` alongside other instructions like `LDR` automagically perform the tag check in the background. As you can see, in the UAF, there is no tag generation. And the old tag that was assigned to that heap chunk no longer matches the tag in the pointer. STRB instruction will now crash due to tag mismatch with a synchronous exception.
 
 ### Detecting MTE
-Detecting MTE took a bit work research, since, its a new mitigtation.
-I had to extract the JavaScriptCore engine from iOS 26.1 on the new iphone since that the only thing that has that mitigation right now.
+Detecting MTE took a bit of research work, since it's a new mitigation.
+I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since that's the only thing that has that mitigation right now.
 ```c
 bool detect_mie(struct DetectionResults *res, cs_insn *insn, size_t count, macho_t *macho) {
     // MIE (Memory Integrity Enforcement) / EMTE (Enhanced Memory Tagging Extension)
@@ -1349,13 +1349,13 @@ bool detect_mie(struct DetectionResults *res, cs_insn *insn, size_t count, macho
     }
 }
 ```
-As you can see, I had to use a two pronged approach, looking for symbols
-and the actual disassembly from the disassembler. 
-This detection method is activley looking for instructions in arm64
-that are related to memory tagging. These instructions are brand new, and thus some dissassemblers dont support them and cant parse them.
+As you can see, I had to use a two-pronged approach, looking for symbols
+and the actual disassembly from the disassembler.
+This detection method is actively looking for instructions in arm64
+that are related to memory tagging. These instructions are brand new, and thus some disassemblers don't support them and can't parse them.
 But this is the best method of detecting it.
 
 ## ARC (ObjectiveC)
 ### What is ARC?
-ARC, or Automatic Reference Counting, is a mitigation available in the swift/objectiveC programming langs, that does referene counting
-in order to make UAF's harder in objC and swift, since all of the higher level objects and datastructures let you create, are stored in the heap.
+ARC, or Automatic Reference Counting, is a mitigation available in the Swift/Objective-C programming languages, that does reference counting
+in order to make UAFs harder in Objective-C and Swift, since all of the higher level objects and data structures you create are stored in the heap.

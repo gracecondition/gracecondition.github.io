@@ -13,7 +13,7 @@ Since the mitigations are super unique, and don't exist in any other operating s
 Writing a tool from scratch was necessary.
 Detecting mitigations present in a binary are a crucial step in understanding what kind
 of exploits need to be found and abused in order to gain arbitrary code execution in them.
-For example, you can not abuse a dangling pointer if all of your pointers are signed.
+For example, you can not preform a ROP attack if all of your instruction pointers are  signed.
 What are signed pointers? There is no such thing on other platforms? this is exactly the issue
 I tried to solve with this program.
 # Mitigations 
@@ -42,9 +42,7 @@ Every function you implement and use in any modern low level programming languag
 called the "Stack".
 It's a Last-in-first-out sort of data structure, where data like variables amongst other interesting things is stored for
 functions to make use of.
-One of those interesting things is something called the instruction pointer.
-I won't go into much detail into what an instruction pointer is,
-but basically, it's the memory address location of where to go after the function has finished running,
+One of those interesting things is something called the return address. Put simply, it's the memory address location of where to go after the function has finished running,
 more specifically, it's the address of the function that previously called that function.
 For example, let's imagine the following:
 ``function main --(calls)--> function printf()``
@@ -76,7 +74,7 @@ instruction pointer = 0x80000 <-- we want to control this
 ```
 In the actual code of the program, the compiler will insert an additional function
 before the function returns (reads from the instruction pointer) to check if the canary on the
-stack matches the value of the canary in ``.rodata``, a region of memory in the binary
+stack matches the value of the canary in  a special region of memory similar to``.rodata``, a region of memory in the binary thats readonly.
 that the attacker can never write to, since it's read only.
 Let's compare what the code a developer would see, versus, what would actually get executed
 on a lower level.
@@ -211,6 +209,12 @@ Where 0x40080 is the address before PIE, and will always be
 And 0x00080 is the address after PIE,
 where the first few zeros will be randomized at runtime.
 The offset is the 80.
+PIE randomized the base address, the part that is filled with 00000s.
+So heres what addresses with and without PIE look like:
+* ``0x0000000000400080`` (before PIE) 
+* ``0x00007f8a4b200080`` (after PIE)
+
+Note that the ``080`` part stays the same, thats our offset.
 
 ### Detecting PIE
 Detecting PIE is done via parsing the headers of the Mach-O
@@ -322,7 +326,7 @@ Heap:
 ```
 ## RPATH/RUNPATH
 ### What is rpath/runpath
-Rpath and runpath are the paths where libraries reside on them system,
+Rpath and runpath specify the paths where libraries are stored on the system.
 for the program to use and load, **at runtime**.
 The reason these are dangerous is due to the fact an attacker could replace these libraries
 with modified libraries and thus control code execution, if the paths
@@ -379,56 +383,7 @@ Detection Process
   ├── LC_LOAD_DYLIB: @rpath/lib.dylib ← Detected as @rpath usage  
   └── LC_LOAD_DYLIB: /usr/lib/libc.dylib ← Safe, ignored
 ```
-## RELRO
-### What is relro
-relro, or relocation read only is a mitigation that marks interesting
-areas of binary space as read only.
-Heres how ctf101.org defines it:
 
-"Relocation Read-Only (or RELRO) is a security measure which makes some binary sections read-only.
-
-There are two RELRO "modes": partial and full.
-
-Partial RELRO
-Partial RELRO is the default setting in GCC, and nearly all binaries you will see have at least partial RELRO.
-
-From an attackers point-of-view, partial RELRO makes almost no difference, other than it forces the GOT to come before the BSS in memory, eliminating the risk of a buffer overflows on a global variable overwriting GOT entries.
-
-Full RELRO
-Full RELRO makes the entire GOT read-only which removes the ability to perform a "GOT overwrite" attack, where the GOT address of a function is overwritten with the location of another function or a ROP gadget an attacker wants to run.
-
-Full RELRO is not a default compiler setting as it can greatly increase program startup time since all symbols must be resolved before the program is started. In large programs with thousands of symbols that need to be linked, this could cause a noticable delay in startup time. "
-
-What is the GOT? the Global offset Table is a special table that tells the binary where to look up functions from
-other libraries.
-If an attacker overwrites the entries in this table, they could replace the address of printf() with the address
-of any functiony they like, so that the next time printf() is called, their function is called.
-### How to detect relro
-Just need to read the initprot section of the machO binary.
-```c
- // Case 1: Partial RELRO
-  if (data_seg && (data_seg->initprot & VM_PROT_WRITE) && !(data_seg->maxprot & VM_PROT_WRITE)) {
-      res->relro_text = "Partial RELRO (read-only data)";
-      res->relro_status = 1;  // YELLOW
-      res->relro_color = COLOR_YELLOW;
-  }
-
-  // Case 2: No RELRO  
-  else if (data_seg && (data_seg->initprot & VM_PROT_WRITE)) {
-      res->relro_text = "No RELRO";
-      res->relro_status = 2;  // RED
-      res->relro_color = COLOR_RED;
-  }
-
-  // Case 3: Unknown
-  else {
-      res->relro_text = "RELRO unknown";
-      res->relro_status = 1;  // YELLOW
-      res->relro_color = COLOR_YELLOW;
-  }
-```
-
----
 ## FORTIFY
 ### What is fortify?
 Fortify is a compiler flag to replace common memory unsafe functions
@@ -1057,19 +1012,19 @@ PAC makes use of this to insert a little signature, so a signed pointer might lo
 This hash gets computed using the following equation:
 
 ```math
-truncate(hmac(key, ptr || context))
+truncate(QARMA_encrypt(key, pointer, context))
 ```
 Where:
 
 Truncate - we cannot fit the whole result into the few bits we have, so we truncate to the 16 or 24 bits available.
 
-hmac - hash-based message authentication code.
+QARMA - Custom ARM hasing algorthim, a tweakable block cipher algorthim. 
 
 key - secret key sitting in registers which can only be set by the kernel.
 
 context - current value of the stack pointer, so that the function pointer can only be called within the context of the stackframe it resides in. This prevents just reusing a signed pointer from somewhere else in the program. The signed pointer will not work outside the proper stackframe (execution context); the signature calculated won’t match, and the process will crash.
 
-However, it’s important to note that *PAC ONLY SIGNS INSTRUCTION POINTERS AND RETURN ADDRESSES (AND SOME BASIC VARIABLES)*.
+However, it’s important to note that *PAC primarily signs instruction pointers, return addresses, and function pointers. Data pointers can be signed with PAC in some implementations, but this is limited by C language constraints (pointer arithmetic, pointer-to-integer casts, etc).*
 Unfortunately, due to the way the C spec is defined, it’s impossible to sign all the pointers without completely breaking everything.
 Since C allows you to do things like pointer arithmetic and interact with pointers as a datatype, any interaction with a pointer as a datatype would cause an exception in the way PAC works.
 

@@ -2,81 +2,81 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>gracecondition</title>
-    <link>http://localhost:1313/</link>
+    <link>https://gracecondition.github.io/</link>
     <description>Recent content on gracecondition</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 Sep 2024 10:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 10 Oct 2025 14:00:00 +0000</lastBuildDate><atom:link href="https://gracecondition.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>machsec - detecting XNU binary mitigations</title>
+      <link>https://gracecondition.github.io/posts/machsec-documentation/</link>
+      <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
+      
+      <guid>https://gracecondition.github.io/posts/machsec-documentation/</guid>
+      <description>This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
+    </item>
+    
     <item>
       <title>Welcome to Security Research</title>
-      <link>http://localhost:1313/posts/welcome-to-security-research/</link>
+      <link>https://gracecondition.github.io/posts/welcome-to-security-research/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/posts/welcome-to-security-research/</guid>
+      <guid>https://gracecondition.github.io/posts/welcome-to-security-research/</guid>
       <description>An introduction to this security research blog and what you can expect to find here.</description>
     </item>
     
     <item>
-      <title>Stack-Based Buffer Overflow Fundamentals</title>
-      <link>http://localhost:1313/posts/buffer-overflow-basics/</link>
-      <pubDate>Sun, 22 Sep 2024 14:30:00 +0000</pubDate>
+      <title>Demo VM Escape Challenge</title>
+      <link>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</link>
+      <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/posts/buffer-overflow-basics/</guid>
-      <description>Introduction to stack-based buffer overflow vulnerabilities and basic exploitation techniques.</description>
+      <guid>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</guid>
+      <description>Demo template for VM escape writeups - demonstrates proper formatting and structure.</description>
     </item>
     
     <item>
-      <title>Linux Kernel Heap Exploitation in 2024</title>
-      <link>http://localhost:1313/posts/linux-kernel-heap-exploitation/</link>
-      <pubDate>Fri, 20 Sep 2024 09:00:00 +0000</pubDate>
+      <title>Demo Kernel Challenge</title>
+      <link>https://gracecondition.github.io/ctf/defcon-31/kernel-nightmare/</link>
+      <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/posts/linux-kernel-heap-exploitation/</guid>
-      <description>Deep dive into modern Linux kernel heap exploitation techniques, covering SLUB allocator internals and bypass methods for current mitigations.</description>
+      <guid>https://gracecondition.github.io/ctf/defcon-31/kernel-nightmare/</guid>
+      <description>Demo template for kernel exploitation writeups - demonstrates proper formatting and structure.</description>
     </item>
     
     <item>
-      <title>Sample Research Post</title>
-      <link>http://localhost:1313/posts/sample-research-post/</link>
-      <pubDate>Sun, 15 Sep 2024 10:00:00 +0000</pubDate>
+      <title>Demo Advanced Research - Kernel Exploitation</title>
+      <link>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</link>
+      <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/posts/sample-research-post/</guid>
-      <description>This is a sample research post to demonstrate the layout and structure.</description>
+      <guid>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</guid>
+      <description>Demo template for in-depth technical research posts - demonstrates proper structure for complex topics.</description>
     </item>
     
     <item>
-      <title>MACHSEC</title>
-      <link>http://localhost:1313/posts/machsec-documentation/</link>
-      <pubDate>Tue, 10 Sep 2024 14:00:00 +0000</pubDate>
+      <title>Demo Heap Challenge</title>
+      <link>https://gracecondition.github.io/ctf/defcon-31/heap-heaven/</link>
+      <pubDate>Mon, 15 Jan 2024 10:30:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/posts/machsec-documentation/</guid>
-      <description>This article explains my new mitigtion detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
+      <guid>https://gracecondition.github.io/ctf/defcon-31/heap-heaven/</guid>
+      <description>Demo template for heap exploitation writeups - demonstrates proper formatting and structure.</description>
     </item>
     
     <item>
-      <title>kernel-nightmare</title>
-      <link>http://localhost:1313/ctf/defcon-31/kernel-nightmare/</link>
-      <pubDate>Mon, 12 Aug 2024 15:45:00 +0000</pubDate>
+      <title>Demo Tutorial - Binary Exploitation Basics</title>
+      <link>https://gracecondition.github.io/posts/buffer-overflow-basics/</link>
+      <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/ctf/defcon-31/kernel-nightmare/</guid>
-      <description>Linux kernel module exploitation challenge requiring privilege escalation through race condition exploitation.</description>
+      <guid>https://gracecondition.github.io/posts/buffer-overflow-basics/</guid>
+      <description>Demo template for tutorial posts - demonstrates proper formatting for educational content.</description>
     </item>
     
     <item>
-      <title>heap-heaven</title>
-      <link>http://localhost:1313/ctf/defcon-31/heap-heaven/</link>
-      <pubDate>Mon, 12 Aug 2024 10:30:00 +0000</pubDate>
+      <title>Demo Research Post</title>
+      <link>https://gracecondition.github.io/posts/sample-research-post/</link>
+      <pubDate>Wed, 10 Jan 2024 10:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/ctf/defcon-31/heap-heaven/</guid>
-      <description>Advanced heap exploitation challenge involving tcache poisoning and arbitrary write primitive.</description>
-    </item>
-    
-    <item>
-      <title>vm-escape</title>
-      <link>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</link>
-      <pubDate>Sun, 14 Apr 2024 20:15:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</guid>
-      <description>Custom virtual machine reversing challenge requiring escape from sandboxed environment.</description>
+      <guid>https://gracecondition.github.io/posts/sample-research-post/</guid>
+      <description>Demo template for research posts - demonstrates proper layout and structure.</description>
     </item>
     
   </channel>

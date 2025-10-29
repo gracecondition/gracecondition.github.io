@@ -2,120 +2,93 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://gracecondition.github.io/tags/analysis/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/tags/example/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/posts/machsec-documentation/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/posts/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/tags/</loc>
+    <lastmod>2025-10-10T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://gracecondition.github.io/tags/introduction/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/introduction/</loc>
+    <loc>https://gracecondition.github.io/tags/research/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>https://gracecondition.github.io/tags/security/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/research/</loc>
+    <loc>https://gracecondition.github.io/posts/welcome-to-security-research/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/security/</loc>
-    <lastmod>2024-09-24T10:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
-    <lastmod>2024-09-24T10:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/welcome-to-security-research/</loc>
-    <lastmod>2024-09-24T10:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/about/</loc>
+    <loc>https://gracecondition.github.io/about/</loc>
     <lastmod>2024-09-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/basics/</loc>
-    <lastmod>2024-09-22T14:30:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/buffer-overflow/</loc>
-    <lastmod>2024-09-22T14:30:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/demo/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/exploitation/</loc>
-    <lastmod>2024-09-22T14:30:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/stack/</loc>
-    <lastmod>2024-09-22T14:30:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/reversing/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/buffer-overflow-basics/</loc>
-    <lastmod>2024-09-22T14:30:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/template/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/heap/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/vm-escape/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/kernel-exploitation/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/plaidctf-2024/</loc>
+    <lastmod>2024-01-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/kmalloc/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/defcon-31/kernel-nightmare/</loc>
+    <lastmod>2024-01-20T15:45:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/linux/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/kernel-exploitation/</loc>
+    <lastmod>2024-01-20T15:45:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/linux-kernel-heap-exploitation/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/defcon-31/</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/slab/</loc>
-    <lastmod>2024-09-20T09:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/advanced/</loc>
+    <lastmod>2024-01-18T09:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/example/</loc>
-    <lastmod>2024-09-15T10:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</loc>
+    <lastmod>2024-01-18T09:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/sample-research-post/</loc>
-    <lastmod>2024-09-15T10:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/ctf/defcon-31/heap-heaven/</loc>
+    <lastmod>2024-01-15T10:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/analysis/</loc>
-    <lastmod>2024-09-10T14:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/heap-exploitation/</loc>
+    <lastmod>2024-01-15T10:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/machsec-documentation/</loc>
-    <lastmod>2024-09-10T14:00:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/binary-exploitation/</loc>
+    <lastmod>2024-01-12T14:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/ctf/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/posts/buffer-overflow-basics/</loc>
+    <lastmod>2024-01-12T14:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/defcon31/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/tags/tutorial/</loc>
+    <lastmod>2024-01-12T14:30:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/first-blood/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
+    <loc>https://gracecondition.github.io/posts/sample-research-post/</loc>
+    <lastmod>2024-01-10T10:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/ctf/defcon-31/kernel-nightmare/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/privilege-escalation/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/pwn/</loc>
-    <lastmod>2024-08-12T15:45:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/heap-exploitation/</loc>
-    <lastmod>2024-08-12T10:30:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/ctf/defcon-31/heap-heaven/</loc>
-    <lastmod>2024-08-12T10:30:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/ctf/defcon-31/</loc>
-    <lastmod>2024-08-12T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/ctf/plaidctf-2024/</loc>
-    <lastmod>2024-04-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/custom-architecture/</loc>
-    <lastmod>2024-04-14T20:15:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/plaidctf2024/</loc>
-    <lastmod>2024-04-14T20:15:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/rev/</loc>
-    <lastmod>2024-04-14T20:15:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/vm-escape/</loc>
-    <lastmod>2024-04-14T20:15:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</loc>
-    <lastmod>2024-04-14T20:15:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://gracecondition.github.io/categories/</loc>
   </url>
 </urlset>

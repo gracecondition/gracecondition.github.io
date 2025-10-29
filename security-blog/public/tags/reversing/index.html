@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>reversing - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+
+    <link rel="stylesheet" href="https://gracecondition.github.io/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    
+
+    
+</head>
+<body>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="https://gracecondition.github.io/" class="nav-brand">
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="https://gracecondition.github.io/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-sidebar">
+    <aside class="sidebar">
+    <div class="sidebar-content">
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">🔍 Search</h3>
+            <div class="search-container-robust">
+                <input type="text" id="search-input-robust" class="search-input-robust" placeholder="Type to search..." autocomplete="off">
+                <button id="search-clear-robust" class="search-clear-robust">×</button>
+            </div>
+
+            
+            <div id="search-results-robust" class="search-results-robust" style="display: none;">
+                <div class="search-results-header-robust">
+                    <span id="search-count-robust"></span>
+                </div>
+                <div class="search-results-scrollable">
+                    <div id="search-list-robust">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Categories</h3>
+            <div class="category-filters">
+                <button class="category-filter active" data-category="all">All Posts</button>
+                <button class="category-filter" data-category="research">🔬 Research</button>
+                <button class="category-filter" data-category="analysis">🔍 Analysis</button>
+                <button class="category-filter" data-category="tutorial">📚 Tutorial</button>
+                <button class="category-filter" data-category="ctf">🚩 CTF</button>
+            </div>
+        </div>
+
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Recent Posts</h3>
+            <div class="recent-posts">
+                
+                <article class="recent-post-item" data-category="analysis">
+                    <a href="https://gracecondition.github.io/posts/machsec-documentation/" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-analysis">
+                                🔍
+                                
+                            </span>
+                            <time class="recent-post-date">Oct 10</time>
+                        </div>
+                        <h4 class="recent-post-title">machsec - detecting XNU binary mitigations</h4>
+                        <p class="recent-post-excerpt">This article explains my new mitigation detection tool machsec, for iOS/macOS, …</p>
+                    </a>
+                </article>
+                
+                <article class="recent-post-item" data-category="research">
+                    <a href="https://gracecondition.github.io/posts/welcome-to-security-research/" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-research">
+                                🔬
+                                
+                            </span>
+                            <time class="recent-post-date">Sep 24</time>
+                        </div>
+                        <h4 class="recent-post-title">Welcome to Security Research</h4>
+                        <p class="recent-post-excerpt">An introduction to this security research blog and what you can expect to find …</p>
+                    </a>
+                </article>
+                
+                <article class="recent-post-item" data-category="research">
+                    <a href="https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-research">
+                                🔬
+                                
+                            </span>
+                            <time class="recent-post-date">Jan 18</time>
+                        </div>
+                        <h4 class="recent-post-title">Demo Advanced Research - Kernel Exploitation</h4>
+                        <p class="recent-post-excerpt">Demo template for in-depth technical research posts - demonstrates proper …</p>
+                    </a>
+                </article>
+                
+                <article class="recent-post-item" data-category="tutorial">
+                    <a href="https://gracecondition.github.io/posts/buffer-overflow-basics/" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-tutorial">
+                                📚
+                                
+                            </span>
+                            <time class="recent-post-date">Jan 12</time>
+                        </div>
+                        <h4 class="recent-post-title">Demo Tutorial - Binary Exploitation Basics</h4>
+                        <p class="recent-post-excerpt">Demo template for tutorial posts - demonstrates proper formatting for …</p>
+                    </a>
+                </article>
+                
+                <article class="recent-post-item" data-category="research">
+                    <a href="https://gracecondition.github.io/posts/sample-research-post/" class="recent-post-link">
+                        <div class="recent-post-meta">
+                            <span class="recent-post-category category-research">
+                                🔬
+                                
+                            </span>
+                            <time class="recent-post-date">Jan 10</time>
+                        </div>
+                        <h4 class="recent-post-title">Demo Research Post</h4>
+                        <p class="recent-post-excerpt">Demo template for research posts - demonstrates proper layout and structure.</p>
+                    </a>
+                </article>
+                
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">CTF Competitions</h3>
+            <div class="ctf-competitions">
+                
+                <article class="ctf-competition-item">
+                    <a href="https://gracecondition.github.io/ctf/" class="ctf-competition-link">
+                        <div class="ctf-competition-meta">
+                            <span class="ctf-badge-small">🚩</span>
+                            
+                        </div>
+                        <h4 class="ctf-competition-name">CTF Solutions</h4>
+                        
+                    </a>
+                </article>
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">All Posts</h3>
+            <div class="posts-by-category">
+                
+                
+                <div class="category-group">
+                    <h4 class="category-group-title">
+                        🔍 Analysis
+                        
+                        <span class="post-count">(1)</span>
+                    </h4>
+                    <ul class="category-post-list">
+                        
+                        <li class="category-post-item" data-category="analysis">
+                            <a href="https://gracecondition.github.io/posts/machsec-documentation/" class="category-post-link">
+                                <span class="category-post-title">machsec - detecting XNU binary mitigations</span>
+                                <time class="category-post-date">Oct 10</time>
+                            </a>
+                        </li>
+                        
+                        
+                    </ul>
+                </div>
+                
+                <div class="category-group">
+                    <h4 class="category-group-title">
+                        🔬 Research
+                        
+                        <span class="post-count">(3)</span>
+                    </h4>
+                    <ul class="category-post-list">
+                        
+                        <li class="category-post-item" data-category="research">
+                            <a href="https://gracecondition.github.io/posts/welcome-to-security-research/" class="category-post-link">
+                                <span class="category-post-title">Welcome to Security Research</span>
+                                <time class="category-post-date">Sep 24</time>
+                            </a>
+                        </li>
+                        
+                        <li class="category-post-item" data-category="research">
+                            <a href="https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/" class="category-post-link">
+                                <span class="category-post-title">Demo Advanced Research - Kernel Exploitation</span>
+                                <time class="category-post-date">Jan 18</time>
+                            </a>
+                        </li>
+                        
+                        <li class="category-post-item" data-category="research">
+                            <a href="https://gracecondition.github.io/posts/sample-research-post/" class="category-post-link">
+                                <span class="category-post-title">Demo Research Post</span>
+                                <time class="category-post-date">Jan 10</time>
+                            </a>
+                        </li>
+                        
+                        
+                    </ul>
+                </div>
+                
+                <div class="category-group">
+                    <h4 class="category-group-title">
+                        📚 Tutorial
+                        
+                        <span class="post-count">(1)</span>
+                    </h4>
+                    <ul class="category-post-list">
+                        
+                        <li class="category-post-item" data-category="tutorial">
+                            <a href="https://gracecondition.github.io/posts/buffer-overflow-basics/" class="category-post-link">
+                                <span class="category-post-title">Demo Tutorial - Binary Exploitation Basics</span>
+                                <time class="category-post-date">Jan 12</time>
+                            </a>
+                        </li>
+                        
+                        
+                    </ul>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Popular Tags</h3>
+            <div class="tag-cloud">
+                
+                <a href="https://gracecondition.github.io/tags/demo/" class="tag-link" data-count="6">
+                    #demo
+                    <span class="tag-count">6</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/template/" class="tag-link" data-count="6">
+                    #template
+                    <span class="tag-count">6</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/kernel-exploitation/" class="tag-link" data-count="2">
+                    #kernel-exploitation
+                    <span class="tag-count">2</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/advanced/" class="tag-link" data-count="1">
+                    #advanced
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/analysis/" class="tag-link" data-count="1">
+                    #analysis
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/binary-exploitation/" class="tag-link" data-count="1">
+                    #binary-exploitation
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/example/" class="tag-link" data-count="1">
+                    #example
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/heap-exploitation/" class="tag-link" data-count="1">
+                    #heap-exploitation
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/introduction/" class="tag-link" data-count="1">
+                    #introduction
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/research/" class="tag-link" data-count="1">
+                    #research
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/reversing/" class="tag-link" data-count="1">
+                    #reversing
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/security/" class="tag-link" data-count="1">
+                    #security
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/tutorial/" class="tag-link" data-count="1">
+                    #tutorial
+                    <span class="tag-count">1</span>
+                </a>
+                
+                <a href="https://gracecondition.github.io/tags/vm-escape/" class="tag-link" data-count="1">
+                    #vm-escape
+                    <span class="tag-count">1</span>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</aside>
+
+    <div class="main-column">
+        <header class="list-header">
+            <h1 class="list-title">reversing</h1>
+            
+        </header>
+
+        
+
+        <section class="posts-section">
+            <div class="posts-grid">
+                
+                <article class="post-card">
+                    <a href="https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/">
+                        <div class="post-image post-image-ctf" >
+                            <span class="post-icon">
+                                🚩
+                                
+                            </span>
+                        </div>
+                        <div class="post-content">
+                            <h3 class="post-title">Demo VM Escape Challenge</h3>
+                            <p class="post-excerpt">Demo template for VM escape writeups - demonstrates proper formatting and structure.</p>
+                            <div class="post-meta">
+                                <span class="post-date">Jan 25, 2024</span>
+                                <span class="post-category">ctf</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+                
+            </div>
+        </section>
+    </div>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+                
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script src="https://gracecondition.github.io/js/main.js"></script>
+    
+</body>
+</html>

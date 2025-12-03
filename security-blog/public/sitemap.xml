@@ -2,162 +2,172 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/tags/analysis/</loc>
+    <loc>http://192.168.1.101:1313/tags/analysis/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>http://192.168.1.101:1313/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/paragowned/</loc>
+    <loc>http://192.168.1.101:1313/posts/paragowned/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>http://192.168.1.101:1313/posts/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>http://192.168.1.101:1313/tags/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/vulnerability/</loc>
+    <loc>http://192.168.1.101:1313/tags/vulnerability/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/binary-analysis/</loc>
+    <loc>http://192.168.1.101:1313/tags/binary-analysis/</loc>
     <lastmod>2025-10-10T14:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/machsec-documentation/</loc>
+    <loc>http://192.168.1.101:1313/posts/machsec-documentation/</loc>
     <lastmod>2025-10-10T14:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/</loc>
+    <loc>http://192.168.1.101:1313/tags/ctf/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/demo/</loc>
+    <loc>http://192.168.1.101:1313/ctf/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/heap-exploitation/</loc>
+    <loc>http://192.168.1.101:1313/ctf/pwnable.kr/passcode/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/pwnable.kr/passcode/</loc>
+    <loc>http://192.168.1.101:1313/tags/pwnable/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/template/</loc>
+    <loc>http://192.168.1.101:1313/tags/write-what-where/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/introduction/</loc>
+    <loc>http://192.168.1.101:1313/tags/introduction/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/research/</loc>
+    <loc>http://192.168.1.101:1313/tags/research/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/security/</loc>
+    <loc>http://192.168.1.101:1313/tags/security/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/welcome-to-security-research/</loc>
+    <loc>http://192.168.1.101:1313/posts/welcome-to-security-research/</loc>
     <lastmod>2024-09-24T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/about/</loc>
+    <loc>http://192.168.1.101:1313/about/</loc>
     <lastmod>2024-09-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</loc>
+    <loc>http://192.168.1.101:1313/tags/demo/</loc>
     <lastmod>2024-01-25T20:15:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/reversing/</loc>
+    <loc>http://192.168.1.101:1313/ctf/plaidctf-2024/vm-escape/</loc>
     <lastmod>2024-01-25T20:15:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/vm-escape/</loc>
+    <loc>http://192.168.1.101:1313/tags/reversing/</loc>
     <lastmod>2024-01-25T20:15:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/plaidctf-2024/</loc>
+    <loc>http://192.168.1.101:1313/tags/template/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://192.168.1.101:1313/tags/vm-escape/</loc>
+    <lastmod>2024-01-25T20:15:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://192.168.1.101:1313/ctf/plaidctf-2024/</loc>
     <lastmod>2024-01-25T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/pwnable.kr/kernel-nightmare/</loc>
+    <loc>http://192.168.1.101:1313/ctf/pwnable.kr/kernel-nightmare/</loc>
     <lastmod>2024-01-20T15:45:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/kernel-exploitation/</loc>
+    <loc>http://192.168.1.101:1313/tags/kernel-exploitation/</loc>
     <lastmod>2024-01-20T15:45:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/ctf/pwnable.kr/</loc>
+    <loc>http://192.168.1.101:1313/ctf/pwnable.kr/</loc>
     <lastmod>2024-01-20T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/advanced/</loc>
+    <loc>http://192.168.1.101:1313/tags/advanced/</loc>
     <lastmod>2024-01-18T09:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/linux-kernel-heap-exploitation/</loc>
+    <loc>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</loc>
     <lastmod>2024-01-18T09:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/binary-exploitation/</loc>
+    <loc>http://192.168.1.101:1313/tags/binary-exploitation/</loc>
     <lastmod>2024-01-12T14:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/buffer-overflow-basics/</loc>
+    <loc>http://192.168.1.101:1313/posts/buffer-overflow-basics/</loc>
     <lastmod>2024-01-12T14:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/tutorial/</loc>
+    <loc>http://192.168.1.101:1313/tags/tutorial/</loc>
     <lastmod>2024-01-12T14:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/sample-research-post/</loc>
+    <loc>http://192.168.1.101:1313/posts/sample-research-post/</loc>
     <lastmod>2024-01-10T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>http://192.168.1.101:1313/categories/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

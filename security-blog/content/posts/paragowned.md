@@ -206,7 +206,7 @@ I tried diffing IMSharedUtils and found that its unchanged. This is significant 
 
 # Hypothetical Exploit flow:
 
-{{< mermaid >}}
+{{< mermaid fallback="/images/paragowned/graph.svg" >}}
 flowchart TD
     subgraph P1["PHASE 1 - Initial Message Injection"]
         A1[Attacker sends malicious<br/>iMessage with iCloud link]

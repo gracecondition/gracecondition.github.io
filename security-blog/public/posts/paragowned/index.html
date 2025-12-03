@@ -2,7 +2,7 @@
 <html lang="en">
 <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone - gracecondition</title>
@@ -12,11 +12,11 @@
 
     
     <meta property="og:type" content="article">
-    <meta property="og:url" content="http://localhost:1313/posts/paragowned/">
+    <meta property="og:url" content="http://192.168.1.101:1313/posts/paragowned/">
     <meta property="og:title" content="ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone">
     <meta property="og:description" content="How the paragon iMessage exploit worked.">
     
-    <meta property="og:image" content="http://localhost:1313/images/paragowned/Paragon-Website_White.png">
+    <meta property="og:image" content="http://192.168.1.101:1313/images/paragowned/Paragon-Website_White.png">
     
     
     <meta property="article:published_time" content="2025-12-03T06:59:55&#43;02:00">
@@ -25,15 +25,15 @@
 
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="http://localhost:1313/posts/paragowned/">
+    <meta name="twitter:url" content="http://192.168.1.101:1313/posts/paragowned/">
     <meta name="twitter:title" content="ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone">
     <meta name="twitter:description" content="How the paragon iMessage exploit worked.">
     
-    <meta name="twitter:image" content="http://localhost:1313/images/paragowned/Paragon-Website_White.png">
+    <meta name="twitter:image" content="http://192.168.1.101:1313/images/paragowned/Paragon-Website_White.png">
     
 
     
-    <link rel="canonical" href="http://localhost:1313/posts/paragowned/">
+    <link rel="canonical" href="http://192.168.1.101:1313/posts/paragowned/">
 
     
     <script type="application/ld+json">
@@ -50,26 +50,26 @@
         "datePublished": "2025-12-03T06:59:55\u002b02:00",
         "dateModified": "2025-12-03T06:59:55\u002b02:00",
         
-        "image": "http:\/\/localhost:1313\/images\/paragowned\/Paragon-Website_White.png",
+        "image": "http:\/\/192.168.1.101:1313\/images\/paragowned\/Paragon-Website_White.png",
         
         "publisher": {
             "@type": "Organization",
             "name": "gracecondition",
-            "url": "http:\/\/localhost:1313\/"
+            "url": "http:\/\/192.168.1.101:1313\/"
         },
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "http:\/\/localhost:1313\/posts\/paragowned\/"
+            "@id": "http:\/\/192.168.1.101:1313\/posts\/paragowned\/"
         }
         
     }
     </script>
 
-    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link rel="stylesheet" href="http://192.168.1.101:1313/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     
-    <link rel="icon" href="http://localhost:1313/favicon.png">
+    <link rel="icon" href="http://192.168.1.101:1313/favicon.png">
     
 
     
@@ -80,12 +80,12 @@
         <header class="site-header">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="http://localhost:1313/" class="nav-brand">
+            <a href="http://192.168.1.101:1313/" class="nav-brand">
                 <h1>gracecondition</h1>
             </a>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="http://192.168.1.101:1313/" class="nav-link">Home</a>
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
@@ -249,7 +249,7 @@
                 
                 
                 <article class="related-post">
-                    <a href="http://localhost:1313/posts/machsec-documentation/" class="related-post-link">
+                    <a href="http://192.168.1.101:1313/posts/machsec-documentation/" class="related-post-link">
                         <span class="related-post-icon">
                             🔍
                             
@@ -479,7 +479,8 @@ likely injects content into the AI&rsquo;s JSON processing pipeline.</p>
 <h4 id="diffing-imsharedutils">Diffing IMSharedUtils</h4>
 <p>I tried diffing IMSharedUtils and found that its unchanged. This is significant - it further strengthens the arugment that this isn&rsquo;t a classic image parsing vulnerability like JBIG2. Instead, the maliciously crafted photo or video (shared via iCloud link) likely exploits bugs in how Apple Intelligence <strong>processes media content</strong>, not in low-level image parsers.</p>
 <h1 id="hypothetical-exploit-flow">Hypothetical Exploit flow:</h1>
-<div class="mermaid">
+<div class="mermaid-wrapper" data-fallback="/images/paragowned/graph.svg">
+    <div class="mermaid">
 flowchart TD
     subgraph P1["PHASE 1 - Initial Message Injection"]
         A1[Attacker sends malicious<br/>iMessage with iCloud link]
@@ -546,6 +547,7 @@ flowchart TD
     style F3 fill:#a855f7,stroke:#9333ea,stroke-width:2px,color:#fff
     style G2 fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
 
+    </div>
 </div>
 
 <h2 id="daemon-level-exploit-chain">Daemon-Level Exploit Chain</h2>
@@ -818,6 +820,9 @@ For providing an invaluable amount of knowledge on iMessage exploits of the past
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
+        
+        const isMobile = window.innerWidth <= 768;
+
         mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
@@ -830,10 +835,23 @@ For providing an invaluable amount of knowledge on iMessage exploits of the past
                 lineColor: '#4a4a4a',
                 secondaryColor: '#2a2a2a',
                 tertiaryColor: '#1a1a1a',
+                fontSize: '14px',
+                fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            },
+            gantt: {
+                useMaxWidth: true
             }
         });
     </script>
-    <script src="http://localhost:1313/js/main.js"></script>
+    <script src="http://192.168.1.101:1313/js/main.js"></script>
     
 </body>
 </html>

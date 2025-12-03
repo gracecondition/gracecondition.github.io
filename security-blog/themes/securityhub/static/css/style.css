@@ -729,11 +729,16 @@ body {
     text-align: center;
     margin: var(--spacing-lg) auto;
     background-color: transparent;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mermaid svg {
     max-width: 100%;
     height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* Remove ugly gray boxes from subgraphs */
@@ -3140,5 +3145,548 @@ body {
     .image-lightbox-close {
         top: 10px;
         right: 10px;
+    }
+}
+
+/* ============================================ */
+/* COMPREHENSIVE MOBILE FIXES */
+/* These styles only affect mobile devices */
+/* ============================================ */
+
+/* Mobile-only fixes for better readability and usability */
+@media (max-width: 768px) {
+    /* Prevent horizontal scrolling */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    .site-container {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    /* Ensure all images are responsive */
+    .post-body img {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Make figures responsive */
+    .post-body figure {
+        margin: var(--spacing-md) 0;
+        max-width: 100%;
+    }
+
+    .post-body figure img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Fix code blocks for mobile */
+    .post-body pre {
+        font-size: 14px;
+        line-height: 1.6;
+        padding: var(--spacing-sm);
+        margin: var(--spacing-md) 0;
+        border-radius: var(--radius-sm);
+        max-width: 100%;
+        word-wrap: break-word;
+        box-sizing: border-box;
+    }
+
+    .post-body pre code {
+        font-size: 14px;
+        word-break: break-all;
+        white-space: pre-wrap !important;
+    }
+
+    /* Fix inline code */
+    .post-body code {
+        font-size: 13px;
+        word-break: break-word;
+    }
+
+    /* Better spacing for mobile - EQUAL PADDING */
+    .content-with-toc,
+    .main-content {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .single-post {
+        padding: var(--spacing-md) 16px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .post-body {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Ensure text content has proper spacing */
+    .post-body > * {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Adjust heading sizes for mobile */
+    .post-body h1 {
+        font-size: 26px;
+        line-height: 1.3;
+    }
+
+    .post-body h2 {
+        font-size: 22px;
+        line-height: 1.3;
+    }
+
+    .post-body h3 {
+        font-size: 19px;
+        line-height: 1.3;
+    }
+
+    /* Better paragraph spacing */
+    .post-body p {
+        margin-bottom: var(--spacing-sm);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Fix lists on mobile */
+    .post-body ul,
+    .post-body ol {
+        padding-left: var(--spacing-md);
+        margin: var(--spacing-sm) 0;
+    }
+
+    /* Make tables responsive */
+    .post-body table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+    }
+
+    /* Fix long URLs and links */
+    .post-body a {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Better blockquote on mobile */
+    .post-body blockquote {
+        padding-left: var(--spacing-sm);
+        margin: var(--spacing-md) 0;
+        font-size: 16px;
+    }
+
+    /* Reduce hero section padding */
+    .hero-section {
+        padding: var(--spacing-xl) 0;
+    }
+
+    /* Fix post grid on mobile */
+    .posts-grid {
+        gap: var(--spacing-md);
+        padding: 0 var(--spacing-xs);
+    }
+
+    /* Better card sizing on mobile */
+    .post-card {
+        margin-bottom: 0;
+    }
+
+    /* Fix navigation menu on mobile */
+    .nav-menu {
+        padding: var(--spacing-md) 0;
+    }
+
+    .nav-link {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 16px;
+    }
+
+    /* Improve touch targets for mobile */
+    .nav-toggle {
+        padding: var(--spacing-xs);
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Fix CTF challenge cards on mobile */
+    .challenges-grid {
+        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-xs);
+    }
+
+    /* Better footer on mobile */
+    .site-footer {
+        padding: var(--spacing-xl) 0 var(--spacing-md) 0;
+    }
+
+    .footer-content {
+        gap: var(--spacing-md);
+    }
+
+    /* Fix search on mobile */
+    .search-dropdown {
+        left: 0;
+        right: 0;
+        max-width: 100vw;
+    }
+
+    /* Ensure sidebar content is readable on mobile */
+    .sidebar,
+    .toc-sidebar {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .sidebar-content,
+    .toc-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+}
+
+/* Extra small mobile devices (phones in portrait) */
+@media (max-width: 480px) {
+    /* Further reduce font sizes */
+    .post-body {
+        font-size: 16px;
+    }
+
+    .post-body h1 {
+        font-size: 24px;
+    }
+
+    .post-body h2 {
+        font-size: 20px;
+    }
+
+    .post-body h3 {
+        font-size: 18px;
+    }
+
+    /* Tighter spacing */
+    .hero-section {
+        padding: var(--spacing-lg) 0;
+    }
+
+    .hero-title {
+        font-size: 28px;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    /* Reduce code block font size for small screens */
+    .post-body pre {
+        font-size: 12px;
+        padding: var(--spacing-xs);
+        margin: var(--spacing-sm) 0;
+        box-sizing: border-box;
+    }
+
+    .post-body pre code {
+        font-size: 12px;
+    }
+
+    /* Better button sizing on small screens */
+    .cta-button {
+        padding: var(--spacing-xs) var(--spacing-md);
+        font-size: 16px;
+    }
+
+    /* Ensure post images don't overflow */
+    .post-image {
+        height: 150px;
+    }
+
+    /* Compact post metadata */
+    .post-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    /* Better navigation brand */
+    .nav-brand h1 {
+        font-size: 20px;
+    }
+
+    /* Fix very small padding */
+    .section-container,
+    .nav-container,
+    .hero-content {
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+    }
+}
+
+/* Landscape mobile phones (improve readability in landscape) */
+@media (max-width: 900px) and (max-height: 500px) {
+    .hero-section {
+        padding: var(--spacing-md) 0;
+    }
+
+    .nav-menu {
+        top: 60px;
+    }
+
+    /* Reduce vertical spacing in landscape */
+    .content-section {
+        padding: var(--spacing-lg) 0;
+    }
+}
+
+/* Ensure content never causes horizontal scroll */
+@media (max-width: 768px) {
+    * {
+        max-width: 100%;
+    }
+
+    /* Allow specific elements to be full width */
+    html, body, .site-container, .main-content {
+        max-width: 100vw;
+    }
+
+    /* Fix any potential overflow issues */
+    .post-body > * {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+}
+
+/* ============================================ */
+/* NUCLEAR MOBILE FIXES - AGGRESSIVE MODE */
+/* These fixes FORCE proper mobile behavior */
+/* ============================================ */
+
+@media (max-width: 768px) {
+    /* FORCE no horizontal scroll - nuclear option */
+    html {
+        overflow-x: hidden !important;
+        width: 100vw !important;
+        position: relative;
+    }
+
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        position: relative;
+    }
+
+    /* Constrain all containers */
+    .site-container,
+    .main-content,
+    .content-section,
+    .section-container,
+    .single-post,
+    .post-body {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* FORCE all content elements to fit */
+    .post-body * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Aggressive code block fix */
+    .post-body pre {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        white-space: pre !important;
+        word-wrap: normal !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        border-radius: var(--radius-sm) !important;
+        box-sizing: border-box !important;
+    }
+
+    .post-body pre code {
+        white-space: pre !important;
+        word-wrap: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        display: block !important;
+        font-size: 13px !important;
+    }
+
+    /* Inline code should wrap */
+    .post-body p code,
+    .post-body li code,
+    .post-body td code {
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+        font-size: 13px !important;
+    }
+
+    /* Fix images HARD */
+    .post-body img,
+    .post-body figure img {
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    /* Fix tables - make them scrollable */
+    .post-body table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Better text wrapping everywhere */
+    .post-body p,
+    .post-body li,
+    .post-body td,
+    .post-body div {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
+        hyphens: auto !important;
+        -webkit-hyphens: auto !important;
+        -ms-hyphens: auto !important;
+    }
+
+    /* Fix long URLs */
+    .post-body a {
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+    }
+
+    /* Fix header to not cause overflow */
+    .site-header {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    .nav-container {
+        max-width: 100vw !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* Fix footer */
+    .site-footer {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    .footer-content {
+        max-width: 100vw !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* Fix hero section */
+    .hero-section {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    .hero-content {
+        max-width: 100vw !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* Ensure canvas doesn't cause issues */
+    #wave-gradient-canvas {
+        max-width: 100vw !important;
+        overflow: hidden !important;
+    }
+
+    /* Fix any grid layouts */
+    .posts-grid,
+    .challenges-grid {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Better blockquote */
+    .post-body blockquote {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* Fix lists */
+    .post-body ul,
+    .post-body ol {
+        padding-left: 24px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* iPhone specific fixes */
+@media only screen
+    and (max-device-width: 480px) {
+
+    /* Extra iPhone-specific constraints */
+    body {
+        -webkit-text-size-adjust: 100% !important;
+        text-size-adjust: 100% !important;
+    }
+
+    /* Prevent text inflation */
+    .post-body {
+        -webkit-text-size-adjust: 100% !important;
+        text-size-adjust: 100% !important;
+    }
+
+    /* Better touch scrolling */
+    .post-body pre {
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Fix iOS safe areas */
+    .site-header {
+        padding-top: env(safe-area-inset-top) !important;
+    }
+
+    .site-footer {
+        padding-bottom: env(safe-area-inset-bottom) !important;
+    }
+}
+
+/* Simple mobile Mermaid fixes */
+@media (max-width: 768px) {
+    .post-body .mermaid {
+        width: 100%;
+        max-width: 100%;
+        margin: var(--spacing-md) 0;
+    }
+
+    .post-body .mermaid svg {
+        max-width: 100%;
+        height: auto;
     }
 }

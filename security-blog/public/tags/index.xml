@@ -2,115 +2,129 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on gracecondition</title>
-    <link>http://localhost:1313/tags/</link>
+    <link>http://192.168.1.101:1313/tags/</link>
     <description>Recent content in Tags on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 11 Nov 2025 14:59:55 +0200</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 03 Dec 2025 06:59:55 +0200</lastBuildDate>
+    <atom:link href="http://192.168.1.101:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Analysis</title>
-      <link>http://localhost:1313/tags/analysis/</link>
-      <pubDate>Tue, 11 Nov 2025 14:59:55 +0200</pubDate>
-      <guid>http://localhost:1313/tags/analysis/</guid>
+      <link>http://192.168.1.101:1313/tags/analysis/</link>
+      <pubDate>Wed, 03 Dec 2025 06:59:55 +0200</pubDate>
+      <guid>http://192.168.1.101:1313/tags/analysis/</guid>
       <description></description>
     </item>
     <item>
       <title>Vulnerability</title>
-      <link>http://localhost:1313/tags/vulnerability/</link>
-      <pubDate>Tue, 11 Nov 2025 14:59:55 +0200</pubDate>
-      <guid>http://localhost:1313/tags/vulnerability/</guid>
+      <link>http://192.168.1.101:1313/tags/vulnerability/</link>
+      <pubDate>Wed, 03 Dec 2025 06:59:55 +0200</pubDate>
+      <guid>http://192.168.1.101:1313/tags/vulnerability/</guid>
       <description></description>
     </item>
     <item>
       <title>Binary Analysis</title>
-      <link>http://localhost:1313/tags/binary-analysis/</link>
+      <link>http://192.168.1.101:1313/tags/binary-analysis/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/binary-analysis/</guid>
+      <guid>http://192.168.1.101:1313/tags/binary-analysis/</guid>
       <description></description>
     </item>
     <item>
-      <title>Demo</title>
-      <link>http://localhost:1313/tags/demo/</link>
+      <title>CTF</title>
+      <link>http://192.168.1.101:1313/tags/ctf/</link>
       <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/demo/</guid>
+      <guid>http://192.168.1.101:1313/tags/ctf/</guid>
       <description></description>
     </item>
     <item>
-      <title>Heap-Exploitation</title>
-      <link>http://localhost:1313/tags/heap-exploitation/</link>
+      <title>Pwnable</title>
+      <link>http://192.168.1.101:1313/tags/pwnable/</link>
       <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/heap-exploitation/</guid>
+      <guid>http://192.168.1.101:1313/tags/pwnable/</guid>
       <description></description>
     </item>
     <item>
-      <title>Template</title>
-      <link>http://localhost:1313/tags/template/</link>
+      <title>Write-What-Where</title>
+      <link>http://192.168.1.101:1313/tags/write-what-where/</link>
       <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/template/</guid>
+      <guid>http://192.168.1.101:1313/tags/write-what-where/</guid>
       <description></description>
     </item>
     <item>
       <title>Introduction</title>
-      <link>http://localhost:1313/tags/introduction/</link>
+      <link>http://192.168.1.101:1313/tags/introduction/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/introduction/</guid>
+      <guid>http://192.168.1.101:1313/tags/introduction/</guid>
       <description></description>
     </item>
     <item>
       <title>Research</title>
-      <link>http://localhost:1313/tags/research/</link>
+      <link>http://192.168.1.101:1313/tags/research/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/research/</guid>
+      <guid>http://192.168.1.101:1313/tags/research/</guid>
       <description></description>
     </item>
     <item>
       <title>Security</title>
-      <link>http://localhost:1313/tags/security/</link>
+      <link>http://192.168.1.101:1313/tags/security/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/security/</guid>
+      <guid>http://192.168.1.101:1313/tags/security/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Demo</title>
+      <link>http://192.168.1.101:1313/tags/demo/</link>
+      <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
+      <guid>http://192.168.1.101:1313/tags/demo/</guid>
       <description></description>
     </item>
     <item>
       <title>Reversing</title>
-      <link>http://localhost:1313/tags/reversing/</link>
+      <link>http://192.168.1.101:1313/tags/reversing/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/reversing/</guid>
+      <guid>http://192.168.1.101:1313/tags/reversing/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Template</title>
+      <link>http://192.168.1.101:1313/tags/template/</link>
+      <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
+      <guid>http://192.168.1.101:1313/tags/template/</guid>
       <description></description>
     </item>
     <item>
       <title>Vm-Escape</title>
-      <link>http://localhost:1313/tags/vm-escape/</link>
+      <link>http://192.168.1.101:1313/tags/vm-escape/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/vm-escape/</guid>
+      <guid>http://192.168.1.101:1313/tags/vm-escape/</guid>
       <description></description>
     </item>
     <item>
       <title>Kernel-Exploitation</title>
-      <link>http://localhost:1313/tags/kernel-exploitation/</link>
+      <link>http://192.168.1.101:1313/tags/kernel-exploitation/</link>
       <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/kernel-exploitation/</guid>
+      <guid>http://192.168.1.101:1313/tags/kernel-exploitation/</guid>
       <description></description>
     </item>
     <item>
       <title>Advanced</title>
-      <link>http://localhost:1313/tags/advanced/</link>
+      <link>http://192.168.1.101:1313/tags/advanced/</link>
       <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/advanced/</guid>
+      <guid>http://192.168.1.101:1313/tags/advanced/</guid>
       <description></description>
     </item>
     <item>
       <title>Binary-Exploitation</title>
-      <link>http://localhost:1313/tags/binary-exploitation/</link>
+      <link>http://192.168.1.101:1313/tags/binary-exploitation/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/binary-exploitation/</guid>
+      <guid>http://192.168.1.101:1313/tags/binary-exploitation/</guid>
       <description></description>
     </item>
     <item>
       <title>Tutorial</title>
-      <link>http://localhost:1313/tags/tutorial/</link>
+      <link>http://192.168.1.101:1313/tags/tutorial/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/tutorial/</guid>
+      <guid>http://192.168.1.101:1313/tags/tutorial/</guid>
       <description></description>
     </item>
   </channel>

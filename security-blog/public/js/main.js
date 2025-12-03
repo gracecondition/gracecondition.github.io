@@ -127,6 +127,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize image lightbox
     initializeImageLightbox();
+
+    // Initialize mobile Mermaid diagrams
+    initializeMobileMermaid();
 });
 
 function initializeSidebarFeatures() {
@@ -956,4 +959,102 @@ function initializeImageLightbox() {
             lightboxImg.src = '';
         }, 200);
     }
+}
+
+// Mobile Mermaid handler with fallback support
+function initializeMobileMermaid() {
+    const isMobile = window.innerWidth <= 768;
+
+    if (!isMobile) {
+        console.log('Desktop - using normal Mermaid rendering');
+        return;
+    }
+
+    console.log('📱 Mobile detected - checking for fallback SVGs');
+
+    setTimeout(() => {
+        const wrappers = document.querySelectorAll('.mermaid-wrapper');
+
+        if (wrappers.length === 0) {
+            console.log('No Mermaid diagrams found');
+            return;
+        }
+
+        console.log(`Found ${wrappers.length} Mermaid diagram(s)`);
+
+        wrappers.forEach((wrapper, index) => {
+            const fallbackPath = wrapper.dataset.fallback;
+
+            // Skip if no fallback or already replaced
+            if (!fallbackPath || wrapper.dataset.replaced === 'true') {
+                console.log(`Diagram ${index}: No fallback specified, using normal rendering`);
+                return;
+            }
+
+            console.log(`Diagram ${index}: Using fallback ${fallbackPath}`);
+
+            const mermaidDiv = wrapper.querySelector('.mermaid');
+            if (!mermaidDiv) return;
+
+            // Create image element
+            const img = document.createElement('img');
+            img.src = fallbackPath;
+            img.alt = 'Diagram';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.margin = '0';
+            img.style.backgroundColor = '#0a0a0a';
+            img.style.padding = '16px';
+            img.style.borderRadius = '8px';
+            img.style.boxSizing = 'border-box';
+
+            // Handle load/error
+            img.onload = () => {
+                console.log(`✅ Diagram ${index}: Fallback loaded successfully`);
+            };
+
+            img.onerror = () => {
+                console.error(`❌ Diagram ${index}: Failed to load fallback from ${fallbackPath}`);
+                // Show error message
+                const error = document.createElement('div');
+                error.textContent = '⚠️ Diagram failed to load. Please view on desktop.';
+                error.style.cssText = 'padding:16px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);border-radius:8px;color:#ff3b30;text-align:center;';
+                mermaidDiv.innerHTML = '';
+                mermaidDiv.appendChild(error);
+                return;
+            };
+
+            // Replace Mermaid with image
+            mermaidDiv.innerHTML = '';
+            mermaidDiv.appendChild(img);
+
+            // Add tap hint
+            const hint = document.createElement('div');
+            hint.style.cssText = `
+                text-align: center;
+                font-size: 11px;
+                color: #666;
+                margin-top: 8px;
+                font-style: italic;
+            `;
+            hint.textContent = 'Tap to view full size';
+            mermaidDiv.appendChild(hint);
+
+            // Make clickable for lightbox
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', () => {
+                const lightbox = document.querySelector('.image-lightbox');
+                if (lightbox) {
+                    const lightboxImg = lightbox.querySelector('img');
+                    lightboxImg.src = fallbackPath;
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+
+            // Mark as replaced
+            wrapper.dataset.replaced = 'true';
+        });
+    }, 500);
 }

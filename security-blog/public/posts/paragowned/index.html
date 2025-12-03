@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+    <meta name="author" content="gracecondition">
+    <meta name="keywords" content="security research, binary exploitation, OS internals, vulnerability analysis, reverse engineering">
+
+    
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://localhost:1313/posts/paragowned/">
+    <meta property="og:title" content="ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone">
+    <meta property="og:description" content="How the paragon iMessage exploit worked.">
+    
+    <meta property="og:image" content="http://localhost:1313/images/paragowned/Paragon-Website_White.png">
+    
+    
+    <meta property="article:published_time" content="2025-12-03T06:59:55&#43;02:00">
+    <meta property="article:modified_time" content="2025-12-03T06:59:55&#43;02:00">
+    
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/posts/paragowned/">
+    <meta name="twitter:title" content="ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone">
+    <meta name="twitter:description" content="How the paragon iMessage exploit worked.">
+    
+    <meta name="twitter:image" content="http://localhost:1313/images/paragowned/Paragon-Website_White.png">
+    
+
+    
+    <link rel="canonical" href="http://localhost:1313/posts/paragowned/">
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        
+        "headline": "ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone",
+        "description": "How the paragon iMessage exploit worked.",
+        "author": {
+            "@type": "Person",
+            "name": "gracecondition"
+        },
+        "datePublished": "2025-12-03T06:59:55\u002b02:00",
+        "dateModified": "2025-12-03T06:59:55\u002b02:00",
+        
+        "image": "http:\/\/localhost:1313\/images\/paragowned\/Paragon-Website_White.png",
+        
+        "publisher": {
+            "@type": "Organization",
+            "name": "gracecondition",
+            "url": "http:\/\/localhost:1313\/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/posts\/paragowned\/"
+        }
+        
+    }
+    </script>
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    
+    <link rel="icon" href="http://localhost:1313/favicon.png">
+    
+
+    
+</head>
+<body>
+    <canvas id="wave-gradient-canvas"></canvas>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:1313/" class="nav-brand">
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-toc">
+    <aside class="toc-sidebar">
+    <div class="toc-content">
+        
+        <div class="toc-section">
+            <h3 class="toc-title">📖 Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                
+                
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#who-are-paragon">Who are Paragon?</a></li>
+    <li><a href="#what-was-the-exploit">What Was The exploit?</a>
+      <ul>
+        <li><a href="#imessage---the-one-stop-shop-for-remote-code-execution">iMessage - The one stop shop for Remote Code Execution</a></li>
+        <li><a href="#what-we-do-know-about-cve-2025-43200">What we do know about CVE-2025-43200</a>
+          <ul>
+            <li><a href="#from-the-mediainvestigative-journalism">From the media/investigative journalism</a></li>
+            <li><a href="#from-apple">From Apple</a></li>
+          </ul>
+        </li>
+        <li><a href="#where-one-blastdoor-closes-another-door-opens">Where one BlastDoor Closes, Another Door Opens</a>
+          <ul>
+            <li><a href="#the-core-vulnerability-missing-isfromme-check">The Core Vulnerability: Missing isFromMe Check</a>
+              <ul>
+                <li><a href="#stage-1----confirmed">Stage 1  - Confirmed</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#apple-intelligence-gets-pwnd">Apple Intelligence gets PWN&rsquo;D</a>
+          <ul>
+            <li><a href="#patchdiffing-writingtoolsuiservice">PatchDiffing WritingToolsUIService</a></li>
+            <li><a href="#refinements---ai-instructions">Refinements - AI instructions</a></li>
+            <li><a href="#more-evidence---proactivesummarizaton">More Evidence - ProactiveSummarizaton</a>
+              <ul>
+                <li><a href="#stage-2---apple-intelligence-parsing-bug">Stage 2 - Apple Intelligence parsing bug</a></li>
+                <li><a href="#diffing-imsharedutils">Diffing IMSharedUtils</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#hypothetical-exploit-flow">Hypothetical Exploit flow:</a>
+      <ul>
+        <li><a href="#daemon-level-exploit-chain">Daemon-Level Exploit Chain</a>
+          <ul>
+            <li><a href="#phase-1-initial-message-injection">Phase 1: Initial Message Injection</a></li>
+            <li><a href="#phase-2-the-isfromme-bug-exploitation">Phase 2: The isFromMe Bug Exploitation</a></li>
+            <li><a href="#phase-3-sandbox-bypass-via-trust-inversion">Phase 3: Sandbox Bypass via Trust Inversion</a></li>
+            <li><a href="#phase-4-apple-intelligence-summarization-processing">Phase 4: Apple Intelligence Summarization Processing</a></li>
+            <li><a href="#phase-5-json-injection-in-writingtoolsuiservice">Phase 5: JSON Injection in WritingToolsUIService</a></li>
+            <li><a href="#phase-6-exploitation-speculative">Phase 6: Exploitation (Speculative)</a></li>
+            <li><a href="#phase-7-post-exploitation">Phase 7: Post-Exploitation</a></li>
+          </ul>
+        </li>
+        <li><a href="#attack-surface-summary">Attack Surface Summary</a></li>
+      </ul>
+    </li>
+    <li><a href="#the-story-most-likely--conclusions">The story, most likely &amp; Conclusions</a>
+      <ul>
+        <li><a href="#exploitation--discovery-timeline">Exploitation &amp; Discovery timeline</a></li>
+        <li><a href="#organizational-methodoligies">Organizational methodoligies</a></li>
+        <li><a href="#lessons-learned-from-history">Lessons learned from history</a></li>
+        <li><a href="#what-happened-post-patching">What happened post patching</a></li>
+      </ul>
+    </li>
+    <li><a href="#credits-and-closing-remarks">Credits and closing remarks</a>
+      <ul>
+        <li><a href="#closing-remarks">Closing remarks</a></li>
+        <li><a href="#credits">Credits</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+                
+            </nav>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Article Info</h4>
+            <div class="article-info">
+                <div class="info-item">
+                    <span class="info-label">Published:</span>
+                    <time class="info-value">Dec 3, 2025</time>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Read time:</span>
+                    <span class="info-value">15 min</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Words:</span>
+                    <span class="info-value">3121</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value category-analysis">Analysis</span>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Tags</h4>
+            <div class="toc-tags">
+                
+                <a href="/tags/vulnerability/" class="toc-tag">#vulnerability</a>
+                
+                <a href="/tags/analysis/" class="toc-tag">#analysis</a>
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-percentage">0%</span>
+                    <span class="progress-label">completed</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Related</h4>
+            <div class="related-posts">
+                
+                
+                <article class="related-post">
+                    <a href="http://localhost:1313/posts/machsec-documentation/" class="related-post-link">
+                        <span class="related-post-icon">
+                            🔍
+                            
+                        </span>
+                        <div class="related-post-content">
+                            <h5 class="related-post-title">machsec - detecting XNU binary mitigations</h5>
+                            <time class="related-post-date">Oct 10</time>
+                        </div>
+                    </a>
+                </article>
+                
+            </div>
+        </div>
+
+    </div>
+</aside>
+
+    <article class="single-post">
+        <header class="post-header">
+            <div class="post-meta-badge">
+                
+                    <span class="analysis-badge">🔍 Analysis</span>
+                
+            </div>
+
+            <h1 class="post-title-single">ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone</h1>
+
+            <div class="post-meta-single">
+                <time datetime="2025-12-03">December 3, 2025</time>
+                
+                <span> • </span>
+                <span>15 min read</span>
+                
+                
+                <span> • </span>
+                <div class="inline-tags">
+                    
+                    <span class="inline-tag">#vulnerability</span>
+                    
+                    <span class="inline-tag">#analysis</span>
+                    
+                </div>
+                
+            </div>
+        </header>
+
+        <div class="post-body" id="post-content">
+            <blockquote>
+<p><strong>Note:</strong> This analysis is based on patch diffing and reverse engineering. Some conclusions about the Apple Intelligence component are speculative based on the evidence available. The isFromMe bug vector is confirmed through patch analysis.</p>
+</blockquote>
+<figure><img src="/images/paragowned/Paragon-Website_White.png"
+    alt="Figure 1: Paragon&rsquo;s logo" width="60%"><figcaption>
+      <p>Figure 1: Paragon&rsquo;s logo</p>
+    </figcaption>
+</figure>
+
+<h1 id="who-are-paragon">Who are Paragon?</h1>
+<p>Paragon Solutions is a cyberweapons company,
+that sells spyware tools to foreign government agencies.
+This is a buisness model that was pioneered and proven successful
+first by NSO Group, then was emulated by others:</p>
+<ul>
+<li><a href="https://www.surveillancewatch.io/entities/quadream">QuaDream</a></li>
+<li><a href="https://www.surveillancewatch.io/entities/candiru">Candiru</a></li>
+<li><a href="https://www.surveillancewatch.io/entities/intellexa-consortium">Cytrox/Intellexa</a></li>
+<li><a href="https://www.surveillancewatch.io/entities/toka">Toka group</a></li>
+<li><a href="https://www.surveillancewatch.io/entities/blue-ocean">BlueOcean</a></li>
+<li><a href="https://www.surveillancewatch.io/entities/dataflow-security">Dataflow</a></li>
+</ul>
+<p>Paragon differentiates itself from NSO Group by emphasizing that it sells its tools exclusively to what it refers to as “<a href="https://he.wikipedia.org/wiki/%D7%A4%D7%90%D7%A8%D7%90%D7%92%D7%95%D7%9F_%D7%A4%D7%AA%D7%A8%D7%95%D7%A0%D7%95%D7%AA">Democratic Governments</a>.” NSO Group, meanwhile, became the focus of extensive international media coverage following reports about how its technology had been used by various clients. In the period after that global scrutiny, oversight and export controls surrounding offensive cyber tools were tightened, which in turn narrowed the pool of eligible customers across the industry.</p>
+<p>Paragon has ties in the US Government and have the US governments&rsquo; trust since they do not have a complicated
+past like NSO Group.
+They leverage this clean record to offer basically the same service as NSO Group without the &ldquo;<a href="https://www.bis.gov/press-release/commerce-adds-nso-group-other-foreign-companies-entity-list-malicious-cyber-activities">Stigma</a>&rdquo;
+that comes along with using NSO Group products.</p>
+<h1 id="what-was-the-exploit">What Was The exploit?</h1>
+<h2 id="imessage---the-one-stop-shop-for-remote-code-execution">iMessage - The one stop shop for Remote Code Execution</h2>
+<p>Apple&rsquo;s iMessage has been for a long time, the vector for remote code execution.
+Every time an iPhone receives an iMessage, there are a bunch of complex compontents that
+parse and process the message recieved automatically.
+Anywhere were parsing happens, we have the potential for bugs.</p>
+<h2 id="what-we-do-know-about-cve-2025-43200">What we do know about CVE-2025-43200</h2>
+<h3 id="from-the-mediainvestigative-journalism">From the media/investigative journalism</h3>
+<p>We only have very limited information about the techincal aspects of this CVE.
+Bill marczak of citizen lab discovered the Graphite implant, and apple patched a cve that is part of the 0-Click chain used by Graphite (Paragon&rsquo;s equivalent to Pegasus).
+The full chain is obviously not available, but its assumed that what apple described in their patchnotes is the entrance vector onto the device.</p>
+<h3 id="from-apple">From Apple</h3>
+<p><figure><img src="/images/paragowned/apple-advisory1.png" width="100%">
+</figure>
+
+<figure><img src="/images/paragowned/apple-advisory2.png" width="100%">
+</figure>
+</p>
+<p>Apple&rsquo;s advisory gives us the surface details, but the real story is in the patch itself.</p>
+<h2 id="where-one-blastdoor-closes-another-door-opens">Where one BlastDoor Closes, Another Door Opens</h2>
+<p>Seeing that this fix was released as part of a minor patch, I was optimistic in possibly being able to PatchDiff to find this vulnerability.
+Luckily for us, there is a repo that details the diffs of every single iOS version against its previous release.
+<a href="https://github.com/blacktop/ipsw-diffs/tree/main/18_3_22D63__vs_18_3_1_22D72">Link to the great work by blacktop</a>
+<figure><img src="/images/paragowned/diff.png" width="100%">
+</figure>
+</p>
+<p>Here we find an interesting change in the iMessage side of things, a new string has been added!:
+<figure><img src="/images/paragowned/interesting-string.png" width="100%">
+</figure>
+</p>
+<p>Bingo! thats a massive hint! thanks apple!</p>
+<p>lets diff this bad boy in IDA PRO, using <a href="https://github.com/gracecondition/diaphoraplusplus">Diaphora++, my custom fork of diaphora</a></p>
+<figure><img src="/images/paragowned/partial-matches.png" width="100%">
+</figure>
+
+<p>We find that literally just one function has changed:</p>
+<p><code>_reAttemptMessageDeliveryForGUID</code>
+Diffing it, i find:</p>
+<figure><img src="/images/paragowned/screenshot2.png" width="100%">
+</figure>
+
+<p>In the first diff I found a new check, an ObjectiveC invocation of &ldquo;isFromMe&rdquo;.
+This is checking if the is_from_me bit is set in <code>sms.db</code> , where the message is stored.</p>
+<figure><img src="/images/paragowned/screenshot4.png" width="100%">
+</figure>
+
+<p>And theres our</p>
+<p><code>Being requested to re-send a message that wasn't sent by me</code></p>
+<p>That we found in the patchdiffs.</p>
+<h3 id="the-core-vulnerability-missing-isfromme-check">The Core Vulnerability: Missing isFromMe Check</h3>
+<p>This is it. The smoking gun. Apple added a check to verify message ownership before processing resend requests - a check that was completely missing before.
+What does this mean? Attackers could force victims to &ldquo;resend&rdquo; messages they never actually sent. When this happens, iOS marks those malicious messages
+as originating from the victim (<code>isFromMe = 1</code>), granting them elevated trust. This single missing check bypasses BlastDoor&rsquo;s sandbox protections,
+allowing malicious link previews to be processed by Apple Intelligence with the security model completely inverted.</p>
+<h4 id="stage-1----confirmed">Stage 1  - Confirmed</h4>
+<p>Stage one goes as follows (Probably):</p>
+<p>Attacker sends a maliciously crafted iMessage containing a link, and then another malicious iMessage asking the target
+to resend that message (&ldquo;being asked to resend a message that wasnt sent by me&rdquo;), a missing isFromMe check is not performed.
+this marks the message as being sent from the target, thus altering the behaviour of how the data is stored, and treated security wise by the operating system.</p>
+<p>This message contains an iCloud link to a maliciously crafted photo or video (per Apple&rsquo;s advisory). When the isFromMe bug flips the message ownership to is_from_me = 1, the victim&rsquo;s iPhone treats this as their own content. The malicious media gets processed outside the BlastDoor sandbox because it&rsquo;s treated as &ldquo;user-initiated&rdquo; content.</p>
+<h2 id="apple-intelligence-gets-pwnd">Apple Intelligence gets PWN&rsquo;D</h2>
+<p>I kept thinking about this one patch in the diff. The second most significant patch in the diff.
+And I just couldnt make sense of it.</p>
+<p><figure><img src="/images/paragowned/diff3.png" width="100%">
+</figure>
+
+<figure><img src="/images/paragowned/diff2.png" width="100%">
+</figure>
+</p>
+<p>It looks like a bunch of AI (Apple Intelligence) code had been patched.
+Yet, this was supposed to be an image parsing vulnerability, according to apple.</p>
+<p>And then,</p>
+<p>It hit me.
+<figure><img src="/images/paragowned/umactually.png" width="100%">
+</figure>
+</p>
+<p>The &ldquo;processing logic issue&rdquo; is in Apple Intelligence!!!</p>
+<h3 id="patchdiffing-writingtoolsuiservice">PatchDiffing WritingToolsUIService</h3>
+<p>This library appears to be code for applying Language Models on data.
+This library recieves data as a string, injects json into it, and then parses it.</p>
+<p>Heres what I did:</p>
+<ul>
+<li>PatchDiff&rsquo;d the binary to create a list of removed functions.</li>
+<li>cross referenced the strings that were removed to the removed functions</li>
+<li>confirmed that the strings crossreferenced exist in the functions that were removed.</li>
+</ul>
+<p>This gave me the following results, a few functions that were completely removed from <code>WritingToolsUIService</code>:</p>
+<figure><img src="/images/paragowned/json-bug1.png" width="100%">
+</figure>
+
+<p>The interesting behaviour is the appending of arbitrary strings on line 27, and line 34.</p>
+<p>Lines 27 and 34 append attacker‑controlled data directly into a JSON literal. There is no escaping/sanitization;
+only a final JSON validity check. A skilled attacker can and probably did craft an input that passes this check and injects additional code.</p>
+<h3 id="refinements---ai-instructions">Refinements - AI instructions</h3>
+<p>There is an array that is added into json, <code>refinements</code>.
+From what I can gather refinements are like &ldquo;visual enhacements&rdquo; in the form of markdown to how the plain text spit out
+of the language model look, in the form of markdown. And thus require a markdown parser.
+This array should not be writeable to by the attacker, hence when its added, its added like a closed empty array (See line 34 of PatchDiffing WritingToolsUIService)
+However, due to the loose checks, an attacker could still still populate it.</p>
+<figure><img src="/images/paragowned/markdown-bug1.png" width="100%">
+</figure>
+
+<p>Now that I have confirmed that multiple bugs were present in the way AppleIntelligence handles Untrusted input,
+stuff like weak checks on JSON (just making sure its a valid json, not checking if the schema/format of the json has changed)
+Theres a high probability that there was a bug in apple intelligence.</p>
+<h3 id="more-evidence---proactivesummarizaton">More Evidence - ProactiveSummarizaton</h3>
+<figure><img src="/images/paragowned/summerization.png" width="100%">
+</figure>
+
+<p>It would appear there are now a bunch of checks in the way AI summaries are generated, likely to prevent
+malicious media and messages from being processed by Apple Intelligence.</p>
+<p><strong>This is the smoking gun for summarization being part of the chain.</strong> Apple didn&rsquo;t just patch WritingToolsUIService - they added comprehensive input filtering to prevent malicious content from ever reaching the summarization pipeline in the first place. These deny lists are emergency mitigations that confirm:</p>
+<ol>
+<li>Content from notifications (which includes iMessages) was being automatically fed into notification summarization</li>
+<li>The summarization pipeline had weak input validation</li>
+<li>Certain apps/content types were exploitable through this path</li>
+</ol>
+<p>Specifically, the new defensive checks include:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-objc" data-lang="objc"><span style="display:flex;"><span>CStrings:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Could not load summarization bundleIds deny list plist: %@; proceeding with empty set&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Could not load summarization categories plist: %@; proceeding with empty set&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification not eligible for summarization (bundleId not allowed); bundle: %{public}s&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification not eligible for summarization (iTunes category not allowed); bundle: %{public}s iTunes category: %{public}ld&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification not eligible for summarization (no bundle): %{public}s&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack has no app bundleId&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack not eligible for summarization (bundleId not allowed); bundle: %{public}s&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack not eligible for summarization (iTunes category not allowed); bundle: %{public}s iTunes category: %{public}ld&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack not eligible for summarization (no bundle): %{public}s&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack&#39;s bundleId is not allowed: &#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;Notification stack&#39;s iTunes category is not allowed: &#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;SummarizationBundleIdsDenyList&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;SummarizationCategoriesDenyList&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;The summarization bundleIds deny list plist exists but is missing a DeniedBundleIds key&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;The summarization categories plist exists but is missing a DeniedCategories key&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notificationStack_ineligibleBundleId&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notificationStack_ineligibleItunesCategory&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notificationStack_missingBundleId&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notification_ineligibleBundleId&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notification_ineligibleItunesCategory&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;summarizationFilter_notification_missingBundleId&#34;</span>
+</span></span></code></pre></div><p><em>&ldquo;Due to a significant amount of code redaction and error checking done in the AppleIntelligence codebase in the patch, I strongly believe an AppleIntelligence parsing bug is the second stage of the atttack.&rdquo;</em> - My conclusion</p>
+<p>The following screenshot also backs up our hypothesis, and also suggests that this particular exploit was only used for a short while:
+<figure><img src="/images/paragowned/auto-enable.png" width="100%">
+</figure>
+</p>
+<h4 id="stage-2---apple-intelligence-parsing-bug">Stage 2 - Apple Intelligence parsing bug</h4>
+<p>Now that we have received a message with an iCloud link from an attacker, and the iPhone has begun to treat the message from the attacker as if it were from us
+(isFromMe flipped to 1),
+the security model changes. The iCloud link points to a maliciously crafted photo or video (per Apple&rsquo;s advisory). Since the message appears to be user-originated, the media is processed outside the BlastDoor sandbox with elevated trust.
+Apple Intelligence then processes this malicious media for summarization, and a parsing bug is probably encountered somewhere
+in the WritingToolsUIService/ProactiveSummarization part of the AppleIntelligence stack. The malicious photo/video or its metadata
+likely injects content into the AI&rsquo;s JSON processing pipeline.</p>
+<h4 id="diffing-imsharedutils">Diffing IMSharedUtils</h4>
+<p>I tried diffing IMSharedUtils and found that its unchanged. This is significant - it further strengthens the arugment that this isn&rsquo;t a classic image parsing vulnerability like JBIG2. Instead, the maliciously crafted photo or video (shared via iCloud link) likely exploits bugs in how Apple Intelligence <strong>processes media content</strong>, not in low-level image parsers.</p>
+<h1 id="hypothetical-exploit-flow">Hypothetical Exploit flow:</h1>
+<div class="mermaid">
+flowchart TD
+    subgraph P1["PHASE 1 - Initial Message Injection"]
+        A1[Attacker sends malicious<br/>iMessage with iCloud link]
+        A2[imagent daemon receives]
+        A3[BlastDoor validates<br/>inactive payload]
+        A4[Stored in sms.db<br/>is_from_me = 0]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph P2["PHASE 2 - isFromMe Bug"]
+        B1[Attacker sends<br/>resend request]
+        B2[imagent calls<br/>_reAttemptMessageDeliveryForGUID]
+        B3[❌ MISSING isFromMe CHECK]
+        B4[IMDPersistenceAgent<br/>updates database<br/>is_from_me = 1]
+        B1 --> B2 --> B3 --> B4
+    end
+
+    subgraph P3["PHASE 3 - Sandbox Bypass"]
+        C1[Message now trusted<br/>as user-initiated]
+        C2[Malicious photo/video<br/>processed OUTSIDE BlastDoor]
+        C3[iCloud media link<br/>Content with crafted metadata]
+        C1 --> C2 --> C3
+    end
+
+    subgraph P4["PHASE 4 - AI Summarization"]
+        D1[Media sent to<br/>Notification Summarization]
+        D2[❌ NO DENY LISTS<br/>Weak input validation]
+        D3[Media processed as<br/>notification content]
+        D1 --> D2 --> D3
+    end
+
+    subgraph P5["PHASE 5 - JSON Injection"]
+        E1[Data routed to<br/>WritingToolsUIService]
+        E2[❌ Lines 27 & 34 bug<br/>Attacker strings appended<br/>without sanitization]
+        E3[Malformed JSON created]
+        E1 --> E2 --> E3
+    end
+
+    subgraph P6["PHASE 6 - Exploitation (Speculative)"]
+        F1[LLM processes<br/>malformed JSON]
+        F2[Markdown/Schema/<br/>Directive bugs triggered]
+        F3[Code execution achieved<br/>in Apple Intelligence context]
+        F1 --> F2 --> F3
+    end
+
+    subgraph P7["PHASE 7 - Post-Exploitation (speculative)"]
+        G1[Graphite implant installed]
+        G2[Access: messages, notifications,<br/>other user data ]
+        G3[Graphite maintains persistence via launchd & privesc exploit]
+        G1 --> G2 --> G3
+    end
+
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+    P4 --> P5
+    P5 --> P6
+    P6 --> P7
+
+    style B3 fill:#ff6b6b,stroke:#f03e3e,stroke-width:3px,color:#fff
+    style B4 fill:#f97316,stroke:#ea580c,stroke-width:2px,color:#fff
+    style D2 fill:#ff8787,stroke:#f03e3e,stroke-width:2px,color:#fff
+    style E2 fill:#ff6b6b,stroke:#f03e3e,stroke-width:3px,color:#fff
+    style F3 fill:#a855f7,stroke:#9333ea,stroke-width:2px,color:#fff
+    style G2 fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+
+</div>
+
+<h2 id="daemon-level-exploit-chain">Daemon-Level Exploit Chain</h2>
+<p>Based on the patch analysis, here&rsquo;s how the exploit likely flows through iOS at the daemon level:</p>
+<h3 id="phase-1-initial-message-injection">Phase 1: Initial Message Injection</h3>
+<ol>
+<li><strong>Attacker → imagent (iMessage daemon)</strong>
+<ul>
+<li>Attacker sends malicious iMessage containing an iCloud link to a malicious photo or video</li>
+<li>Message passes through BlastDoor sandbox (inactive payload - no immediate trigger)</li>
+<li>BlastDoor validates basic iMessage structure but doesn&rsquo;t detect dormant exploit</li>
+<li>Message stored in <code>sms.db</code> with <code>is_from_me = 0</code> and assigned a GUID</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-2-the-isfromme-bug-exploitation">Phase 2: The isFromMe Bug Exploitation</h3>
+<ol start="2">
+<li><strong>Attacker → imagent → IMDPersistenceAgent</strong>
+<ul>
+<li>Attacker sends a second control message: a resend request for the victim&rsquo;s message GUID</li>
+<li><code>imagent</code> calls <code>_reAttemptMessageDeliveryForGUID:...</code> without verifying ownership</li>
+<li><strong>Missing check:</strong> No <code>if (![message isFromMe]) { return; }</code> validation</li>
+<li><code>IMDPersistenceAgent</code> updates the message in <code>sms.db</code>: <code>is_from_me</code> changes from <code>0</code> to <code>1</code></li>
+<li>Message now appears to originate from the victim</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-3-sandbox-bypass-via-trust-inversion">Phase 3: Sandbox Bypass via Trust Inversion</h3>
+<ol start="3">
+<li><strong>Message processing with inverted trust model</strong>
+<ul>
+<li>Message marked as <code>is_from_me = 1</code> changes security context</li>
+<li>iOS treats this as a &ldquo;user-initiated&rdquo; message</li>
+<li>The message contains an iCloud link to a maliciously crafted photo or video</li>
+<li>Since the message appears to be from the user, the media bypasses BlastDoor sandbox and is processed with elevated trust</li>
+<li>The malicious media includes:
+<ul>
+<li>Crafted photo/video with malicious metadata</li>
+<li>Content designed to exploit AI processing bugs</li>
+<li>Not a classic image parsing vulnerability (IMSharedUtils unchanged)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-4-apple-intelligence-summarization-processing">Phase 4: Apple Intelligence Summarization Processing</h3>
+<ol start="4">
+<li>
+<p><strong>Media Content → Notification Summarization Pipeline</strong></p>
+<ul>
+<li>The malicious photo/video from the iCloud link is forwarded to Apple Intelligence for automatic summarization</li>
+<li>iMessage media can trigger notification summarization</li>
+<li>The exact daemon/framework name is private, but patch analysis reveals extensive changes to summarization logic</li>
+<li><strong>Evidence from patches:</strong> Apple added comprehensive filtering checks (see &ldquo;More Evidence - AI summarization&rdquo; section):
+<ul>
+<li><code>SummarizationBundleIdsDenyList</code> - Probably blocks specific apps from being summarized</li>
+<li><code>SummarizationCategoriesDenyList</code> - Probably blocks apps by their iTunes category metadata (the App Store category like &ldquo;Social Networking&rdquo;, &ldquo;Games&rdquo;, etc.)</li>
+<li>Notification eligibility checks for bundleId, categories, and missing bundle validation</li>
+</ul>
+</li>
+</ul>
+<p>These NEW defensive checks confirm summarization was exploited - Apple is now filtering what content can enter the summarization pipeline</p>
+<ul>
+<li>Media content that gets processed includes:
+<ul>
+<li>Photo/video data from iCloud link</li>
+<li>Metadata from the malicious media</li>
+<li>All of this fed into the AI summarization system that previously had weak input validation</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-5-json-injection-in-writingtoolsuiservice">Phase 5: JSON Injection in WritingToolsUIService</h3>
+<ol start="5">
+<li><strong>Summarization Pipeline → WritingToolsUIService</strong>
+<ul>
+<li>The summarization system (whatever Apple calls it internally) processes the malicious media</li>
+<li>Since the message appears to be from the user (isFromMe bug), and passes any pre-existing bundleId checks (before the patch added deny lists), the media gets processed</li>
+<li>Data routed to <code>WritingToolsUIService</code> for LLM-based text processing</li>
+<li><strong>Bug location:</strong> Lines 27 and 34 of removed function (from patch analysis)</li>
+<li>Attacker-controlled strings from the media/metadata appended directly into JSON literal without sanitization</li>
+<li>Only final JSON validity check (no schema validation)</li>
+<li>Malicious payload in media metadata crafted to:
+<ul>
+<li>Pass basic JSON syntax validation</li>
+<li>Inject additional fields into the JSON structure</li>
+<li>Potentially inject markdown in &ldquo;refinements&rdquo; array</li>
+</ul>
+</li>
+<li><strong>Why summarization had to be involved:</strong> The tight coupling between the summarization checks (deny lists) and the WritingToolsUIService bugs (JSON injection) in the same patch strongly suggests summarization was the entry point that fed malicious data to WritingToolsUIService</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-6-exploitation-speculative">Phase 6: Exploitation (Speculative)</h3>
+<ol start="6">
+<li><strong>WritingToolsUIService → Language Model Processing</strong>
+<ul>
+<li>Malformed JSON with injected content processed by LLM pipeline</li>
+<li>Possible exploitation paths:
+<ul>
+<li><strong>Path A:</strong> Markdown injection in &ldquo;refinements&rdquo; triggers markdown parser bug</li>
+<li><strong>Path B:</strong> JSON schema confusion causes type confusion vulnerability</li>
+<li><strong>Path C:</strong> Injected JSON directives alter LLM processing behavior</li>
+<li><strong>Path D:</strong> Malicious &ldquo;instructions&rdquo; embedded in refinements executed by AI system</li>
+</ul>
+</li>
+<li>Exploitation leads to code execution in Apple Intelligence context</li>
+<li>Apple Intelligence runs with elevated privileges (access to user data, notifications, messages)</li>
+</ul>
+</li>
+</ol>
+<h3 id="phase-7-post-exploitation">Phase 7: Post-Exploitation</h3>
+<ol start="7">
+<li><strong>Code Execution → Persistence</strong>
+<ul>
+<li>Exploit gains execution within Apple Intelligence daemon</li>
+<li>Potential capabilities:
+<ul>
+<li>Standard Implant data collection: Gallery, messages, contacts, etc.</li>
+<li>Potentially escalate to kernel via additional exploits</li>
+<li>Install persistent implant (Graphite payload)</li>
+</ul>
+</li>
+<li>Attacker maintains access to device</li>
+</ul>
+</li>
+</ol>
+<h2 id="attack-surface-summary">Attack Surface Summary</h2>
+<p><strong>Daemons Involved (Confirmed by Patch Analysis):</strong></p>
+<ul>
+<li><code>WritingToolsUIService</code> - LLM text processing service with JSON injection bugs (Stage 5-6)</li>
+<li><code>ProactiveSummarization</code> - Apple Intelligence notification/message summarization framework (Stage 4-5)</li>
+</ul>
+<p><strong>Daemons Likely Involved (Inferred but not directly patched):</strong></p>
+<ul>
+<li><code>imagent</code> - iMessage handling daemon with isFromMe bug (Stage 1-2)</li>
+<li><code>IMDPersistenceAgent</code> - Message database management daemon (Stage 2)</li>
+<li><code>intelligenceplatformd</code> - Apple Intelligence knowledge graph daemon, may route data between components (Stage 4)</li>
+<li>iCloud media processing components - The malicious photo/video from iCloud link is processed with elevated trust once isFromMe=1</li>
+</ul>
+<p><strong>Security Boundaries Crossed:</strong></p>
+<ol>
+<li>BlastDoor sandbox (bypassed via isFromMe bug - malicious iCloud media processed outside sandbox)</li>
+<li>User/attacker message trust boundary (inverted by resend bug)</li>
+<li>Apple Intelligence input validation (JSON injection in WritingToolsUIService)</li>
+</ol>
+<h1 id="the-story-most-likely--conclusions">The story, most likely &amp; Conclusions</h1>
+<h2 id="exploitation--discovery-timeline">Exploitation &amp; Discovery timeline</h2>
+<ul>
+<li>This particular bugchain was made widely exploitable with the autoenabling of AppleIntelligence on 18.3.0, Januray 27th 2025</li>
+<li>This particular bugchain was patched with 18.3.1, Feburary 10, 2025 (14 days of exploitation)</li>
+<li>The Graphite implant is discovered on the iPhone, April 29th 2025 thanks to apple notification.</li>
+</ul>
+<h2 id="organizational-methodoligies">Organizational methodoligies</h2>
+<p>Organizations like Paragon operate with the following principals:</p>
+<ul>
+<li>Any bug that can be exploited, should be exploited.</li>
+<li>Even if the bug is probably applicable to an obscure amount of iPhones, its still worth trying.</li>
+<li>If we dont exploit it, someone else will.</li>
+</ul>
+<p>Aswell as</p>
+<ul>
+<li>Vulnerability research teams constantly work around the clock to create a sufficient backlog of exploits that can be swapped in and out so that the product remains operational even when a bug get patched.</li>
+<li>Vulnerability research teams have to update their existing exploit chains to work, when a part of the chain gets patched.</li>
+</ul>
+<p>Also,</p>
+<ul>
+<li>Its almost confirmed that the <code>isFromMe</code> bug is the main vector of exploitation.</li>
+<li>Due to AppleIntelligence not being enabled on every phone, its likely that other chains were used in conjunction with the <code>isFromMe</code> bug, in cases
+where apple intelligence was not exploitable.</li>
+</ul>
+<h2 id="lessons-learned-from-history">Lessons learned from history</h2>
+<p>More facts from history:</p>
+<ul>
+<li>Most times, security researchers that research these bugs cannot find the full chain.</li>
+<li>Finding the full chain requires a significant amount of effort</li>
+<li>Recreating the entire exploit, in working condition, requires even more effort</li>
+<li>Thus, its its more economical, practical, and more immediate to patch the intial access vector,alongside some of the chain (as much as possible), instead of reverse engineering the whole chain and patching accordingly.</li>
+</ul>
+<h2 id="what-happened-post-patching">What happened post patching</h2>
+<p>It is highly likely that Paragon has a double digit backlog of exploits for iOS and android.
+That backlog of exploits can be used to create chains that allow remote code execution.
+The bugs in the current used RCE chain were swapped out for other bugs, and the RCE chain presists.</p>
+<ul>
+<li>The <code>isFromMe</code> iMessage entry vector was closed, and likely replaced with another bug.</li>
+<li>The AppleIntelligence parsing bug was replaced with another bug for code execution</li>
+</ul>
+<h1 id="credits-and-closing-remarks">Credits and closing remarks</h1>
+<h2 id="closing-remarks">Closing remarks</h2>
+<p>All of the information in this post is hypothetical security research from the very little made available to the public.</p>
+<p>I do not have a personal stance on this industry, and am not an &ldquo;activist&rdquo;. I simply find the technology fascinating.</p>
+<p>If you are reading this and work for an organization like this, The only thing I would think is that on a <strong>purely technological level</strong>, what  you work on is insanely cool, thats about it.</p>
+<p>Everything in this blog was written to the best of my knowledge, if you want to submit corrections or know something that I dont
+please dont hesitate to reach out!</p>
+<h2 id="credits">Credits</h2>
+<p><a href="https://jaybird1291.github.io/blog-cyber/en/posts/graphite-caught/">Jaybird1291</a>, who also independantly replicated some of the exploit chain research, aswell as creating heuristics for how one might forensically detect this exploit.</p>
+<p><a href="https://saelo.github.io/presentations/bluehat_il_22_a_brief_history_of_imessage_exploitation.pdf">A Brief History of
+iMessage Exploitation
+Samuel Groß (@5aelo), Ian Beer (@i41nbeer)</a>
+For providing an invaluable amount of knowledge on iMessage exploits of the past.</p>
+
+        </div>
+
+        
+        <footer class="post-footer">
+            <div class="post-tags">
+                <h4>Tags</h4>
+                <div class="tag-list">
+                    
+                    <span class="tag">#vulnerability</span>
+                    
+                    <span class="tag">#analysis</span>
+                    
+                </div>
+            </div>
+        </footer>
+        
+    </article>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+                
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script type="module">
+        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
+
+        const canvas = document.getElementById('wave-gradient-canvas');
+        if (canvas) {
+            const gradient = new WaveGradient(canvas, {
+                colors: ['#000000', '#0a0a0a', '#151515', '#202020', '#2a2a2a', '#353535'],
+                fps: 30,
+                seed: 42,
+                speed: 1.0,
+                amplitude: 320,
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#0a0a0a',
+                primaryColor: '#1a1a1a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#2a2a2a',
+                lineColor: '#4a4a4a',
+                secondaryColor: '#2a2a2a',
+                tertiaryColor: '#1a1a1a',
+            }
+        });
+    </script>
+    <script src="http://localhost:1313/js/main.js"></script>
+    
+</body>
+</html>

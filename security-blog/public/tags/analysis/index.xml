@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>analysis on gracecondition</title>
-    <link>https://gracecondition.github.io/tags/analysis/</link>
-    <description>Recent content in analysis on gracecondition</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <title>Analysis on gracecondition</title>
+    <link>http://localhost:1313/tags/analysis/</link>
+    <description>Recent content in Analysis on gracecondition</description>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 10 Oct 2025 14:00:00 +0000</lastBuildDate><atom:link href="https://gracecondition.github.io/tags/analysis/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 03 Dec 2025 06:59:55 +0200</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/analysis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone</title>
+      <link>http://localhost:1313/posts/paragowned/</link>
+      <pubDate>Wed, 03 Dec 2025 06:59:55 +0200</pubDate>
+      <guid>http://localhost:1313/posts/paragowned/</guid>
+      <description>How the paragon iMessage exploit worked.</description>
+    </item>
     <item>
       <title>machsec - detecting XNU binary mitigations</title>
-      <link>https://gracecondition.github.io/posts/machsec-documentation/</link>
+      <link>http://localhost:1313/posts/machsec-documentation/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/posts/machsec-documentation/</guid>
+      <guid>http://localhost:1313/posts/machsec-documentation/</guid>
       <description>This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
     </item>
-    
   </channel>
 </rss>

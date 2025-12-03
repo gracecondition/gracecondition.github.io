@@ -1,31 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>Demo VM Escape Challenge - gracecondition</title>
     <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+    <meta name="author" content="gracecondition">
+    <meta name="keywords" content="security research, binary exploitation, OS internals, vulnerability analysis, reverse engineering">
 
-    <link rel="stylesheet" href="https://gracecondition.github.io/css/style.css">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://localhost:1313/ctf/plaidctf-2024/vm-escape/">
+    <meta property="og:title" content="Demo VM Escape Challenge">
+    <meta property="og:description" content="Demo template for VM escape writeups - demonstrates proper formatting and structure.">
+    
+    <meta property="og:image" content="http://localhost:1313/images/default-preview.svg">
+    
+    
+    <meta property="article:published_time" content="2024-01-25T20:15:00Z">
+    <meta property="article:modified_time" content="2024-01-25T20:15:00Z">
+    
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/ctf/plaidctf-2024/vm-escape/">
+    <meta name="twitter:title" content="Demo VM Escape Challenge">
+    <meta name="twitter:description" content="Demo template for VM escape writeups - demonstrates proper formatting and structure.">
+    
+    <meta name="twitter:image" content="http://localhost:1313/images/default-preview.svg">
+    
+
+    
+    <link rel="canonical" href="http://localhost:1313/ctf/plaidctf-2024/vm-escape/">
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        
+        "headline": "Demo VM Escape Challenge",
+        "description": "Demo template for VM escape writeups - demonstrates proper formatting and structure.",
+        "author": {
+            "@type": "Person",
+            "name": "gracecondition"
+        },
+        "datePublished": "2024-01-25T20:15:00Z",
+        "dateModified": "2024-01-25T20:15:00Z",
+        
+        "publisher": {
+            "@type": "Organization",
+            "name": "gracecondition",
+            "url": "http:\/\/localhost:1313\/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/ctf\/plaidctf-2024\/vm-escape\/"
+        }
+        
+    }
+    </script>
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+    
+    <link rel="icon" href="http://localhost:1313/favicon.png">
     
 
     
 </head>
 <body>
+    <canvas id="wave-gradient-canvas"></canvas>
     <div class="site-container">
         <header class="site-header">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="https://gracecondition.github.io/" class="nav-brand">
+            <a href="http://localhost:1313/" class="nav-brand">
                 <h1>gracecondition</h1>
             </a>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="https://gracecondition.github.io/" class="nav-link">Home</a>
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
@@ -50,7 +108,30 @@
             <h3 class="toc-title">📖 Contents</h3>
             <nav class="toc-nav" id="toc-nav">
                 
-                <div class="toc-loading">Generating table of contents...</div>
+                
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#demo-vm-escape-challenge---demo-ctf">Demo VM Escape Challenge - Demo CTF</a>
+      <ul>
+        <li><a href="#challenge-description">Challenge Description</a></li>
+        <li><a href="#initial-analysis">Initial Analysis</a></li>
+        <li><a href="#vm-architecture-analysis">VM Architecture Analysis</a>
+          <ul>
+            <li><a href="#vm-state-structure">VM State Structure</a></li>
+            <li><a href="#instruction-set-architecture">Instruction Set Architecture</a></li>
+          </ul>
+        </li>
+        <li><a href="#vulnerability-analysis">Vulnerability Analysis</a></li>
+        <li><a href="#exploitation-strategy">Exploitation Strategy</a></li>
+        <li><a href="#exploitation-implementation">Exploitation Implementation</a></li>
+        <li><a href="#alternative-approach-rop-in-vm-space">Alternative Approach: ROP in VM Space</a></li>
+        <li><a href="#key-insights">Key Insights</a></li>
+        <li><a href="#mitigation">Mitigation</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+                
             </nav>
         </div>
 
@@ -153,7 +234,7 @@
                 
                 
                 <article class="related-post">
-                    <a href="https://gracecondition.github.io/ctf/defcon-31/kernel-nightmare/" class="related-post-link">
+                    <a href="http://localhost:1313/ctf/pwnable.kr/kernel-nightmare/" class="related-post-link">
                         <span class="related-post-icon">
                             🚩
                             
@@ -166,7 +247,7 @@
                 </article>
                 
                 <article class="related-post">
-                    <a href="https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/" class="related-post-link">
+                    <a href="http://localhost:1313/posts/linux-kernel-heap-exploitation/" class="related-post-link">
                         <span class="related-post-icon">
                             🔬
                             
@@ -179,14 +260,14 @@
                 </article>
                 
                 <article class="related-post">
-                    <a href="https://gracecondition.github.io/ctf/defcon-31/heap-heaven/" class="related-post-link">
+                    <a href="http://localhost:1313/posts/buffer-overflow-basics/" class="related-post-link">
                         <span class="related-post-icon">
-                            🚩
+                            📚
                             
                         </span>
                         <div class="related-post-content">
-                            <h5 class="related-post-title">Demo Heap Challenge</h5>
-                            <time class="related-post-date">Jan 15</time>
+                            <h5 class="related-post-title">Demo Tutorial - Binary Exploitation Basics</h5>
+                            <time class="related-post-date">Jan 12</time>
                         </div>
                     </a>
                 </article>
@@ -247,10 +328,10 @@
 <strong>Solves</strong>: 23</p>
 <p><em>This is a demo template showing the proper structure for VM escape/custom architecture CTF writeups.</em></p>
 <h2 id="challenge-description">Challenge Description</h2>
-<pre tabindex="0"><code>[Challenge description from CTF organizers]
-
-nc challenge.example.com 1337
-</code></pre><p><strong>Files</strong>: <code>vm_engine</code>, <code>firmware.bin</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>[Challenge description from CTF organizers]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>nc challenge.example.com 1337
+</span></span></code></pre></div><p><strong>Files</strong>: <code>vm_engine</code>, <code>firmware.bin</code></p>
 <h2 id="initial-analysis">Initial Analysis</h2>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ file vm_engine
 </span></span><span style="display:flex;"><span>vm_engine: ELF 64-bit LSB executable, x86-64, dynamically linked, not stripped
@@ -270,26 +351,26 @@ nc challenge.example.com 1337
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
 </span></span></code></pre></div><h3 id="instruction-set-architecture">Instruction Set Architecture</h3>
 <p>Document the custom instruction set:</p>
-<pre tabindex="0"><code class="language-assembly" data-lang="assembly"># Arithmetic Operations
-ADD  R1, R2, R3    # R1 = R2 + R3
-SUB  R1, R2, R3    # R1 = R2 - R3
-MUL  R1, R2, R3    # R1 = R2 * R3
-
-# Memory Operations
-LOAD  R1, [R2]     # R1 = memory[R2]
-STORE [R1], R2     # memory[R1] = R2
-LOADI R1, #imm     # R1 = immediate
-
-# Control Flow
-JMP   addr         # Jump to address
-JEQ   R1, R2, addr # Jump if R1 == R2
-CALL  addr         # Call subroutine
-RET                # Return from subroutine
-
-# System Operations
-SYSCALL #num       # System call
-PRIVESC            # Privilege escalation instruction
-</code></pre><h2 id="vulnerability-analysis">Vulnerability Analysis</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span># Arithmetic Operations
+</span></span><span style="display:flex;"><span>ADD  R1, R2, R3    # R1 = R2 + R3
+</span></span><span style="display:flex;"><span>SUB  R1, R2, R3    # R1 = R2 - R3
+</span></span><span style="display:flex;"><span>MUL  R1, R2, R3    # R1 = R2 * R3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Memory Operations
+</span></span><span style="display:flex;"><span>LOAD  R1, [R2]     # R1 = memory[R2]
+</span></span><span style="display:flex;"><span>STORE [R1], R2     # memory[R1] = R2
+</span></span><span style="display:flex;"><span>LOADI R1, #imm     # R1 = immediate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Control Flow
+</span></span><span style="display:flex;"><span>JMP   addr         # Jump to address
+</span></span><span style="display:flex;"><span>JEQ   R1, R2, addr # Jump if R1 == R2
+</span></span><span style="display:flex;"><span>CALL  addr         # Call subroutine
+</span></span><span style="display:flex;"><span>RET                # Return from subroutine
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># System Operations
+</span></span><span style="display:flex;"><span>SYSCALL #num       # System call
+</span></span><span style="display:flex;"><span>PRIVESC            # Privilege escalation instruction
+</span></span></code></pre></div><h2 id="vulnerability-analysis">Vulnerability Analysis</h2>
 <p>Identified vulnerabilities in the VM implementation:</p>
 <ol>
 <li><strong>Privilege Check Bug</strong>: Logic error in privilege escalation validation</li>
@@ -464,8 +545,8 @@ PRIVESC            # Privilege escalation instruction
         <footer class="post-footer">
             
             <div class="ctf-nav">
-                <a href="https://gracecondition.github.io/ctf/plaidctf-2024/" class="back-to-ctf">
-                    ← Back to Demo CTF 2025
+                <a href="http://localhost:1313/ctf/plaidctf-2024/" class="back-to-ctf">
+                    ← Back to PlaidCTF 2024
                 </a>
             </div>
             
@@ -508,7 +589,38 @@ PRIVESC            # Privilege escalation instruction
 </footer>
     </div>
 
-    <script src="https://gracecondition.github.io/js/main.js"></script>
+    <script type="module">
+        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
+
+        const canvas = document.getElementById('wave-gradient-canvas');
+        if (canvas) {
+            const gradient = new WaveGradient(canvas, {
+                colors: ['#000000', '#0a0a0a', '#151515', '#202020', '#2a2a2a', '#353535'],
+                fps: 30,
+                seed: 42,
+                speed: 1.0,
+                amplitude: 320,
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#0a0a0a',
+                primaryColor: '#1a1a1a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#2a2a2a',
+                lineColor: '#4a4a4a',
+                secondaryColor: '#2a2a2a',
+                tertiaryColor: '#1a1a1a',
+            }
+        });
+    </script>
+    <script src="http://localhost:1313/js/main.js"></script>
     
 </body>
 </html>

@@ -1,5 +1,6 @@
 {{ define "main" }}
-<section class="hero-section diagonal-gradient-bg">
+<section class="hero-section">
+    <canvas id="hero-wave-canvas"></canvas>
     <div class="hero-content">
         <h1 class="hero-title">{{ .Site.Params.hero.title | default "Security Research & Analysis" }}</h1>
         <p class="hero-subtitle">{{ .Site.Params.hero.subtitle | default "Exploring cybersecurity through research, analysis, and hands-on techniques" }}</p>
@@ -7,33 +8,81 @@
     </div>
 </section>
 
+<script type="module">
+    import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
+
+    const heroCanvas = document.getElementById('hero-wave-canvas');
+    if (heroCanvas) {
+        const heroGradient = new WaveGradient(heroCanvas, {
+            colors: ['#3a3a3a', '#4a4a4a', '#5a5a5a', '#6a6a6a', '#7a7a7a', '#8a8a8a'],
+            fps: 30,
+            seed: 123,
+            speed: 1.2,
+            amplitude: 350,
+        });
+    }
+</script>
+
 <section class="content-section">
     <div class="section-container">
-        <h2 class="section-title">Latest Posts</h2>
+        <h2 class="section-title">Latest Content</h2>
         <div class="posts-grid">
-            {{ range first 6 (where .Site.RegularPages "Type" "in" (slice "posts" "articles" "ctf")) }}
+            {{ $pages := where .Site.RegularPages "Kind" "page" }}
+            {{ range first 6 $pages }}
             <article class="post-card">
                 <a href="{{ .Permalink }}">
-                    <div class="post-image post-image-{{ .Params.category | default "security" }}" {{ if .Params.image }}style="background-image: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('{{ .Params.image }}'); background-size: cover; background-position: center;"{{ end }}>
+                    <div class="post-image post-image-{{ .Params.category | default (cond (eq .Type "ctf") "ctf" "security") }} {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" {{ if .Params.image }}style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), {{ end }}url('{{ .Params.image }}');"{{ end }}>
+                        {{ if not .Params.image }}
                         <span class="post-icon">
-                            {{ if eq .Params.category "ctf" }}🚩
+                            {{ if eq .Type "ctf" }}🚩
                             {{ else if eq .Params.category "research" }}🔬
                             {{ else if eq .Params.category "analysis" }}🔍
                             {{ else if eq .Params.category "tutorial" }}📚
                             {{ else if eq .Params.category "writeup" }}📝
                             {{ else }}🔐{{ end }}
                         </span>
+                        {{ end }}
                     </div>
                     <div class="post-content">
                         <h3 class="post-title">{{ .Title }}</h3>
                         <p class="post-excerpt">{{ .Summary | truncate 120 }}</p>
                         <div class="post-meta">
                             <span class="post-date">{{ .Date.Format "Jan 2, 2006" }}</span>
-                            <span class="post-category">{{ .Params.category | default "security" }}</span>
+                            <span class="post-category">{{ if eq .Type "ctf" }}CTF{{ else }}{{ .Params.category | default "security" }}{{ end }}</span>
                         </div>
                     </div>
                 </a>
             </article>
+            {{ end }}
+        </div>
+    </div>
+</section>
+
+<section class="content-section" style="background-color: var(--background-secondary);">
+    <div class="section-container">
+        <h2 class="section-title">CTF Writeups</h2>
+        <div class="posts-grid">
+            {{ $ctfSection := .Site.GetPage "/ctf" }}
+            {{ range $ctfSection.Pages }}
+            {{ if .IsSection }}
+            <article class="post-card ctf-competition-card">
+                <a href="{{ .Permalink }}">
+                    <div class="post-image post-image-ctf" {{ if .Params.image }}style="background-image: url('{{ .Params.image }}');"{{ end }}>
+                        {{ if not .Params.image }}
+                        <span class="post-icon">🚩</span>
+                        {{ end }}
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">{{ .Title }}</h3>
+                        <p class="post-excerpt">{{ .Params.description | default .Summary | truncate 120 }}</p>
+                        <div class="post-meta">
+                            <span class="post-date">{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
+                            <span class="post-category">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {{ end }}
             {{ end }}
         </div>
     </div>

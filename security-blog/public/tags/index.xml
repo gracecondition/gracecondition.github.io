@@ -2,136 +2,116 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on gracecondition</title>
-    <link>https://gracecondition.github.io/tags/</link>
+    <link>http://localhost:1313/tags/</link>
     <description>Recent content in Tags on gracecondition</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 10 Oct 2025 14:00:00 +0000</lastBuildDate><atom:link href="https://gracecondition.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 11 Nov 2025 14:59:55 +0200</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>analysis</title>
-      <link>https://gracecondition.github.io/tags/analysis/</link>
+      <title>Analysis</title>
+      <link>http://localhost:1313/tags/analysis/</link>
+      <pubDate>Tue, 11 Nov 2025 14:59:55 +0200</pubDate>
+      <guid>http://localhost:1313/tags/analysis/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Vulnerability</title>
+      <link>http://localhost:1313/tags/vulnerability/</link>
+      <pubDate>Tue, 11 Nov 2025 14:59:55 +0200</pubDate>
+      <guid>http://localhost:1313/tags/vulnerability/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Binary Analysis</title>
+      <link>http://localhost:1313/tags/binary-analysis/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/analysis/</guid>
+      <guid>http://localhost:1313/tags/binary-analysis/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>example</title>
-      <link>https://gracecondition.github.io/tags/example/</link>
-      <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/example/</guid>
+      <title>Demo</title>
+      <link>http://localhost:1313/tags/demo/</link>
+      <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/demo/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>introduction</title>
-      <link>https://gracecondition.github.io/tags/introduction/</link>
+      <title>Heap-Exploitation</title>
+      <link>http://localhost:1313/tags/heap-exploitation/</link>
+      <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/heap-exploitation/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Template</title>
+      <link>http://localhost:1313/tags/template/</link>
+      <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/template/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Introduction</title>
+      <link>http://localhost:1313/tags/introduction/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/introduction/</guid>
+      <guid>http://localhost:1313/tags/introduction/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>research</title>
-      <link>https://gracecondition.github.io/tags/research/</link>
+      <title>Research</title>
+      <link>http://localhost:1313/tags/research/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/research/</guid>
+      <guid>http://localhost:1313/tags/research/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>security</title>
-      <link>https://gracecondition.github.io/tags/security/</link>
+      <title>Security</title>
+      <link>http://localhost:1313/tags/security/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/security/</guid>
+      <guid>http://localhost:1313/tags/security/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>demo</title>
-      <link>https://gracecondition.github.io/tags/demo/</link>
+      <title>Reversing</title>
+      <link>http://localhost:1313/tags/reversing/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/demo/</guid>
+      <guid>http://localhost:1313/tags/reversing/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>reversing</title>
-      <link>https://gracecondition.github.io/tags/reversing/</link>
+      <title>Vm-Escape</title>
+      <link>http://localhost:1313/tags/vm-escape/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/reversing/</guid>
+      <guid>http://localhost:1313/tags/vm-escape/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>template</title>
-      <link>https://gracecondition.github.io/tags/template/</link>
-      <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/template/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>vm-escape</title>
-      <link>https://gracecondition.github.io/tags/vm-escape/</link>
-      <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/vm-escape/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kernel-exploitation</title>
-      <link>https://gracecondition.github.io/tags/kernel-exploitation/</link>
+      <title>Kernel-Exploitation</title>
+      <link>http://localhost:1313/tags/kernel-exploitation/</link>
       <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/kernel-exploitation/</guid>
+      <guid>http://localhost:1313/tags/kernel-exploitation/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>advanced</title>
-      <link>https://gracecondition.github.io/tags/advanced/</link>
+      <title>Advanced</title>
+      <link>http://localhost:1313/tags/advanced/</link>
       <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/advanced/</guid>
+      <guid>http://localhost:1313/tags/advanced/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>heap-exploitation</title>
-      <link>https://gracecondition.github.io/tags/heap-exploitation/</link>
-      <pubDate>Mon, 15 Jan 2024 10:30:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/heap-exploitation/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>binary-exploitation</title>
-      <link>https://gracecondition.github.io/tags/binary-exploitation/</link>
+      <title>Binary-Exploitation</title>
+      <link>http://localhost:1313/tags/binary-exploitation/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/binary-exploitation/</guid>
+      <guid>http://localhost:1313/tags/binary-exploitation/</guid>
       <description></description>
     </item>
-    
     <item>
-      <title>tutorial</title>
-      <link>https://gracecondition.github.io/tags/tutorial/</link>
+      <title>Tutorial</title>
+      <link>http://localhost:1313/tags/tutorial/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      
-      <guid>https://gracecondition.github.io/tags/tutorial/</guid>
+      <guid>http://localhost:1313/tags/tutorial/</guid>
       <description></description>
     </item>
-    
   </channel>
 </rss>

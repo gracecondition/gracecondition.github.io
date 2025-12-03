@@ -4,6 +4,12 @@
 
     <div class="main-column">
         <header class="ctf-list-header">
+            {{ if .Params.image }}
+            <div class="ctf-logo-header">
+                <img src="{{ .Params.image }}" alt="{{ .Title }} logo" class="ctf-logo">
+            </div>
+            {{ end }}
+
             <div class="ctf-meta">
                 <span class="ctf-badge">🚩 {{ .Params.ctf_name | default .Title }}</span>
                 {{ if .Params.ctf_date }}
@@ -48,10 +54,19 @@
                 {{ range .Pages.ByWeight.ByDate.Reverse }}
                 <article class="challenge-card">
                     <a href="{{ .Permalink }}">
+                        {{ if .Params.image }}
+                        <div class="challenge-image {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), {{ end }}url('{{ .Params.image }}');"></div>
+                        {{ end }}
                         <div class="challenge-header">
+                            {{ if not .IsSection }}
                             <div class="challenge-category category-{{ .Params.challenge_category | default "misc" }}">
                                 {{ .Params.challenge_category | default "misc" | upper }}
                             </div>
+                            {{ else }}
+                            <div class="challenge-category category-ctf">
+                                {{ .Params.ctf_type | default "CTF" | upper }}
+                            </div>
+                            {{ end }}
                             {{ if eq (.Params.tags | jsonify) ("[\"first-blood\"]" | jsonify) }}
                             <div class="first-blood-indicator">🩸</div>
                             {{ end }}
@@ -59,14 +74,18 @@
 
                         <div class="challenge-content">
                             <h3 class="challenge-title">{{ .Title }}</h3>
-                            <p class="challenge-excerpt">{{ .Summary | truncate 100 }}</p>
+                            <p class="challenge-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 100 }}{{ else }}{{ .Summary | truncate 100 }}{{ end }}</p>
 
                             <div class="challenge-stats">
+                                {{ if .IsSection }}
+                                <span class="challenge-points">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
+                                {{ else }}
                                 {{ if .Params.challenge_points }}
                                 <span class="challenge-points">{{ .Params.challenge_points }} pts</span>
                                 {{ end }}
                                 {{ if .Params.challenge_solves }}
                                 <span class="challenge-solves">{{ .Params.challenge_solves }} solves</span>
+                                {{ end }}
                                 {{ end }}
                             </div>
                         </div>

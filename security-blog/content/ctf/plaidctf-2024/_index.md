@@ -1,11 +1,13 @@
 ---
-title: "Demo CTF 2025"
+title: "PlaidCTF 2024"
 date: 2024-01-25
-description: "Demo CTF writeup templates - additional examples of writeup structure"
-ctf_name: "Demo CTF 2025"
-ctf_date: "January 2025"
-team: "Demo Team"
-placement: "Demo"
+description: "Writeups from PlaidCTF 2024 competition"
+ctf_name: "PlaidCTF 2024"
+ctf_date: "April 2024"
+ctf_type: "competition"
+team: "PwnPasTen"
+placement: "Top 100"
+image: "/images/plaidctf-logo.png"
 ---
 
 # Demo CTF 2025

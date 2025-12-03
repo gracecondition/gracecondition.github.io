@@ -3,8 +3,26 @@ languageCode = 'en-us'
 title = 'gracecondition'
 theme = 'securityhub'
 
+[markup]
+  [markup.tableOfContents]
+    endLevel = 4
+    ordered = false
+    startLevel = 1
+  [markup.highlight]
+    anchorLineNos = false
+    codeFences = true
+    guessSyntax = true
+    lineNos = false
+    lineNumbersInTable = false
+    noClasses = true
+    style = "monokai"
+    tabWidth = 4
+
 [params]
   description = "OS internals, binary exploitation, and low-level security research"
+  author = "gracecondition"
+  keywords = ["security research", "binary exploitation", "OS internals", "vulnerability analysis", "reverse engineering"]
+  favicon = "/favicon.png"
 
   [params.hero]
     title = "gracecondition"
@@ -14,3 +32,14 @@ theme = 'securityhub'
   # twitter = "https://twitter.com/yourusername"
   # github = "https://github.com/yourusername"
   # linkedin = "https://linkedin.com/in/yourusername"
+
+# Enable sitemap generation
+[sitemap]
+  changefreq = "weekly"
+  filename = "sitemap.xml"
+  priority = 0.5
+
+# Enable RSS
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]

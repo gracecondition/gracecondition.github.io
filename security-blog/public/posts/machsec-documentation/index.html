@@ -1,31 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>machsec - detecting XNU binary mitigations - gracecondition</title>
     <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+    <meta name="author" content="gracecondition">
+    <meta name="keywords" content="security research, binary exploitation, OS internals, vulnerability analysis, reverse engineering">
 
-    <link rel="stylesheet" href="https://gracecondition.github.io/css/style.css">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://localhost:1313/posts/machsec-documentation/">
+    <meta property="og:title" content="machsec - detecting XNU binary mitigations">
+    <meta property="og:description" content="This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU">
+    
+    <meta property="og:image" content="https://raw.githubusercontent.com/gracecondition/machsec/main/assets/logo.png">
+    
+    
+    <meta property="article:published_time" content="2025-10-10T14:00:00Z">
+    <meta property="article:modified_time" content="2025-10-10T14:00:00Z">
+    
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/posts/machsec-documentation/">
+    <meta name="twitter:title" content="machsec - detecting XNU binary mitigations">
+    <meta name="twitter:description" content="This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU">
+    
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/gracecondition/machsec/main/assets/logo.png">
+    
+
+    
+    <link rel="canonical" href="http://localhost:1313/posts/machsec-documentation/">
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        
+        "headline": "machsec - detecting XNU binary mitigations",
+        "description": "This article explains my new mitigation detection tool machsec, for iOS\/macOS, alongside binary mitigations available on XNU",
+        "author": {
+            "@type": "Person",
+            "name": "gracecondition"
+        },
+        "datePublished": "2025-10-10T14:00:00Z",
+        "dateModified": "2025-10-10T14:00:00Z",
+        
+        "image": "https:\/\/raw.githubusercontent.com\/gracecondition\/machsec\/main\/assets\/logo.png",
+        
+        "publisher": {
+            "@type": "Organization",
+            "name": "gracecondition",
+            "url": "http:\/\/localhost:1313\/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/posts\/machsec-documentation\/"
+        }
+        
+    }
+    </script>
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+    
+    <link rel="icon" href="http://localhost:1313/favicon.png">
     
 
     
 </head>
 <body>
+    <canvas id="wave-gradient-canvas"></canvas>
     <div class="site-container">
         <header class="site-header">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="https://gracecondition.github.io/" class="nav-brand">
+            <a href="http://localhost:1313/" class="nav-brand">
                 <h1>gracecondition</h1>
             </a>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="https://gracecondition.github.io/" class="nav-link">Home</a>
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
@@ -50,7 +110,134 @@
             <h3 class="toc-title">📖 Contents</h3>
             <nav class="toc-nav" id="toc-nav">
                 
-                <div class="toc-loading">Generating table of contents...</div>
+                
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-is-machsec">What is machsec?</a></li>
+    <li><a href="#mitigations">Mitigations</a>
+      <ul>
+        <li><a href="#stack-canaries">Stack Canaries</a>
+          <ul>
+            <li><a href="#what-are-stack-canaries">What are stack canaries?</a></li>
+            <li><a href="#how-to-detect-them-in-binaries">How to detect them in binaries</a>
+              <ul>
+                <li><a href="#method-1">Method 1</a></li>
+                <li><a href="#method-2">Method 2</a></li>
+                <li><a href="#optional-method-3">Optional method 3</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#pie">PIE</a>
+          <ul>
+            <li><a href="#what-is-pie">What is PIE</a></li>
+            <li><a href="#detecting-pie">Detecting PIE</a></li>
+          </ul>
+        </li>
+        <li><a href="#no-execute-nx">No eXecute (NX)</a>
+          <ul>
+            <li><a href="#whats-nx">Whats NX?</a></li>
+            <li><a href="#detecting-nx">Detecting NX</a></li>
+          </ul>
+        </li>
+        <li><a href="#rpathrunpath">RPATH/RUNPATH</a>
+          <ul>
+            <li><a href="#what-is-rpathrunpath">What is rpath/runpath</a></li>
+            <li><a href="#how-to-detect-rpathrunpath">How to detect rpath/runpath</a></li>
+          </ul>
+        </li>
+        <li><a href="#fortify">FORTIFY</a>
+          <ul>
+            <li><a href="#what-is-fortify">What is fortify?</a></li>
+            <li><a href="#how-to-detect-fortify">How to detect fortify</a></li>
+          </ul>
+        </li>
+        <li><a href="#ubsan-undefined-behaviour-sanitizer">UBSAN (Undefined behaviour sanitizer)</a>
+          <ul>
+            <li><a href="#what-is-ubsan">What is UBSAN?</a></li>
+            <li><a href="#how-to-detect-ubsan">How to detect ubsan?</a></li>
+          </ul>
+        </li>
+        <li><a href="#asan-address-sanitizer">ASAN (Address Sanitizer)</a>
+          <ul>
+            <li><a href="#what-is-asan">What is ASAN?</a></li>
+            <li><a href="#detecting-asan">Detecting ASAN</a></li>
+          </ul>
+        </li>
+        <li><a href="#cfi-control-flow-integrity">CFI (Control Flow Integrity)</a>
+          <ul>
+            <li><a href="#what-is-cfi">What is CFI?</a></li>
+            <li><a href="#detecting-cfi">Detecting CFI</a></li>
+          </ul>
+        </li>
+        <li><a href="#symbols-symbol-stripping">Symbols (Symbol Stripping)</a>
+          <ul>
+            <li><a href="#what-is-symbol-stripping">What is symbol stripping</a></li>
+            <li><a href="#detecting-symbol-stripping">Detecting symbol stripping</a></li>
+          </ul>
+        </li>
+        <li><a href="#stack-clashing">Stack Clashing</a>
+          <ul>
+            <li><a href="#what-is-stack-clashing">What is stack clashing?</a></li>
+            <li><a href="#detecting-stack-clashing">Detecting stack clashing</a></li>
+          </ul>
+        </li>
+        <li><a href="#heap-cookies">Heap cookies</a>
+          <ul>
+            <li><a href="#what-are-heap-cookies">What are heap cookies?</a></li>
+            <li><a href="#detecting-heap-cookies">Detecting heap cookies</a></li>
+          </ul>
+        </li>
+        <li><a href="#integer-overflow">Integer overflow</a>
+          <ul>
+            <li><a href="#what-is-integer-overflow">What is Integer overflow</a></li>
+            <li><a href="#detecting-integer-overflow">Detecting Integer Overflow</a></li>
+          </ul>
+        </li>
+        <li><a href="#sandbox-xnu-exclusive">Sandbox (XNU exclusive)</a>
+          <ul>
+            <li><a href="#what-is-sandboxing">What is sandboxing?</a></li>
+            <li><a href="#detecting-sandboxing">Detecting sandboxing</a></li>
+          </ul>
+        </li>
+        <li><a href="#hardened-runtime--sip---amfi-xnu-exclusive">Hardened runtime + SIP  + AMFI (XNU Exclusive)</a>
+          <ul>
+            <li><a href="#what-is-hardened-runtime">What is Hardened runtime?</a></li>
+            <li><a href="#what-is-sip-system-integrity-protection">What is SIP (System Integrity Protection)</a></li>
+            <li><a href="#binary-encryption-amfi">Binary Encryption (AMFI)</a></li>
+            <li><a href="#detecting-siphardened-runtime">Detecting SIP/Hardened runtime</a></li>
+          </ul>
+        </li>
+        <li><a href="#code-signing">Code signing</a>
+          <ul>
+            <li><a href="#what-is-code-signing">What is code signing?</a></li>
+            <li><a href="#how-does-code-signing-work">How does code signing work?</a></li>
+            <li><a href="#detecting-code-signing">Detecting code signing</a></li>
+          </ul>
+        </li>
+        <li><a href="#pac-arm-exclusive">PAC (ARM Exclusive)</a>
+          <ul>
+            <li><a href="#what-is-pac">What is PAC?</a></li>
+            <li><a href="#how-does-pac-work">How does PAC Work?</a></li>
+            <li><a href="#detecting-pac">Detecting PAC</a></li>
+          </ul>
+        </li>
+        <li><a href="#what-is-emtemtemie">What is EMTE/MTE/MIE</a></li>
+        <li><a href="#how-mte-works">How MTE Works</a>
+          <ul>
+            <li><a href="#detecting-mte">Detecting MTE</a></li>
+          </ul>
+        </li>
+        <li><a href="#arc-objectivec">ARC (ObjectiveC)</a>
+          <ul>
+            <li><a href="#what-is-arc">What is ARC?</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+                
             </nav>
         </div>
 
@@ -92,7 +279,7 @@
             <h4 class="toc-subtitle">Tags</h4>
             <div class="toc-tags">
                 
-                <a href="/tags/example/" class="toc-tag">#example</a>
+                <a href="/tags/binary-analysis/" class="toc-tag">#binary analysis</a>
                 
                 <a href="/tags/analysis/" class="toc-tag">#analysis</a>
                 
@@ -146,7 +333,7 @@
                 <span> • </span>
                 <div class="inline-tags">
                     
-                    <span class="inline-tag">#example</span>
+                    <span class="inline-tag">#binary analysis</span>
                     
                     <span class="inline-tag">#analysis</span>
                     
@@ -203,8 +390,8 @@ The stack layout of a program&rsquo;s function might look something like this (t
 <p>(represented as some sort of weird abomination of a stack)</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">----</span> <span style="color:#960050;background-color:#1e0010">&lt;-</span> <span style="color:#a6e22e">$bp</span> (<span style="color:#66d9ef">base</span> <span style="color:#66d9ef">pointer</span> <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">stackframe</span>)
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">int</span> <span style="color:#66d9ef">i</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x1337</span><span style="color:#75715e">;
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#66d9ef">j</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x41</span><span style="color:#75715e">;
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">stack</span> <span style="color:#66d9ef">canary</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0xr4nd0mnumb3r</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">int</span> <span style="color:#66d9ef">j</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x41</span><span style="color:#75715e">;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">stack</span> <span style="color:#66d9ef">canary</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0xr4nd0mnumb3r</span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">instruction</span> <span style="color:#66d9ef">pointer</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#ae81ff">0x80000</span> <span style="color:#960050;background-color:#1e0010">&lt;</span>-- <span style="color:#66d9ef">we</span> <span style="color:#66d9ef">want</span> <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">control</span> <span style="color:#66d9ef">this</span>
 </span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">----</span> <span style="color:#960050;background-color:#1e0010">&lt;-</span> <span style="color:#a6e22e">$sp</span> (<span style="color:#66d9ef">stack</span> <span style="color:#66d9ef">pointer</span>)
 </span></span></code></pre></div><p>A stack buffer overflow occurs when we read way too much data and start overwriting adjacent variables.
@@ -230,15 +417,15 @@ Here&rsquo;s our code:</p>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
 </span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> buffer[<span style="color:#ae81ff">20</span>];
-</span></span><span style="display:flex;"><span>    fgets(buffer,<span style="color:#66d9ef">sizeof</span>(buffer)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,stdin);
-</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;%s&#34;</span>, buffer);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fgets</span>(buffer,<span style="color:#66d9ef">sizeof</span>(buffer)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,stdin);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>, buffer);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>As you can see, pretty clear-cut.
 The control flow logic would go like this
 <code>main() --&gt; fgets() --&gt; printf() --&gt; return/end()</code>
 Let&rsquo;s take a look at what&rsquo;s actually happening:
-<figure><img src="/images/ida_canary.png" width="80%"/>
+<figure><img src="/images/ida_canary.png" width="80%">
 </figure>
 
 As you can see, a program that should be clear-cut, now has branches, conditional
@@ -253,7 +440,7 @@ The flow looks a little something like this:</p>
 You can either check the binary for the functions that handle the canary verification:</p>
 <h4 id="method-1">Method 1</h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">&amp;&amp;</span> macho) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symtab) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>symbols <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>symoff);
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>strings <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>stroff;
@@ -261,7 +448,7 @@ You can either check the binary for the functions that handle the canary verific
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>nsyms; i<span style="color:#f92672">++</span>) {
 </span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
-</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (strcmp(name, <span style="color:#e6db74">&#34;___stack_chk_fail&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(name, <span style="color:#e6db74">&#34;___stack_chk_fail&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                        res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">break</span>;
 </span></span><span style="display:flex;"><span>                    }
@@ -274,25 +461,25 @@ when the program is stripped and statically linked (packing all of the libraries
 of the program together into one binary).</p>
 <h4 id="method-2">Method 2</h4>
 <p>Or you can look for data that looks like the canary getting moved around:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> count; i<span style="color:#f92672">++</span>) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">size_t</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> count; i<span style="color:#f92672">++</span>) {
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Look for x86_64 stack canary offset gs:[0x28] on macOS
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x28]&#34;</span>) <span style="color:#f92672">||</span> strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:0x28&#34;</span>)) <span style="color:#f92672">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>            (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;mov&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x28]&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:0x28&#34;</span>)) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>            (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;mov&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Look for x86 32-bit stack canary offset gs:[0x14] on macOS
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x14]&#34;</span>) <span style="color:#f92672">||</span> strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:0x14&#34;</span>)) <span style="color:#f92672">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>            (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;mov&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x14]&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:0x14&#34;</span>)) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>            (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;mov&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Check for canary validation (x86)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x28]&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;xor&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x28]&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;xor&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (strstr(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x14]&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;xor&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;gs:[0x14]&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;xor&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span></code></pre></div><p>Since the canary is a very unique data type that resides in a particular
@@ -303,20 +490,20 @@ around, it&rsquo;s a canary.</p>
 <h4 id="optional-method-3">Optional method 3</h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>        <span style="color:#75715e">// ARM64 stack canary detection for iOS devices
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// Look for stack canary loading from thread pointer
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldr&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldur&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>            (strstr(insn[i].op_str, <span style="color:#e6db74">&#34;x18&#34;</span>) <span style="color:#f92672">||</span> strstr(insn[i].op_str, <span style="color:#e6db74">&#34;tpidr_el0&#34;</span>))) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldr&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldur&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>            (<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;x18&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;tpidr_el0&#34;</span>))) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ARM32 stack canary patterns
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldr&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>            (strstr(insn[i].op_str, <span style="color:#e6db74">&#34;pc&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> strstr(insn[i].op_str, <span style="color:#e6db74">&#34;___stack_chk_guard&#34;</span>))) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldr&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>            (<span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;pc&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;___stack_chk_guard&#34;</span>))) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Check for calls to ___stack_chk_fail (both x86 and ARM)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;call&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;bl&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span> 
-</span></span><span style="display:flex;"><span>            strstr(insn[i].op_str, <span style="color:#e6db74">&#34;___stack_chk_fail&#34;</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;call&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;bl&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">&amp;&amp;</span> 
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">strstr</span>(insn[i].op_str, <span style="color:#e6db74">&#34;___stack_chk_fail&#34;</span>)) {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>canary_enabled <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
@@ -336,7 +523,7 @@ This is done via randomization, making it so that the attacker either has to
 leak what the address of a function he&rsquo;s interested in is, or via guessing which is
 VERY HARD to do.</p>
 <p>Here&rsquo;s what a program with and without PIE looks like
-<figure><img src="/images/after_pie.png" width="80%"/>
+<figure><img src="/images/after_pie.png" width="80%">
 </figure>
 
 Where 0x40080 is the address before PIE, and will always be
@@ -397,7 +584,7 @@ The Mach-O header structure looks like this:</p>
 <li>Detection Process in machsec</li>
 </ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_pie</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_pie</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint32_t</span> flags <span style="color:#f92672">=</span> macho<span style="color:#f92672">-&gt;</span>is_64bit <span style="color:#f92672">?</span> macho<span style="color:#f92672">-&gt;</span>header<span style="color:#f92672">-&gt;</span>flags : ((<span style="color:#66d9ef">struct</span> mach_header <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data)<span style="color:#f92672">-&gt;</span>flags;
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (flags <span style="color:#f92672">&amp;</span> MH_PIE) {
@@ -445,7 +632,7 @@ execution to it, and expect it to run.</p>
 Stack:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check stack segments for NX protection
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>stack_seg <span style="color:#f92672">=</span> macho_find_segment(macho, <span style="color:#e6db74">&#34;__STACK&#34;</span>);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>stack_seg <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_segment</span>(macho, <span style="color:#e6db74">&#34;__STACK&#34;</span>);
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> stack_nx <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>    
@@ -455,8 +642,8 @@ Stack:</p>
 </span></span><span style="display:flex;"><span>    }
 </span></span></code></pre></div><p>Heap:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>    <span style="color:#75715e">// Check heap segments for NX protection
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>data_seg <span style="color:#f92672">=</span> macho_find_segment(macho, SEG_DATA);
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>heap_seg <span style="color:#f92672">=</span> macho_find_segment(macho, <span style="color:#e6db74">&#34;__HEAP&#34;</span>);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>data_seg <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_segment</span>(macho, SEG_DATA);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> segment_command_64 <span style="color:#f92672">*</span>heap_seg <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_segment</span>(macho, <span style="color:#e6db74">&#34;__HEAP&#34;</span>);
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> heap_nx <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>    
@@ -500,7 +687,7 @@ defined are areas where the attacker can write code (the same dir as the binary,
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (cmd<span style="color:#f92672">-&gt;</span>cmd <span style="color:#f92672">==</span> LC_LOAD_DYLIB) {
 </span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">struct</span> dylib_command <span style="color:#f92672">*</span>dylib <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> dylib_command <span style="color:#f92672">*</span>)cmd;
 </span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>path <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)dylib <span style="color:#f92672">+</span> dylib<span style="color:#f92672">-&gt;</span>dylib.name.offset;
-</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (strstr(path, <span style="color:#e6db74">&#34;@rpath&#34;</span>)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(path, <span style="color:#e6db74">&#34;@rpath&#34;</span>)) {
 </span></span><span style="display:flex;"><span>          has_runpath <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>      }
 </span></span><span style="display:flex;"><span>  }
@@ -532,7 +719,7 @@ It&rsquo;s a relatively weak mitigation, but still something to be aware of.</p>
 <p>This mitigation modifies the way the functions work, which means the way
 the code looks at the assembly level is also different from a binary that was
 compiled without this mitigation.
-<figure><img src="/images/foritfy.png" width="80%"/>
+<figure><img src="/images/foritfy.png" width="80%">
 </figure>
 
 As you can see, the memory unsafe functions like memcpy are now called
@@ -540,8 +727,8 @@ As you can see, the memory unsafe functions like memcpy are now called
 on the linking level with a more secure version.
 If we just look for these symbols, we can detect this mitigation.
 And here&rsquo;s what the code for the detection mechanism looks like:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_fortify</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_fortify</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>fortify_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>fortify_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -571,8 +758,8 @@ And here&rsquo;s what the code for the detection mechanism looks like:</p>
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> (name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;_&#39;</span>) name<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Check against known fortified functions
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">for</span> (size_t j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">sizeof</span>(fortified_functions) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(fortified_functions[<span style="color:#ae81ff">0</span>]); j<span style="color:#f92672">++</span>) {
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (strstr(name, fortified_functions[j])) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">size_t</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">sizeof</span>(fortified_functions) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(fortified_functions[<span style="color:#ae81ff">0</span>]); j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, fortified_functions[j])) {
 </span></span><span style="display:flex;"><span>                    fortified_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;  <span style="color:#75715e">// Don&#39;t double-count the same symbol
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                }
@@ -583,9 +770,9 @@ And here&rsquo;s what the code for the detection mechanism looks like:</p>
 </span></span><span style="display:flex;"><span>    res<span style="color:#f92672">-&gt;</span>fortified_count <span style="color:#f92672">=</span> fortified_count;
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (fortified_count <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> malloc(<span style="color:#ae81ff">64</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">64</span>);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (text_buffer) {
-</span></span><span style="display:flex;"><span>            snprintf(text_buffer, <span style="color:#ae81ff">64</span>, <span style="color:#e6db74">&#34;FORTIFY enabled (%d functions)&#34;</span>, fortified_count);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">snprintf</span>(text_buffer, <span style="color:#ae81ff">64</span>, <span style="color:#e6db74">&#34;FORTIFY enabled (%d functions)&#34;</span>, fortified_count);
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>fortify_text <span style="color:#f92672">=</span> text_buffer;
 </span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>fortify_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;FORTIFY enabled&#34;</span>;
@@ -609,14 +796,14 @@ UBsan aims to catch undefined behaviors like integer bugs (int overflow, int und
 signedness bugs).
 Amongst other things.</p>
 <h3 id="how-to-detect-ubsan">How to detect ubsan?</h3>
-<p><figure><img src="/images/ubsan.png" width="80%"/>
+<p><figure><img src="/images/ubsan.png" width="80%">
 </figure>
 
 As you can see, we get a new function inserted into our code,
 all we have to do is look for this symbol, and then we will know if ubsan is enabled or not.
 Very similar idea to how detecting fortify works.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_ubsan</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_ubsan</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>ubsan_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>ubsan_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -631,7 +818,7 @@ Very similar idea to how detecting fortify works.</p>
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>            
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;__ubsan&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;__sanitizer&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;_ubsan_handle&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__ubsan&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__sanitizer&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_ubsan_handle&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>ubsan_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;UBSan enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>ubsan_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>ubsan_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -657,14 +844,14 @@ program, which significantly reduces the performance of the program.</p>
 <h3 id="detecting-asan">Detecting ASAN</h3>
 <p>Detecting ASAN works in much the same way as the previously discussed mitigations
 Here&rsquo;s what a binary with the asan checks looks like:
-<figure><img src="/images/asan.png" width="80%"/>
+<figure><img src="/images/asan.png" width="80%">
 </figure>
 
 As you can see, a bunch of asan functions get added.
 And here&rsquo;s how the code detects asan:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_asan</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_asan</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>asan_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>asan_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -679,7 +866,7 @@ And here&rsquo;s how the code detects asan:</p>
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>            
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;__asan&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;__sanitizer_cov&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;__interceptor_malloc&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__asan&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__sanitizer_cov&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__interceptor_malloc&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>asan_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ASAN enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>asan_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>asan_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -703,9 +890,9 @@ just use PAC, which is a hardware based implementation of control flow integrity
 <h3 id="detecting-cfi">Detecting CFI</h3>
 <p>Detecting CFI works much like detecting the other previous instrumentation based mitigations, we just read the symbols
 from the binary&hellip; and we&rsquo;re done.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_cfi</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_cfi</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// CFI is less common on macOS, check for symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>cfi_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>cfi_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -720,7 +907,7 @@ from the binary&hellip; and we&rsquo;re done.</p>
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>            
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;__cfi&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;_cfi_&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;cfi_check&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__cfi&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_cfi_&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;cfi_check&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>cfi_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;CFI enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>cfi_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>cfi_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -748,8 +935,8 @@ generated obviously depend on your decompiler of choice.</p>
 mitigations we look for something that exists in the binary, but this one, we look for the nonpresence of something.
 You can tell how many symbols are in a binary, as well as how many symbols are in the binary total, by just reading
 the binary headers and metadata</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_symbols</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_symbols</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab <span style="color:#f92672">||</span> symtab<span style="color:#f92672">-&gt;</span>nsyms <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Fully stripped (0 symbols)&#34;</span>;
@@ -772,7 +959,7 @@ the binary headers and metadata</p>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> malloc(<span style="color:#ae81ff">128</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">128</span>);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>text_buffer) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Memory error&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -781,19 +968,19 @@ the binary headers and metadata</p>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (local_syms <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
-</span></span><span style="display:flex;"><span>        snprintf(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Not stripped (%d symbols)&#34;</span>, symtab<span style="color:#f92672">-&gt;</span>nsyms);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">snprintf</span>(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Not stripped (%d symbols)&#34;</span>, symtab<span style="color:#f92672">-&gt;</span>nsyms);
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_text <span style="color:#f92672">=</span> text_buffer;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_color <span style="color:#f92672">=</span> COLOR_RED;
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> true;
 </span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (external_syms <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> undef_syms <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
-</span></span><span style="display:flex;"><span>        snprintf(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Partially stripped (%d symbols)&#34;</span>, external_syms <span style="color:#f92672">+</span> undef_syms);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">snprintf</span>(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Partially stripped (%d symbols)&#34;</span>, external_syms <span style="color:#f92672">+</span> undef_syms);
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_text <span style="color:#f92672">=</span> text_buffer;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_color <span style="color:#f92672">=</span> COLOR_YELLOW;
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> true;
 </span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
-</span></span><span style="display:flex;"><span>        snprintf(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Fully stripped (0 symbols)&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">snprintf</span>(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;Fully stripped (0 symbols)&#34;</span>);
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_text <span style="color:#f92672">=</span> text_buffer;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>symbols_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -818,8 +1005,8 @@ They check that heap chunks haven&rsquo;t been overflown.</p>
 <h3 id="detecting-heap-cookies">Detecting heap cookies</h3>
 <p>Detecting heap cookies can be done by checking the symbols in the binary.
 Here&rsquo;s how to detect them:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_heap_cookies</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_heap_cookies</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>heap_cookies_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>heap_cookies_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -834,7 +1021,7 @@ Here&rsquo;s how to detect them:</p>
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>            
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;malloc_zone&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;guard_malloc&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;_malloc_check&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;malloc_zone&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;guard_malloc&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_malloc_check&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>heap_cookies_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Heap hardening enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>heap_cookies_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>heap_cookies_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -854,8 +1041,8 @@ Here&rsquo;s how to detect them:</p>
 to the program to make sure that integers have not exceeded their limits and wrapped around to another value.</p>
 <h3 id="detecting-integer-overflow">Detecting Integer Overflow</h3>
 <p>Quite like the other mitigations, you can just check for the presence of certain symbols:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_integer_overflow</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_integer_overflow</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>symtab) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>integer_overflow_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;No symbols&#34;</span>;
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>integer_overflow_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
@@ -870,8 +1057,8 @@ to the program to make sure that integers have not exceeded their limits and wra
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (symbols[i].n_un.n_strx <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> symbols[i].n_un.n_strx <span style="color:#f92672">&lt;</span> symtab<span style="color:#f92672">-&gt;</span>strsize) {
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>            
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;__muloti4&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;__addoti4&#34;</span>) <span style="color:#f92672">||</span> 
-</span></span><span style="display:flex;"><span>                strstr(name, <span style="color:#e6db74">&#34;__ubsan_handle_add_overflow&#34;</span>) <span style="color:#f92672">||</span> strstr(name, <span style="color:#e6db74">&#34;__wrap_&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__muloti4&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__addoti4&#34;</span>) <span style="color:#f92672">||</span> 
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__ubsan_handle_add_overflow&#34;</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__wrap_&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>integer_overflow_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Integer overflow protection enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>integer_overflow_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                res<span style="color:#f92672">-&gt;</span>integer_overflow_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -892,13 +1079,13 @@ In the case of XNU and mitigations, this mitigation does a couple of things:</p>
 <h3 id="detecting-sandboxing">Detecting sandboxing</h3>
 <p>We can detect sandboxing either via the symbols present, by checking if the binary is signed, which is also
 a strong indicator that the binary is sandboxed, and also checking for strings that have to do with entitlements.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_sandbox</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_sandbox</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> has_sandbox_symbols <span style="color:#f92672">=</span> false;
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> has_code_signature <span style="color:#f92672">=</span> false;
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> has_entitlements <span style="color:#f92672">=</span> false;
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check for sandboxing symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (symtab) {
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>symbols <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>symoff);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>strings <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>stroff;
@@ -908,12 +1095,12 @@ a strong indicator that the binary is sandboxed, and also checking for strings t
 </span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>                
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Check for macOS/iOS sandboxing symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;sandbox_&#34;</span>) <span style="color:#f92672">||</span> 
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_sandbox_init&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;sandbox_check&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;sandbox_free_error&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;container_&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_container_create&#34;</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;sandbox_&#34;</span>) <span style="color:#f92672">||</span> 
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_sandbox_init&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;sandbox_check&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;sandbox_free_error&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;container_&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_container_create&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                    has_sandbox_symbols <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;
 </span></span><span style="display:flex;"><span>                }
@@ -939,9 +1126,9 @@ a strong indicator that the binary is sandboxed, and also checking for strings t
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Look for common sandbox entitlement strings
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (sig_cmd<span style="color:#f92672">-&gt;</span>datasize <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">20</span>) {  <span style="color:#75715e">// Minimum size check
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#75715e">// Search for sandbox-related entitlement keys
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> (search_memory(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;com.apple.security.app-sandbox&#34;</span>, <span style="color:#ae81ff">31</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                        search_memory(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;platform-application&#34;</span>, <span style="color:#ae81ff">20</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                        search_memory(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;sandbox&#34;</span>, <span style="color:#ae81ff">7</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">search_memory</span>(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;com.apple.security.app-sandbox&#34;</span>, <span style="color:#ae81ff">31</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">search_memory</span>(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;platform-application&#34;</span>, <span style="color:#ae81ff">20</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">search_memory</span>(sig_data, sig_cmd<span style="color:#f92672">-&gt;</span>datasize, <span style="color:#e6db74">&#34;sandbox&#34;</span>, <span style="color:#ae81ff">7</span>)) {
 </span></span><span style="display:flex;"><span>                        has_entitlements <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                    }
 </span></span><span style="display:flex;"><span>                }
@@ -1031,17 +1218,17 @@ amfid verifies cert chains, provisioning profiles, etc.</p>
 <p>Detecting if SIP is enabled on the operating system level is out of the scope of machsec, but it&rsquo;s safe to assume every XNU based operating system will have it enabled by default.
 However, not all binaries will have a hardened runtime enabled, so we can definitely check for that in the binary.
 We can check for the headers in the binary, which tell the kernel how to handle the binary. The same information that helps the kernel, helps us.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_hardened_runtime</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) { <span style="color:#75715e">// Check for LC_CODE_SIGNATURE load command (both macOS and iOS)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>code_sig <span style="color:#f92672">=</span> macho_find_command(macho, LC_CODE_SIGNATURE);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_hardened_runtime</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) { <span style="color:#75715e">// Check for LC_CODE_SIGNATURE load command (both macOS and iOS)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>code_sig <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_command</span>(macho, LC_CODE_SIGNATURE);
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Also check for iOS-specific security features
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//uint32_t flags = macho-&gt;is_64bit ? macho-&gt;header-&gt;flags : ((struct mach_header *)macho-&gt;data)-&gt;flags;
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">bool</span> has_ios_security <span style="color:#f92672">=</span> false;
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check for iOS App Store binaries (encrypted)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>encryption <span style="color:#f92672">=</span> macho_find_command(macho, LC_ENCRYPTION_INFO);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>encryption <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_command</span>(macho, LC_ENCRYPTION_INFO);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>encryption <span style="color:#f92672">&amp;&amp;</span> macho<span style="color:#f92672">-&gt;</span>is_64bit) {
-</span></span><span style="display:flex;"><span>        encryption <span style="color:#f92672">=</span> macho_find_command(macho, LC_ENCRYPTION_INFO_64);
+</span></span><span style="display:flex;"><span>        encryption <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_command</span>(macho, LC_ENCRYPTION_INFO_64);
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (encryption) {
@@ -1088,8 +1275,8 @@ The following are NOT signed:</p>
 </ul>
 <h3 id="detecting-code-signing">Detecting code signing</h3>
 <p>It&rsquo;s once again as simple as just parsing the binary headers.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_code_signing</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>code_sig <span style="color:#f92672">=</span> macho_find_command(macho, LC_CODE_SIGNATURE);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_code_signing</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> load_command <span style="color:#f92672">*</span>code_sig <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_find_command</span>(macho, LC_CODE_SIGNATURE);
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (code_sig) {
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">-&gt;</span>code_signing_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Code signed&#34;</span>;
@@ -1123,8 +1310,8 @@ So by default, pointers look a little something like this:</p>
 PAC makes use of this to insert a little signature, so a signed pointer might look something like this:</p>
 <p><code>0xA123A312fa89efa8</code></p>
 <p>This hash gets computed using the following equation:</p>
-<pre tabindex="0"><code class="language-math" data-lang="math">truncate(QARMA_encrypt(key, pointer, context))
-</code></pre><p>Where:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>truncate(QARMA_encrypt(key, pointer, context))
+</span></span></code></pre></div><p>Where:</p>
 <p>Truncate - we cannot fit the whole result into the few bits we have, so we truncate to the 16 or 24 bits available.</p>
 <p>QARMA - Custom ARM hasing algorthim, a tweakable block cipher algorthim.</p>
 <p>key - secret key sitting in registers which can only be set by the kernel.</p>
@@ -1135,7 +1322,7 @@ Since C allows you to do things like pointer arithmetic and interact with pointe
 <p>Thus, only pointers that are generally not going to be messed around with by a C program, things like instruction pointers, we can safely sign them, since they are not going to be modified intentionally by program logic.</p>
 <h3 id="detecting-pac">Detecting PAC</h3>
 <p>Here&rsquo;s a picture of what PAC looks like in a program (<code>/bin/ls</code>).
-<figure><img src="/images/pac.png" width="80%"/>
+<figure><img src="/images/pac.png" width="80%">
 </figure>
 
 As you can see, we get new cool arm instructions like</p>
@@ -1145,7 +1332,7 @@ As you can see, we get new cool arm instructions like</p>
 </ul>
 <p>So the detection mechanism just needs to detect the new instructions.
 Or if the disassembler hasn&rsquo;t been updated with handling these new instructions, we can just resort back to symbols.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_pac</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, macho_t <span style="color:#f92672">*</span>macho) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_pac</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// PAC (Pointer Authentication Code) is available on ARM64 devices
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint32_t</span> cputype <span style="color:#f92672">=</span> macho<span style="color:#f92672">-&gt;</span>is_64bit <span style="color:#f92672">?</span> macho<span style="color:#f92672">-&gt;</span>header<span style="color:#f92672">-&gt;</span>cputype : ((<span style="color:#66d9ef">struct</span> mach_header <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data)<span style="color:#f92672">-&gt;</span>cputype;
 </span></span><span style="display:flex;"><span>    
@@ -1158,7 +1345,7 @@ Or if the disassembler hasn&rsquo;t been updated with handling these new instruc
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check for PAC-related symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (symtab) {
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>symbols <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>symoff);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>strings <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>stroff;
@@ -1168,10 +1355,10 @@ Or if the disassembler hasn&rsquo;t been updated with handling these new instruc
 </span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>                
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Check for PAC-related symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;_ptrauth&#34;</span>) <span style="color:#f92672">||</span> 
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;pac_&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_auth_&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;pointer_auth&#34;</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_ptrauth&#34;</span>) <span style="color:#f92672">||</span> 
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;pac_&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_auth_&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;pointer_auth&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                    res<span style="color:#f92672">-&gt;</span>pac_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;PAC enabled&#34;</span>;
 </span></span><span style="display:flex;"><span>                    res<span style="color:#f92672">-&gt;</span>pac_status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
 </span></span><span style="display:flex;"><span>                    res<span style="color:#f92672">-&gt;</span>pac_color <span style="color:#f92672">=</span> COLOR_GREEN;
@@ -1216,28 +1403,28 @@ Or if the disassembler hasn&rsquo;t been updated with handling these new instruc
 <p>MTE or Memory Tagging Extension is a brand new mitigation (as of time of writing) that Apple/ARM developed to protect the pointers that PAC cannot. They both use the principle that there are unused bits in each pointer&rsquo;s address we can utilize, but that&rsquo;s about where the similarities end.</p>
 <h2 id="how-mte-works">How MTE Works</h2>
 <p>A randomly generated 4-bit tag from hardware RNG is added to both the pointer and stored in tag memory for that allocation. Let&rsquo;s give a practical example of how MTE would stop a UAF Bug. Here&rsquo;s our piece of code:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>ptr <span style="color:#f92672">=</span> malloc(<span style="color:#ae81ff">64</span>); <span style="color:#75715e">// alloc chunk on heap size 64
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>ptr <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">64</span>); <span style="color:#75715e">// alloc chunk on heap size 64
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>ptr[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;A&#39;</span>; <span style="color:#75715e">// set value
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>free(ptr); <span style="color:#75715e">//mark chunk as empty
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">free</span>(ptr); <span style="color:#75715e">//mark chunk as empty
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>ptr[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;B&#39;</span>;  <span style="color:#75715e">// UAF bug (continuing the use of the chunk after it was freed, could be populated with anything now...)
 </span></span></span></code></pre></div><p>Here&rsquo;s what&rsquo;s happening on the assembly level:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOV</span> <span style="color:#66d9ef">x0</span>, <span style="color:#75715e">#64 // move size 64 to argument register for malloc()
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">BL</span> <span style="color:#66d9ef">malloc</span> <span style="color:#960050;background-color:#1e0010">//</span> <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">function</span> <span style="color:#66d9ef">malloc</span>
-</span></span></code></pre></div><p>This is our chunk allocation. Let&rsquo;s assume everything worked and we get the following heap address <code>0x0000001234567890</code>, moved into register <code>x0</code>.</p>
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">BL</span> <span style="color:#66d9ef">malloc</span> <span style="color:#75715e">// call function malloc
+</span></span></span></code></pre></div><p>This is our chunk allocation. Let&rsquo;s assume everything worked and we get the following heap address <code>0x0000001234567890</code>, moved into register <code>x0</code>.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">IRG</span> <span style="color:#66d9ef">x0</span>, <span style="color:#66d9ef">x0</span>
 </span></span></code></pre></div><p>IRG stands for &ldquo;Insert Random Tag&rdquo;, this is the part that generates the random tag, and puts it in the unused bits of our pointer.
 Here&rsquo;s what our pointer looks like now:</p>
-<pre tabindex="0"><code>0x0300001234567890
-</code></pre><p>Now, we need to tag the memory itself.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>0x0300001234567890
+</span></span></code></pre></div><p>Now, we need to tag the memory itself.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">STG</span> <span style="color:#66d9ef">x0</span>, [<span style="color:#66d9ef">x0</span>]
 </span></span></code></pre></div><p>This is accomplished by writing the tag to a special section of RAM metadata called tag memory, that&rsquo;s separate from the memory accessible to userspace. Tag memory at address <code>0x1234567890</code> now stores tag <code>3</code>.</p>
 <p>Now let&rsquo;s write to the heap:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOV</span> <span style="color:#66d9ef">w1</span>, <span style="color:#75715e">#&#39;A&#39;
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">STRB</span> <span style="color:#66d9ef">w1</span>, [<span style="color:#66d9ef">x0</span>]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">STRB</span> <span style="color:#66d9ef">w1</span>, [<span style="color:#66d9ef">x0</span>]
 </span></span></code></pre></div><p>Now that we wrote A to the memory area tagged with 3, everything is ready! Let&rsquo;s see what happens when we free:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">IRG</span> <span style="color:#66d9ef">x1</span>, <span style="color:#66d9ef">x0</span>          <span style="color:#75715e">; generate new random tag in x1
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">STG</span> <span style="color:#66d9ef">x1</span>, [<span style="color:#66d9ef">x0</span>]        <span style="color:#75715e">; write new tag to tag memory
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">BL</span> <span style="color:#66d9ef">free</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">STG</span> <span style="color:#66d9ef">x1</span>, [<span style="color:#66d9ef">x0</span>]        <span style="color:#75715e">; write new tag to tag memory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">BL</span> <span style="color:#66d9ef">free</span>
 </span></span></code></pre></div><p>A few things just happened:</p>
 <ul>
 <li>The memory allocation is marked as free.</li>
@@ -1246,12 +1433,12 @@ Here&rsquo;s what our pointer looks like now:</p>
 </ul>
 <p>Now let&rsquo;s see what happens when the UAF is happening on the assembly level.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOV</span> <span style="color:#66d9ef">w1</span>, <span style="color:#75715e">#&#39;B&#39;
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">STRB</span> <span style="color:#66d9ef">w1</span>, [<span style="color:#66d9ef">x0</span>]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">STRB</span> <span style="color:#66d9ef">w1</span>, [<span style="color:#66d9ef">x0</span>]
 </span></span></code></pre></div><p>The <code>STRB</code> alongside other instructions like <code>LDR</code> automagically perform the tag check in the background. As you can see, in the UAF, there is no tag generation. And the old tag that was assigned to that heap chunk no longer matches the tag in the pointer. STRB instruction will now crash due to tag mismatch with a synchronous exception.</p>
 <h3 id="detecting-mte">Detecting MTE</h3>
 <p>Detecting MTE took a bit of research work, since it&rsquo;s a new mitigation.
 I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since that&rsquo;s the only thing that has that mitigation right now.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_mie</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, cs_insn <span style="color:#f92672">*</span>insn, size_t count, macho_t <span style="color:#f92672">*</span>macho) {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">detect_mie</span>(<span style="color:#66d9ef">struct</span> DetectionResults <span style="color:#f92672">*</span>res, cs_insn <span style="color:#f92672">*</span>insn, <span style="color:#66d9ef">size_t</span> count, <span style="color:#66d9ef">macho_t</span> <span style="color:#f92672">*</span>macho) {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// MIE (Memory Integrity Enforcement) / EMTE (Enhanced Memory Tagging Extension)
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// is only available on ARM64 devices
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint32_t</span> cputype <span style="color:#f92672">=</span> macho<span style="color:#f92672">-&gt;</span>is_64bit <span style="color:#f92672">?</span> macho<span style="color:#f92672">-&gt;</span>header<span style="color:#f92672">-&gt;</span>cputype : ((<span style="color:#66d9ef">struct</span> mach_header <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data)<span style="color:#f92672">-&gt;</span>cputype;
@@ -1269,55 +1456,55 @@ I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check for MTE/EMTE instructions in disassembly
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (insn <span style="color:#f92672">&amp;&amp;</span> count <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> count; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">size_t</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> count; i<span style="color:#f92672">++</span>) {
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Check for MTE-specific ARM64 instructions
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">// IRG - Insert Random Tag
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;irg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;irg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// STG - Store Allocation Tag
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;stg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;stg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ST2G - Store Allocation Tags (double)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;st2g&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;st2g&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// STZ2G - Store Allocation Tags and Zero (double)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;stz2g&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;stz2g&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// STZG - Store Allocation Tag and Zero
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;stzg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;stzg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// LDG - Load Allocation Tag
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;ldg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ADDG - Add with Tag
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;addg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;addg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// SUBG - Subtract with Tag
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;subg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;subg&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// GMI - Tag Mask Insert
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;gmi&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;gmi&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>            <span style="color:#75715e">// SUBP/SUBPS - Subtract Pointer (used with MTE)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;subp&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> strcmp(insn[i].mnemonic, <span style="color:#e6db74">&#34;subps&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;subp&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">strcmp</span>(insn[i].mnemonic, <span style="color:#e6db74">&#34;subps&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
 </span></span><span style="display:flex;"><span>                has_mte_instructions <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                mte_instruction_count<span style="color:#f92672">++</span>;
 </span></span><span style="display:flex;"><span>            }
@@ -1325,7 +1512,7 @@ I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Check for MTE/EMTE-related symbols
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> macho_get_symtab(macho);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">struct</span> symtab_command <span style="color:#f92672">*</span>symtab <span style="color:#f92672">=</span> <span style="color:#a6e22e">macho_get_symtab</span>(macho);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (symtab) {
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>symbols <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> nlist_64 <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>symoff);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>strings <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)macho<span style="color:#f92672">-&gt;</span>data <span style="color:#f92672">+</span> symtab<span style="color:#f92672">-&gt;</span>stroff;
@@ -1335,17 +1522,17 @@ I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since
 </span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name <span style="color:#f92672">=</span> strings <span style="color:#f92672">+</span> symbols[i].n_un.n_strx;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Check for MTE/EMTE-related symbols (be specific to avoid false positives)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (strstr(name, <span style="color:#e6db74">&#34;_mte_&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_emte_&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;memory_tagging&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;__hwasan&#34;</span>) <span style="color:#f92672">||</span>  <span style="color:#75715e">// Hardware-assisted AddressSanitizer uses MTE
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    strstr(name, <span style="color:#e6db74">&#34;hwaddress&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    (strstr(name, <span style="color:#e6db74">&#34;tagged&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> strstr(name, <span style="color:#e6db74">&#34;ptr&#34;</span>)) <span style="color:#f92672">||</span>  <span style="color:#75715e">// tagged_ptr but not just any &#34;tagged&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    strstr(name, <span style="color:#e6db74">&#34;_irg&#34;</span>) <span style="color:#f92672">||</span>  <span style="color:#75715e">// MTE instruction functions
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    strstr(name, <span style="color:#e6db74">&#34;_stg&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_ldg&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_addg&#34;</span>) <span style="color:#f92672">||</span>
-</span></span><span style="display:flex;"><span>                    strstr(name, <span style="color:#e6db74">&#34;_subg&#34;</span>)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_mte_&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_emte_&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;memory_tagging&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;__hwasan&#34;</span>) <span style="color:#f92672">||</span>  <span style="color:#75715e">// Hardware-assisted AddressSanitizer uses MTE
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;hwaddress&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    (<span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;tagged&#34;</span>) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;ptr&#34;</span>)) <span style="color:#f92672">||</span>  <span style="color:#75715e">// tagged_ptr but not just any &#34;tagged&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_irg&#34;</span>) <span style="color:#f92672">||</span>  <span style="color:#75715e">// MTE instruction functions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_stg&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_ldg&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_addg&#34;</span>) <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">strstr</span>(name, <span style="color:#e6db74">&#34;_subg&#34;</span>)) {
 </span></span><span style="display:flex;"><span>                    has_mte_symbols <span style="color:#f92672">=</span> true;
 </span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;
 </span></span><span style="display:flex;"><span>                }
@@ -1355,9 +1542,9 @@ I had to extract the JavaScriptCore engine from iOS 26.1 on the new iPhone since
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Determine MIE/EMTE status
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (has_mte_instructions) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> malloc(<span style="color:#ae81ff">128</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>text_buffer <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">128</span>);
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (text_buffer) {
-</span></span><span style="display:flex;"><span>            snprintf(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;MIE/EMTE enabled (%d MTE instructions)&#34;</span>, mte_instruction_count);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">snprintf</span>(text_buffer, <span style="color:#ae81ff">128</span>, <span style="color:#e6db74">&#34;MIE/EMTE enabled (%d MTE instructions)&#34;</span>, mte_instruction_count);
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>mie_text <span style="color:#f92672">=</span> text_buffer;
 </span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
 </span></span><span style="display:flex;"><span>            res<span style="color:#f92672">-&gt;</span>mie_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MIE/EMTE enabled&#34;</span>;
@@ -1395,7 +1582,7 @@ in order to make UAFs harder in Objective-C and Swift, since all of the higher l
                 <h4>Tags</h4>
                 <div class="tag-list">
                     
-                    <span class="tag">#example</span>
+                    <span class="tag">#binary analysis</span>
                     
                     <span class="tag">#analysis</span>
                     
@@ -1441,7 +1628,38 @@ in order to make UAFs harder in Objective-C and Swift, since all of the higher l
 </footer>
     </div>
 
-    <script src="https://gracecondition.github.io/js/main.js"></script>
+    <script type="module">
+        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
+
+        const canvas = document.getElementById('wave-gradient-canvas');
+        if (canvas) {
+            const gradient = new WaveGradient(canvas, {
+                colors: ['#000000', '#0a0a0a', '#151515', '#202020', '#2a2a2a', '#353535'],
+                fps: 30,
+                seed: 42,
+                speed: 1.0,
+                amplitude: 320,
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#0a0a0a',
+                primaryColor: '#1a1a1a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#2a2a2a',
+                lineColor: '#4a4a4a',
+                secondaryColor: '#2a2a2a',
+                tertiaryColor: '#1a1a1a',
+            }
+        });
+    </script>
+    <script src="http://localhost:1313/js/main.js"></script>
     
 </body>
 </html>

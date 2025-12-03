@@ -2,8 +2,10 @@
 title: "machsec - detecting XNU binary mitigations"
 date: 2025-10-10T14:00:00Z
 category: "analysis"
-tags: ["example", "analysis"]
+tags: ["binary analysis", "analysis"]
 summary: "This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU"
+image: "https://raw.githubusercontent.com/gracecondition/machsec/main/assets/logo.png"
+image_fit: "contain"
 ---
 # What is machsec?
 Machsec is a custom tool I wrote to identify security mitigations on MachO binaries on iOS/macOS.

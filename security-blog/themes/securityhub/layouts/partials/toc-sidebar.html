@@ -4,8 +4,13 @@
         <div class="toc-section">
             <h3 class="toc-title">📖 Contents</h3>
             <nav class="toc-nav" id="toc-nav">
+                {{ if .TableOfContents }}
+                <!-- Server-side generated TOC (Hugo) -->
+                {{ .TableOfContents }}
+                {{ else }}
                 <!-- Will be populated by JavaScript -->
                 <div class="toc-loading">Generating table of contents...</div>
+                {{ end }}
             </nav>
         </div>
 

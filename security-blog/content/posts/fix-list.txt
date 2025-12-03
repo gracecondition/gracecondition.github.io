@@ -1,0 +1,51 @@
+MACHSEC DOCUMENTATION - TECHNICAL CONTENT ISSUES
+================================================
+
+LINE 209-214: PIE address example potentially misleading
+- Current: Shows "0x40080" before PIE and "0x00080" after PIE
+- Issue: PIE doesn't make addresses become "0x00080". Instead, PIE makes the binary load at a randomized base address. The offset remains consistent, but the base address changes.
+- Fix: Clarify that PIE randomizes the BASE ADDRESS, not zeros out high bytes. Example: without PIE: 0x0000000000400080 (fixed base), with PIE: 0x00007f8a4b200080 (randomized base + same offset 0x80).
+
+LINE 325-326: RPATH/RUNPATH description imprecise
+- Current: "Rpath and runpath are the paths where libraries reside on them system"
+- Issue: RPATH/RUNPATH don't indicate where libraries "reside" but where to search for them.
+- Fix: "Rpath and runpath specify search paths where the dynamic linker should look for shared libraries at runtime"
+
+LINE 383-430: RELRO section potentially misleading for Mach-O
+- Current: Describes RELRO detection for Mach-O
+- Issue: RELRO (RELocation Read-Only) is primarily an ELF/Linux concept. Mach-O binaries don't have RELRO in the same way. The detection code checks segment permissions which is related but not identical.
+- Fix: Add clarification that RELRO is an ELF concept and this detection is checking for "RELRO-equivalent" protections on Mach-O (segment permission restrictions). Consider noting that Mach-O has different mechanisms.
+
+LINE 395-405: GOT description context
+- Current: Describes GOT in context of Mach-O/macOS
+- Issue: GOT (Global Offset Table) is primarily an ELF concept. Mach-O uses different structures like lazy/non-lazy symbol pointer sections (__la_symbol_ptr, __nl_symbol_ptr).
+- Fix: Clarify that while similar concepts exist, Mach-O primarily uses symbol pointer sections rather than a GOT. Or explain this is a simplified explanation and Mach-O has equivalent structures.
+
+LINE 1049: Notation issue
+- Current: "0x00000002fa89efa8zz"
+- Issue: The "zz" suffix is non-standard and unclear
+- Fix: Remove the "zz" or replace with actual example bytes, or clarify that "zz" represents "unused/zero bits"
+
+LINE 1059-1061: PAC cryptographic primitive description
+- Current: "truncate(hmac(key, ptr || context))"
+- Issue: PAC uses QARMA (a tweakable block cipher), not HMAC (hash-based MAC). These are different cryptographic primitives.
+- Fix: Change formula to better reflect QARMA usage: "PAC = QARMA_encrypt(key, pointer, context)[top_bits]" or add note that this is simplified and actual algorithm uses QARMA tweakable block cipher.
+
+LINE 1066: HMAC description in context of PAC
+- Current: "hmac - hash-based message authentication code"
+- Issue: This reinforces the incorrect notion that PAC uses HMAC. PAC actually uses QARMA.
+- Fix: Either remove this line or clarify: "Note: This is a simplified representation. PAC actually uses QARMA, a tweakable block cipher, not HMAC."
+
+LINE 1072: PAC scope clarification
+- Current: "PAC ONLY SIGNS INSTRUCTION POINTERS AND RETURN ADDRESSES (AND SOME BASIC VARIABLES)"
+- Issue: "SOME BASIC VARIABLES" is vague. PAC can sign function pointers and in some implementations data pointers, but the limitation is about C language semantics, not variable types.
+- Fix: "PAC primarily signs instruction pointers, return addresses, and function pointers. Data pointers can be signed with PAC in some implementations, but this is limited by C language constraints (pointer arithmetic, pointer-to-integer casts, etc.)"
+
+LINE 1360-1361: ARC framing
+- Current: Describes ARC primarily as a security mitigation
+- Issue: ARC is primarily a memory management feature designed to prevent memory leaks, not specifically a security mitigation. Its security benefit (making UAFs harder) is a side effect.
+- Fix: Add context: "ARC, or Automatic Reference Counting, is a memory management feature in Swift/Objective-C that automatically handles retain/release of objects. While primarily designed to prevent memory leaks, it has security benefits as it makes use-after-free (UAF) vulnerabilities more difficult to exploit, since objects are automatically deallocated when no longer referenced."
+
+SUMMARY:
+========
+These are technical content issues that affect the accuracy of the security/exploitation concepts being explained. The grammar and style issues have been fixed separately.

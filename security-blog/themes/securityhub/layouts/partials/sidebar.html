@@ -63,24 +63,37 @@
         {{ if $ctfPages }}
         <div class="sidebar-section">
             <h3 class="sidebar-title">CTF Competitions</h3>
-            <div class="ctf-competitions">
-                {{ range first 5 (where .Site.Sections "Section" "ctf") }}
-                <article class="ctf-competition-item">
-                    <a href="{{ .Permalink }}" class="ctf-competition-link">
-                        <div class="ctf-competition-meta">
-                            <span class="ctf-badge-small">🚩</span>
-                            {{ if .Params.ctf_date }}
-                            <time class="ctf-date-small">{{ .Params.ctf_date }}</time>
-                            {{ end }}
-                        </div>
-                        <h4 class="ctf-competition-name">{{ .Title }}</h4>
-                        {{ if .Params.placement }}
-                        <span class="ctf-placement-small">{{ .Params.placement }} place</span>
-                        {{ end }}
-                    </a>
-                </article>
+            {{ $ctfSections := where .Site.Sections "Section" "ctf" }}
+            {{ range $ctfSections.GroupByParam "ctf_type" }}
+            <div class="ctf-category-group">
+                {{ if .Key }}
+                <h4 class="ctf-category-title">
+                    {{ if eq .Key "wargame" }}🎯 Wargames
+                    {{ else if eq .Key "competition" }}🏆 Competitions
+                    {{ else if eq .Key "practice" }}💪 Practice
+                    {{ else }}🚩 {{ .Key | title }}{{ end }}
+                </h4>
                 {{ end }}
+                <div class="ctf-competitions">
+                    {{ range .Pages }}
+                    <article class="ctf-competition-item">
+                        <a href="{{ .Permalink }}" class="ctf-competition-link">
+                            <div class="ctf-competition-meta">
+                                <span class="ctf-badge-small">🚩</span>
+                                {{ if .Params.ctf_date }}
+                                <time class="ctf-date-small">{{ .Params.ctf_date }}</time>
+                                {{ end }}
+                            </div>
+                            <h4 class="ctf-competition-name">{{ .Title }}</h4>
+                            {{ if .Params.placement }}
+                            <span class="ctf-placement-small">{{ .Params.placement }}</span>
+                            {{ end }}
+                        </a>
+                    </article>
+                    {{ end }}
+                </div>
             </div>
+            {{ end }}
         </div>
         {{ end }}
 
@@ -89,6 +102,34 @@
             <h3 class="sidebar-title">All Posts</h3>
             <div class="posts-by-category">
                 {{ $posts := where .Site.RegularPages "Type" "in" (slice "posts" "articles") }}
+                {{ $ctfChallenges := where .Site.RegularPages "Section" "ctf" }}
+
+                <!-- CTF Challenges Group -->
+                {{ if $ctfChallenges }}
+                <div class="category-group">
+                    <h4 class="category-group-title">
+                        🚩 CTF Challenges
+                        <span class="post-count">({{ len $ctfChallenges }})</span>
+                    </h4>
+                    <ul class="category-post-list">
+                        {{ range first 8 $ctfChallenges }}
+                        <li class="category-post-item" data-category="ctf">
+                            <a href="{{ .Permalink }}" class="category-post-link">
+                                <span class="category-post-title">{{ .Title | truncate 50 }}</span>
+                                <time class="category-post-date">{{ .Date.Format "Jan 2" }}</time>
+                            </a>
+                        </li>
+                        {{ end }}
+                        {{ if gt (len $ctfChallenges) 8 }}
+                        <li class="show-more-item">
+                            <button class="show-more-btn" data-category="ctf">
+                                Show {{ sub (len $ctfChallenges) 8 }} more...
+                            </button>
+                        </li>
+                        {{ end }}
+                    </ul>
+                </div>
+                {{ end }}
                 {{ range $posts.GroupByParam "category" }}
                 <div class="category-group">
                     <h4 class="category-group-title">

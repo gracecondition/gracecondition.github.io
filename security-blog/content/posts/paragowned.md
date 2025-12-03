@@ -34,7 +34,7 @@ that comes along with using NSO Group products.
 
 # What Was The exploit?
 ## iMessage - The one stop shop for Remote Code Execution
-Apple's iMessage has been for a long time, the vector for remote code execution.
+Apple's iMessage has been for a long time, THE vector for remote code execution.
 Every time an iPhone receives an iMessage, there are a bunch of complex compontents that
 parse and process the message recieved automatically.
 Anywhere were parsing happens, we have the potential for bugs.

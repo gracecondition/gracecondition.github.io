@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Advanced on gracecondition</title>
-    <link>http://192.168.1.101:1313/tags/advanced/</link>
+    <link>https://gracecondition.github.io/tags/advanced/</link>
     <description>Recent content in Advanced on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 18 Jan 2024 09:00:00 +0000</lastBuildDate>
-    <atom:link href="http://192.168.1.101:1313/tags/advanced/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gracecondition.github.io/tags/advanced/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Demo Advanced Research - Kernel Exploitation</title>
-      <link>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</link>
+      <link>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</link>
       <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</guid>
+      <guid>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</guid>
       <description>Demo template for in-depth technical research posts - demonstrates proper structure for complex topics.</description>
     </item>
   </channel>

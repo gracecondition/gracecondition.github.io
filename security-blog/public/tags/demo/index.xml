@@ -2,45 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Demo on gracecondition</title>
-    <link>http://192.168.1.101:1313/tags/demo/</link>
+    <link>https://gracecondition.github.io/tags/demo/</link>
     <description>Recent content in Demo on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 25 Jan 2024 20:15:00 +0000</lastBuildDate>
-    <atom:link href="http://192.168.1.101:1313/tags/demo/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gracecondition.github.io/tags/demo/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Demo VM Escape Challenge</title>
-      <link>http://192.168.1.101:1313/ctf/plaidctf-2024/vm-escape/</link>
+      <link>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/ctf/plaidctf-2024/vm-escape/</guid>
+      <guid>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</guid>
       <description>Demo template for VM escape writeups - demonstrates proper formatting and structure.</description>
     </item>
     <item>
       <title>Demo Kernel Challenge</title>
-      <link>http://192.168.1.101:1313/ctf/pwnable.kr/kernel-nightmare/</link>
+      <link>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</link>
       <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/ctf/pwnable.kr/kernel-nightmare/</guid>
+      <guid>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</guid>
       <description>Demo template for kernel exploitation writeups - demonstrates proper formatting and structure.</description>
     </item>
     <item>
       <title>Demo Advanced Research - Kernel Exploitation</title>
-      <link>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</link>
+      <link>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</link>
       <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</guid>
+      <guid>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</guid>
       <description>Demo template for in-depth technical research posts - demonstrates proper structure for complex topics.</description>
     </item>
     <item>
       <title>Demo Tutorial - Binary Exploitation Basics</title>
-      <link>http://192.168.1.101:1313/posts/buffer-overflow-basics/</link>
+      <link>https://gracecondition.github.io/posts/buffer-overflow-basics/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/buffer-overflow-basics/</guid>
+      <guid>https://gracecondition.github.io/posts/buffer-overflow-basics/</guid>
       <description>Demo template for tutorial posts - demonstrates proper formatting for educational content.</description>
     </item>
     <item>
       <title>Demo Research Post</title>
-      <link>http://192.168.1.101:1313/posts/sample-research-post/</link>
+      <link>https://gracecondition.github.io/posts/sample-research-post/</link>
       <pubDate>Wed, 10 Jan 2024 10:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/sample-research-post/</guid>
+      <guid>https://gracecondition.github.io/posts/sample-research-post/</guid>
       <description>Demo template for research posts - demonstrates proper layout and structure.</description>
     </item>
   </channel>

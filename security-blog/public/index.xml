@@ -2,73 +2,73 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>gracecondition</title>
-    <link>http://192.168.1.101:1313/</link>
+    <link>https://gracecondition.github.io/</link>
     <description>Recent content on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 03 Dec 2025 06:59:55 +0200</lastBuildDate>
-    <atom:link href="http://192.168.1.101:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gracecondition.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone</title>
-      <link>http://192.168.1.101:1313/posts/paragowned/</link>
+      <link>https://gracecondition.github.io/posts/paragowned/</link>
       <pubDate>Wed, 03 Dec 2025 06:59:55 +0200</pubDate>
-      <guid>http://192.168.1.101:1313/posts/paragowned/</guid>
+      <guid>https://gracecondition.github.io/posts/paragowned/</guid>
       <description>How the paragon iMessage exploit worked.</description>
     </item>
     <item>
       <title>machsec - detecting XNU binary mitigations</title>
-      <link>http://192.168.1.101:1313/posts/machsec-documentation/</link>
+      <link>https://gracecondition.github.io/posts/machsec-documentation/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/machsec-documentation/</guid>
+      <guid>https://gracecondition.github.io/posts/machsec-documentation/</guid>
       <description>This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
     </item>
     <item>
       <title>Passcode - pwnable.kr</title>
-      <link>http://192.168.1.101:1313/ctf/pwnable.kr/passcode/</link>
+      <link>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</link>
       <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/ctf/pwnable.kr/passcode/</guid>
+      <guid>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</guid>
       <description>Writeup of the pwnable passcode CTF Challenge</description>
     </item>
     <item>
       <title>Welcome to Security Research</title>
-      <link>http://192.168.1.101:1313/posts/welcome-to-security-research/</link>
+      <link>https://gracecondition.github.io/posts/welcome-to-security-research/</link>
       <pubDate>Tue, 24 Sep 2024 10:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/welcome-to-security-research/</guid>
+      <guid>https://gracecondition.github.io/posts/welcome-to-security-research/</guid>
       <description>An introduction to this security research blog and what you can expect to find here.</description>
     </item>
     <item>
       <title>Demo VM Escape Challenge</title>
-      <link>http://192.168.1.101:1313/ctf/plaidctf-2024/vm-escape/</link>
+      <link>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/ctf/plaidctf-2024/vm-escape/</guid>
+      <guid>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</guid>
       <description>Demo template for VM escape writeups - demonstrates proper formatting and structure.</description>
     </item>
     <item>
       <title>Demo Kernel Challenge</title>
-      <link>http://192.168.1.101:1313/ctf/pwnable.kr/kernel-nightmare/</link>
+      <link>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</link>
       <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/ctf/pwnable.kr/kernel-nightmare/</guid>
+      <guid>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</guid>
       <description>Demo template for kernel exploitation writeups - demonstrates proper formatting and structure.</description>
     </item>
     <item>
       <title>Demo Advanced Research - Kernel Exploitation</title>
-      <link>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</link>
+      <link>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</link>
       <pubDate>Thu, 18 Jan 2024 09:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/linux-kernel-heap-exploitation/</guid>
+      <guid>https://gracecondition.github.io/posts/linux-kernel-heap-exploitation/</guid>
       <description>Demo template for in-depth technical research posts - demonstrates proper structure for complex topics.</description>
     </item>
     <item>
       <title>Demo Tutorial - Binary Exploitation Basics</title>
-      <link>http://192.168.1.101:1313/posts/buffer-overflow-basics/</link>
+      <link>https://gracecondition.github.io/posts/buffer-overflow-basics/</link>
       <pubDate>Fri, 12 Jan 2024 14:30:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/buffer-overflow-basics/</guid>
+      <guid>https://gracecondition.github.io/posts/buffer-overflow-basics/</guid>
       <description>Demo template for tutorial posts - demonstrates proper formatting for educational content.</description>
     </item>
     <item>
       <title>Demo Research Post</title>
-      <link>http://192.168.1.101:1313/posts/sample-research-post/</link>
+      <link>https://gracecondition.github.io/posts/sample-research-post/</link>
       <pubDate>Wed, 10 Jan 2024 10:00:00 +0000</pubDate>
-      <guid>http://192.168.1.101:1313/posts/sample-research-post/</guid>
+      <guid>https://gracecondition.github.io/posts/sample-research-post/</guid>
       <description>Demo template for research posts - demonstrates proper layout and structure.</description>
     </item>
   </channel>

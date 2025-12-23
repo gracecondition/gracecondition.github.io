@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Binary Analysis on gracecondition</title>
-    <link>https://gracecondition.github.io/tags/binary-analysis/</link>
+    <link>http://localhost:1313/tags/binary-analysis/</link>
     <description>Recent content in Binary Analysis on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 10 Oct 2025 14:00:00 +0000</lastBuildDate>
-    <atom:link href="https://gracecondition.github.io/tags/binary-analysis/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/binary-analysis/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>machsec - detecting XNU binary mitigations</title>
-      <link>https://gracecondition.github.io/posts/machsec-documentation/</link>
+      <link>http://localhost:1313/posts/machsec-documentation/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      <guid>https://gracecondition.github.io/posts/machsec-documentation/</guid>
+      <guid>http://localhost:1313/posts/machsec-documentation/</guid>
       <description>This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
     </item>
   </channel>

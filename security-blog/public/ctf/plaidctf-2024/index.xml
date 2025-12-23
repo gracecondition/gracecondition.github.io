@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>PlaidCTF 2024 on gracecondition</title>
-    <link>https://gracecondition.github.io/ctf/plaidctf-2024/</link>
+    <link>http://localhost:1313/ctf/plaidctf-2024/</link>
     <description>Recent content in PlaidCTF 2024 on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 25 Jan 2024 20:15:00 +0000</lastBuildDate>
-    <atom:link href="https://gracecondition.github.io/ctf/plaidctf-2024/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/ctf/plaidctf-2024/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Demo VM Escape Challenge</title>
-      <link>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</link>
+      <link>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</link>
       <pubDate>Thu, 25 Jan 2024 20:15:00 +0000</pubDate>
-      <guid>https://gracecondition.github.io/ctf/plaidctf-2024/vm-escape/</guid>
+      <guid>http://localhost:1313/ctf/plaidctf-2024/vm-escape/</guid>
       <description>Demo template for VM escape writeups - demonstrates proper formatting and structure.</description>
     </item>
   </channel>

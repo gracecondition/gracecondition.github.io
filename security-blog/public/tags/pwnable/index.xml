@@ -2,17 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Pwnable on gracecondition</title>
-    <link>https://gracecondition.github.io/tags/pwnable/</link>
+    <link>http://localhost:1313/tags/pwnable/</link>
     <description>Recent content in Pwnable on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 15 Nov 2024 10:30:00 +0000</lastBuildDate>
-    <atom:link href="https://gracecondition.github.io/tags/pwnable/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Dec 2025 10:30:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/pwnable/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>wtf - pwnable.kr</title>
+      <link>http://localhost:1313/ctf/pwnable.kr/wtf-writeup/</link>
+      <pubDate>Mon, 22 Dec 2025 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/ctf/pwnable.kr/wtf-writeup/</guid>
+      <description>Writeup of the pwnable wtf CTF Challenge</description>
+    </item>
     <item>
       <title>Passcode - pwnable.kr</title>
-      <link>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</link>
+      <link>http://localhost:1313/ctf/pwnable.kr/passcode/</link>
       <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</guid>
+      <guid>http://localhost:1313/ctf/pwnable.kr/passcode/</guid>
       <description>Writeup of the pwnable passcode CTF Challenge</description>
     </item>
   </channel>

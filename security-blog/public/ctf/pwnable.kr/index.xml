@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Pwnable.kr on gracecondition</title>
-    <link>https://gracecondition.github.io/ctf/pwnable.kr/</link>
+    <link>http://localhost:1313/ctf/pwnable.kr/</link>
     <description>Recent content in Pwnable.kr on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 15 Nov 2024 10:30:00 +0000</lastBuildDate>
-    <atom:link href="https://gracecondition.github.io/ctf/pwnable.kr/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Dec 2025 10:30:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/ctf/pwnable.kr/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Passcode - pwnable.kr</title>
-      <link>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</link>
-      <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
-      <guid>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</guid>
-      <description>Writeup of the pwnable passcode CTF Challenge</description>
+      <title>wtf - pwnable.kr</title>
+      <link>http://localhost:1313/ctf/pwnable.kr/wtf-writeup/</link>
+      <pubDate>Mon, 22 Dec 2025 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/ctf/pwnable.kr/wtf-writeup/</guid>
+      <description>Writeup of the pwnable wtf CTF Challenge</description>
     </item>
     <item>
-      <title>Demo Kernel Challenge</title>
-      <link>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</link>
-      <pubDate>Sat, 20 Jan 2024 15:45:00 +0000</pubDate>
-      <guid>https://gracecondition.github.io/ctf/pwnable.kr/kernel-nightmare/</guid>
-      <description>Demo template for kernel exploitation writeups - demonstrates proper formatting and structure.</description>
+      <title>Passcode - pwnable.kr</title>
+      <link>http://localhost:1313/ctf/pwnable.kr/passcode/</link>
+      <pubDate>Fri, 15 Nov 2024 10:30:00 +0000</pubDate>
+      <guid>http://localhost:1313/ctf/pwnable.kr/passcode/</guid>
+      <description>Writeup of the pwnable passcode CTF Challenge</description>
     </item>
   </channel>
 </rss>

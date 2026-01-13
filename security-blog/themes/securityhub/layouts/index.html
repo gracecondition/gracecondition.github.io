@@ -1,27 +1,12 @@
 {{ define "main" }}
 <section class="hero-section">
-    <canvas id="hero-wave-canvas"></canvas>
+    <canvas id="hero-wave-canvas" class="hero-waves" aria-hidden="true"></canvas>
     <div class="hero-content">
         <h1 class="hero-title">{{ .Site.Params.hero.title | default "Security Research & Analysis" }}</h1>
         <p class="hero-subtitle">{{ .Site.Params.hero.subtitle | default "Exploring cybersecurity through research, analysis, and hands-on techniques" }}</p>
         <a href="/posts/" class="cta-button">Explore Research</a>
     </div>
 </section>
-
-<script type="module">
-    import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
-
-    const heroCanvas = document.getElementById('hero-wave-canvas');
-    if (heroCanvas) {
-        const heroGradient = new WaveGradient(heroCanvas, {
-            colors: ['#3a3a3a', '#4a4a4a', '#5a5a5a', '#6a6a6a', '#7a7a7a', '#8a8a8a'],
-            fps: 30,
-            seed: 123,
-            speed: 1.2,
-            amplitude: 350,
-        });
-    }
-</script>
 
 <section class="content-section">
     <div class="section-container">
@@ -45,7 +30,7 @@
                     </div>
                     <div class="post-content">
                         <h3 class="post-title">{{ .Title }}</h3>
-                        <p class="post-excerpt">{{ .Summary | truncate 120 }}</p>
+                        <p class="post-excerpt">{{ .Summary | truncate 160 }}</p>
                         <div class="post-meta">
                             <span class="post-date">{{ .Date.Format "Jan 2, 2006" }}</span>
                             <span class="post-category">{{ if eq .Type "ctf" }}CTF{{ else }}{{ .Params.category | default "security" }}{{ end }}</span>
@@ -74,7 +59,7 @@
                     </div>
                     <div class="post-content">
                         <h3 class="post-title">{{ .Title }}</h3>
-                        <p class="post-excerpt">{{ .Params.description | default .Summary | truncate 120 }}</p>
+                        <p class="post-excerpt">{{ .Params.description | default .Summary | truncate 140 }}</p>
                         <div class="post-meta">
                             <span class="post-date">{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
                             <span class="post-category">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
@@ -88,38 +73,4 @@
     </div>
 </section>
 
-<section class="content-section" style="background-color: var(--background-secondary);">
-    <div class="section-container">
-        <h2 class="section-title">Research Areas</h2>
-        <div class="posts-grid">
-            <div class="post-card">
-                <div class="post-image post-image-research">
-                    <span class="post-icon">🛡️</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">Vulnerability Research</h3>
-                    <p class="post-excerpt">Deep dives into security vulnerabilities, exploitation techniques, and mitigation strategies.</p>
-                </div>
-            </div>
-            <div class="post-card">
-                <div class="post-image post-image-ctf">
-                    <span class="post-icon">🚩</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">CTF Challenges</h3>
-                    <p class="post-excerpt">Detailed walkthroughs and solutions for Capture The Flag competitions and challenges.</p>
-                </div>
-            </div>
-            <div class="post-card">
-                <div class="post-image post-image-analysis">
-                    <span class="post-icon">🔍</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">Malware Analysis</h3>
-                    <p class="post-excerpt">Reverse engineering and analysis of malicious software and attack vectors.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {{ end }}

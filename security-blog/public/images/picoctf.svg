@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0b0b"/>
+      <stop offset="100%" stop-color="#171717"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="720" fill="url(#bg)"/>
+  <g stroke="#2a2a2a" stroke-width="1">
+    <path d="M-100 100 L1300 20"/>
+    <path d="M-120 180 L1320 120"/>
+    <path d="M-140 260 L1340 220"/>
+    <path d="M-160 340 L1360 320"/>
+    <path d="M-180 420 L1380 420"/>
+    <path d="M-200 500 L1400 520"/>
+    <path d="M-220 580 L1420 620"/>
+  </g>
+  <g fill="none" stroke="#3a3a3a" stroke-width="2">
+    <circle cx="220" cy="460" r="160"/>
+    <circle cx="980" cy="280" r="190"/>
+  </g>
+  <text x="120" y="360" fill="#f2f2f2" font-size="96" font-family="IBM Plex Sans, sans-serif" letter-spacing="-2">
+    picoCTF
+  </text>
+  <text x="120" y="430" fill="#b5b5b5" font-size="26" font-family="IBM Plex Sans, sans-serif">
+    wargame notes + writeups
+  </text>
+</svg>

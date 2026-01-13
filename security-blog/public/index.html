@@ -47,7 +47,9 @@
     </script>
 
     <link rel="stylesheet" href="http://localhost:1313/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     
     <link rel="icon" href="http://localhost:1313/favicon.png">
@@ -84,28 +86,13 @@
         <main class="main-content">
             
 <section class="hero-section">
-    <canvas id="hero-wave-canvas"></canvas>
+    <canvas id="hero-wave-canvas" class="hero-waves" aria-hidden="true"></canvas>
     <div class="hero-content">
         <h1 class="hero-title">gracecondition</h1>
         <p class="hero-subtitle">Deep dives into OS internals, binary exploitation, and low-level security research</p>
         <a href="/posts/" class="cta-button">Explore Research</a>
     </div>
 </section>
-
-<script type="module">
-    import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
-
-    const heroCanvas = document.getElementById('hero-wave-canvas');
-    if (heroCanvas) {
-        const heroGradient = new WaveGradient(heroCanvas, {
-            colors: ['#3a3a3a', '#4a4a4a', '#5a5a5a', '#6a6a6a', '#7a7a7a', '#8a8a8a'],
-            fps: 30,
-            seed: 123,
-            speed: 1.2,
-            amplitude: 350,
-        });
-    }
-</script>
 
 <section class="content-section">
     <div class="section-container">
@@ -152,7 +139,7 @@
                     </div>
                     <div class="post-content">
                         <h3 class="post-title">machsec - detecting XNU binary mitigations</h3>
-                        <p class="post-excerpt">This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on …</p>
+                        <p class="post-excerpt">This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</p>
                         <div class="post-meta">
                             <span class="post-date">Oct 10, 2025</span>
                             <span class="post-category">analysis</span>
@@ -177,48 +164,6 @@
                 </a>
             </article>
             
-            <article class="post-card">
-                <a href="http://localhost:1313/posts/welcome-to-security-research/">
-                    <div class="post-image post-image-research " >
-                        
-                        <span class="post-icon">
-                            🔬
-                            
-                        </span>
-                        
-                    </div>
-                    <div class="post-content">
-                        <h3 class="post-title">Welcome to Security Research</h3>
-                        <p class="post-excerpt">An introduction to this security research blog and what you can expect to find here.</p>
-                        <div class="post-meta">
-                            <span class="post-date">Sep 24, 2024</span>
-                            <span class="post-category">research</span>
-                        </div>
-                    </div>
-                </a>
-            </article>
-            
-            <article class="post-card">
-                <a href="http://localhost:1313/ctf/plaidctf-2024/vm-escape/">
-                    <div class="post-image post-image-ctf " >
-                        
-                        <span class="post-icon">
-                            🚩
-                            
-                        </span>
-                        
-                    </div>
-                    <div class="post-content">
-                        <h3 class="post-title">Demo VM Escape Challenge</h3>
-                        <p class="post-excerpt">Demo template for VM escape writeups - demonstrates proper formatting and structure.</p>
-                        <div class="post-meta">
-                            <span class="post-date">Jan 25, 2024</span>
-                            <span class="post-category">CTF</span>
-                        </div>
-                    </div>
-                </a>
-            </article>
-            
         </div>
     </div>
 </section>
@@ -231,16 +176,16 @@
             
             
             <article class="post-card ctf-competition-card">
-                <a href="http://localhost:1313/ctf/plaidctf-2024/">
-                    <div class="post-image post-image-ctf" style="background-image: url('/images/plaidctf-logo.png');">
+                <a href="http://localhost:1313/ctf/picoctf/">
+                    <div class="post-image post-image-ctf" style="background-image: url('/images/picoctf.png');">
                         
                     </div>
                     <div class="post-content">
-                        <h3 class="post-title">PlaidCTF 2024</h3>
-                        <p class="post-excerpt">Writeups from PlaidCTF 2024 competition</p>
+                        <h3 class="post-title">picoCTF</h3>
+                        <p class="post-excerpt">Writeups and notes from picoCTF challenges</p>
                         <div class="post-meta">
-                            <span class="post-date">April 2024</span>
-                            <span class="post-category">1 challenge</span>
+                            <span class="post-date">Annual</span>
+                            <span class="post-category">0 challenges</span>
                         </div>
                     </div>
                 </a>
@@ -269,40 +214,6 @@
     </div>
 </section>
 
-<section class="content-section" style="background-color: var(--background-secondary);">
-    <div class="section-container">
-        <h2 class="section-title">Research Areas</h2>
-        <div class="posts-grid">
-            <div class="post-card">
-                <div class="post-image post-image-research">
-                    <span class="post-icon">🛡️</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">Vulnerability Research</h3>
-                    <p class="post-excerpt">Deep dives into security vulnerabilities, exploitation techniques, and mitigation strategies.</p>
-                </div>
-            </div>
-            <div class="post-card">
-                <div class="post-image post-image-ctf">
-                    <span class="post-icon">🚩</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">CTF Challenges</h3>
-                    <p class="post-excerpt">Detailed walkthroughs and solutions for Capture The Flag competitions and challenges.</p>
-                </div>
-            </div>
-            <div class="post-card">
-                <div class="post-image post-image-analysis">
-                    <span class="post-icon">🔍</span>
-                </div>
-                <div class="post-content">
-                    <h3 class="post-title">Malware Analysis</h3>
-                    <p class="post-excerpt">Reverse engineering and analysis of malicious software and attack vectors.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
         </main>
 
@@ -334,7 +245,7 @@
     </div>
 
     <div class="footer-bottom">
-        <p>&copy; 2025 gracecondition. All rights reserved.</p>
+        <p>&copy; 2026 gracecondition. All rights reserved.</p>
     </div>
 </footer>
     </div>
@@ -345,7 +256,7 @@
         const canvas = document.getElementById('wave-gradient-canvas');
         if (canvas) {
             const gradient = new WaveGradient(canvas, {
-                colors: ['#000000', '#0a0a0a', '#151515', '#202020', '#2a2a2a', '#353535'],
+                colors: ['#0b0b0b', '#111111', '#151515', '#1b1b1b', '#141414', '#0b0b0b'],
                 fps: 30,
                 seed: 42,
                 speed: 1.0,
@@ -363,15 +274,15 @@
             theme: 'dark',
             themeVariables: {
                 darkMode: true,
-                background: '#0a0a0a',
-                primaryColor: '#1a1a1a',
+                background: '#0b0b0b',
+                primaryColor: '#171717',
                 primaryTextColor: '#e0e0e0',
-                primaryBorderColor: '#2a2a2a',
-                lineColor: '#4a4a4a',
-                secondaryColor: '#2a2a2a',
-                tertiaryColor: '#1a1a1a',
+                primaryBorderColor: '#2c2c2c',
+                lineColor: '#3a3a3a',
+                secondaryColor: '#1f1f1f',
+                tertiaryColor: '#121212',
                 fontSize: '14px',
-                fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
+                fontFamily: 'IBM Plex Sans, Space Grotesk, sans-serif'
             },
             flowchart: {
                 useMaxWidth: true,
@@ -386,6 +297,7 @@
             }
         });
     </script>
+    <script src="http://localhost:1313/js/waves.js"></script>
     <script src="http://localhost:1313/js/main.js"></script>
     
 </body>

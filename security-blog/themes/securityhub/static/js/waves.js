@@ -1,164 +1,217 @@
-// Proper Perlin noise implementation
-class Noise {
-  constructor(seed) {
-    this.seed = seed || Math.random();
-    this.p = [];
-    for (let i = 0; i < 256; i++) this.p[i] = Math.floor((this.seed * 9301 + 49297) % 233280 / 233280 * 256);
-    for (let i = 0; i < 256; i++) this.p[256 + i] = this.p[i];
-  }
+(() => {
+  function initHeroWaveCanvas() {
+    const canvas = document.getElementById('hero-wave-canvas');
+    if (!canvas) {
+      return;
+    }
 
-  fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-  lerp(t, a, b) { return a + t * (b - a); }
-  grad(hash, x, y) {
-    const h = hash & 15;
-    const u = h < 8 ? x : y;
-    const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
-    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
-  }
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
 
-  perlin2(x, y) {
-    const X = Math.floor(x) & 255;
-    const Y = Math.floor(y) & 255;
-    x -= Math.floor(x);
-    y -= Math.floor(y);
-    const u = this.fade(x);
-    const v = this.fade(y);
-    const A = this.p[X] + Y;
-    const AA = this.p[A];
-    const AB = this.p[A + 1];
-    const B = this.p[X + 1] + Y;
-    const BA = this.p[B];
-    const BB = this.p[B + 1];
+    const state = {
+      width: 0,
+      height: 0,
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      lines: [],
+      rafId: 0,
+      running: false,
+      retryFrames: 0,
+      resizeObserver: null,
+    };
 
-    return this.lerp(v, this.lerp(u, this.grad(this.p[AA], x, y),
-                                     this.grad(this.p[BA], x - 1, y)),
-                        this.lerp(u, this.grad(this.p[AB], x, y - 1),
-                                     this.grad(this.p[BB], x - 1, y - 1)));
-  }
-}
+    const config = {
+      xGap: 9,
+      yGap: 9,
+      amplitude: 10,
+      amplitudeBoost: 40,
+      amplitudeSecondary: 4,
+      amplitudeSecondaryBoost: 12,
+      slope: 0,
+      speed: 0.00085,
+      alphaBase: 0.03,
+      alphaBoost: 0.24,
+    };
 
-class AWaves extends HTMLElement {
-  connectedCallback() {
-    this.svg = this.querySelector('.js-svg');
-    this.lines = [];
-    this.paths = [];
-    this.noise = new Noise(Math.random());
-
-    this.setSize();
-    this.setLines();
-
-    window.addEventListener('resize', this.onResize.bind(this));
-    requestAnimationFrame(this.tick.bind(this));
-  }
-
-  onResize() {
-    this.setSize();
-    this.setLines();
-  }
-
-  setSize() {
-    this.bounding = this.getBoundingClientRect();
-    this.svg.style.width = `${this.bounding.width}px`;
-    this.svg.style.height = `${this.bounding.height}px`;
-  }
-
-  setLines() {
-    const { width, height } = this.bounding;
-
-    this.lines = [];
-    this.paths.forEach((path) => path.remove());
-    this.paths = [];
-
-    const xGap = 10;
-    const yGap = 32;
-    const oWidth = width + 200;
-    const oHeight = height + 30;
-    const totalLines = Math.ceil(oWidth / xGap);
-    const totalPoints = Math.ceil(oHeight / yGap);
-    const xStart = (width - xGap * totalLines) / 2;
-    const yStart = (height - yGap * totalPoints) / 2;
-
-    for (let i = 0; i <= totalLines; i++) {
-      const points = [];
-
-      for (let j = 0; j <= totalPoints; j++) {
-        const point = {
-          x: xStart + xGap * i,
-          y: yStart + yGap * j,
-          wave: { x: 0, y: 0 },
-          cursor: { x: 0, y: 0, vx: 0, vy: 0 },
-        };
-        points.push(point);
+    const getSize = () => {
+      let rect = canvas.getBoundingClientRect();
+      if ((!rect.width || !rect.height) && canvas.parentElement) {
+        rect = canvas.parentElement.getBoundingClientRect();
       }
 
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.classList.add('a__line');
-      path.classList.add('js-line');
-      this.svg.appendChild(path);
-      this.paths.push(path);
-      this.lines.push(points);
+      return {
+        width: Math.max(0, Math.round(rect.width)),
+        height: Math.max(0, Math.round(rect.height)),
+      };
+    };
+
+    const buildLines = () => {
+      const { width, height } = state;
+      const oWidth = width + 160;
+      const oHeight = height + 80;
+      const cols = Math.ceil(oWidth / config.xGap);
+      const rows = Math.ceil(oHeight / config.yGap);
+      const xStart = (width - cols * config.xGap) / 2;
+      const yStart = (height - rows * config.yGap) / 2;
+
+      state.lines = Array.from({ length: cols + 1 }, (_, colIndex) => {
+        const points = Array.from({ length: rows + 1 }, (_, j) => {
+          const seed = (colIndex * 0.35) + (j * 0.22);
+          return {
+            y: yStart + j * config.yGap,
+            seed,
+          };
+        });
+        return {
+          baseX: xStart + colIndex * config.xGap,
+          colIndex,
+          points,
+        };
+      });
+    };
+
+    const resize = () => {
+      const { width, height } = getSize();
+      if (!width || !height) {
+        return false;
+      }
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (width !== state.width || height !== state.height || dpr !== state.dpr) {
+        state.width = width;
+        state.height = height;
+        state.dpr = dpr;
+        canvas.width = Math.max(1, Math.floor(width * dpr));
+        canvas.height = Math.max(1, Math.floor(height * dpr));
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildLines();
+      }
+
+      return true;
+    };
+
+    const blobs = [
+      { phaseX: 0.2, phaseY: 1.6, speedX: 0.32, speedY: 0.24, radius: 0.22 },
+      { phaseX: 2.1, phaseY: 0.7, speedX: 0.26, speedY: 0.28, radius: 0.18 },
+      { phaseX: 3.4, phaseY: 2.4, speedX: 0.2, speedY: 0.22, radius: 0.26 },
+      { phaseX: 4.6, phaseY: 3.1, speedX: 0.24, speedY: 0.18, radius: 0.2 },
+    ];
+
+    const bubbleField = (x, y, t) => {
+      const minSize = Math.max(1, Math.min(state.width, state.height));
+      let value = 0;
+
+      blobs.forEach((blob) => {
+        const cx = (Math.sin(t * blob.speedX + blob.phaseX) * 0.35 + 0.5) * state.width;
+        const cy = (Math.cos(t * blob.speedY + blob.phaseY) * 0.35 + 0.5) * state.height;
+        const radius = minSize * blob.radius;
+        const dx = x - cx;
+        const dy = y - cy;
+        value += Math.exp(-(dx * dx + dy * dy) / (radius * radius));
+      });
+
+      return Math.min(1, value);
+    };
+
+    const waveField = (y, t, amp, ampSecondary) => {
+      const wave1 = Math.sin(y * 0.013 + t * 1.35) * amp;
+      const wave2 = Math.sin(y * 0.024 - t * 1.1) * ampSecondary;
+      return wave1 + wave2;
+    };
+
+    const draw = (now) => {
+      if (!state.running) {
+        return;
+      }
+
+      if (!state.width || !state.height) {
+        state.rafId = requestAnimationFrame(draw);
+        return;
+      }
+
+      const t = now * config.speed;
+      ctx.clearRect(0, 0, state.width, state.height);
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const centerY = state.height * 0.5;
+
+      state.lines.forEach((line) => {
+        const bubbleLine = Math.pow(bubbleField(line.baseX, centerY, t), 1.4);
+        const alpha = config.alphaBase + bubbleLine * config.alphaBoost;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.lineWidth = 0.45 + bubbleLine * 1.9;
+        ctx.beginPath();
+
+        line.points.forEach((point, pointIndex) => {
+          const baseX = line.baseX + (point.y - centerY) * config.slope;
+          const bubble = Math.pow(bubbleField(baseX, point.y, t), 1.3);
+          const amp = config.amplitude + bubble * config.amplitudeBoost;
+          const ampSecondary = config.amplitudeSecondary + bubble * config.amplitudeSecondaryBoost;
+          const wave = waveField(point.y, t, amp, ampSecondary);
+          const x = baseX + wave;
+          const y = point.y;
+
+          if (pointIndex === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+
+        ctx.stroke();
+      });
+
+      state.rafId = requestAnimationFrame(draw);
+    };
+
+    const start = () => {
+      if (!resize()) {
+        state.retryFrames += 1;
+        const delay = state.retryFrames < 90 ? requestAnimationFrame : setTimeout;
+        delay(start, state.retryFrames < 90 ? undefined : 120);
+        return;
+      }
+
+      if (!state.running) {
+        state.running = true;
+        state.rafId = requestAnimationFrame(draw);
+      }
+    };
+
+    const handleResize = () => {
+      resize();
+    };
+
+    start();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      state.resizeObserver = new ResizeObserver(handleResize);
+      const target = canvas.parentElement || canvas;
+      state.resizeObserver.observe(target);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+
+    window.addEventListener('pageshow', handleResize);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        handleResize();
+      }
+    });
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(handleResize);
     }
   }
 
-  movePoints(time) {
-    const { lines, noise } = this;
-
-    lines.forEach((points) => {
-      points.forEach((p) => {
-        // Wave movement - keep original logic
-        const move = noise.perlin2(
-          (p.x + time * 0.0125) * 0.002,
-          (p.y + time * 0.005) * 0.0015
-        ) * 12;
-        p.wave.x = Math.cos(move) * 32;
-        p.wave.y = Math.sin(move) * 16;
-
-        // Cursor effects (but no actual cursor interaction)
-        p.cursor.vx += (0 - p.cursor.x) * 0.005;
-        p.cursor.vy += (0 - p.cursor.y) * 0.005;
-        p.cursor.vx *= 0.925;
-        p.cursor.vy *= 0.925;
-        p.cursor.x += p.cursor.vx * 2;
-        p.cursor.y += p.cursor.vy * 2;
-        p.cursor.x = Math.min(100, Math.max(-100, p.cursor.x));
-        p.cursor.y = Math.min(100, Math.max(-100, p.cursor.y));
-      });
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroWaveCanvas);
+  } else {
+    initHeroWaveCanvas();
   }
-
-  moved(point, withCursorForce = true) {
-    const coords = {
-      x: point.x + point.wave.x + (withCursorForce ? point.cursor.x : 0),
-      y: point.y + point.wave.y + (withCursorForce ? point.cursor.y : 0),
-    };
-
-    coords.x = Math.round(coords.x * 10) / 10;
-    coords.y = Math.round(coords.y * 10) / 10;
-    return coords;
-  }
-
-  drawLines() {
-    const { lines, paths } = this;
-
-    lines.forEach((points, lIndex) => {
-      let p1 = this.moved(points[0], false);
-      let d = `M ${p1.x} ${p1.y}`;
-
-      points.forEach((p1, pIndex) => {
-        const isLast = pIndex === points.length - 1;
-        p1 = this.moved(p1, !isLast);
-        d += `L ${p1.x} ${p1.y}`;
-      });
-
-      paths[lIndex].setAttribute('d', d);
-    });
-  }
-
-  tick(time) {
-    this.movePoints(time);
-    this.drawLines();
-    requestAnimationFrame(this.tick.bind(this));
-  }
-}
-
-customElements.define('a-waves', AWaves);
+})();

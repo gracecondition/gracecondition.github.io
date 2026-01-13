@@ -74,7 +74,7 @@
 
                         <div class="challenge-content">
                             <h3 class="challenge-title">{{ .Title }}</h3>
-                            <p class="challenge-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 100 }}{{ else }}{{ .Summary | truncate 100 }}{{ end }}</p>
+                            <p class="challenge-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 120 }}{{ else }}{{ .Summary | truncate 120 }}{{ end }}</p>
 
                             <div class="challenge-stats">
                                 {{ if .IsSection }}

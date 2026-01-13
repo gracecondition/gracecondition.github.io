@@ -37,7 +37,7 @@
                         </div>
                         <div class="post-content">
                             <h3 class="post-title">{{ .Title }}</h3>
-                            <p class="post-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 120 }}{{ else }}{{ .Summary | truncate 120 }}{{ end }}</p>
+                            <p class="post-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 160 }}{{ else }}{{ .Summary | truncate 160 }}{{ end }}</p>
                             <div class="post-meta">
                                 {{ if .IsSection }}
                                 <span class="post-date">{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>

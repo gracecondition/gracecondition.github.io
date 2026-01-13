@@ -98,11 +98,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const wrapper = document.createElement('div');
         wrapper.className = 'code-block-wrapper';
-        const parent = block.parentNode;
-        const pre = parent;
-        pre.parentNode.insertBefore(wrapper, pre);
+
+        const pre = block.parentNode;
+        const highlight = pre ? pre.parentNode : null;
+        let container = pre;
+
+        if (highlight && (highlight.classList.contains('highlight') || highlight.classList.contains('chroma'))) {
+            container = highlight;
+        }
+
+        if (!container || (container.parentNode && container.parentNode.classList.contains('code-block-wrapper'))) {
+            return;
+        }
+
+        container.parentNode.insertBefore(wrapper, container);
         wrapper.appendChild(button);
-        wrapper.appendChild(pre);
+        wrapper.appendChild(container);
     });
 
     // Sidebar search and filter functionality

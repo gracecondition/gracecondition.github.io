@@ -2,112 +2,112 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://192.168.1.120:1313/posts/dirtyslide/</loc>
+    <loc>https://gracecondition.github.io/posts/dirtyslide/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/</loc>
+    <loc>https://gracecondition.github.io/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/macos/</loc>
+    <loc>https://gracecondition.github.io/tags/macos/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/posts/</loc>
+    <loc>https://gracecondition.github.io/posts/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/privilege-escalation/</loc>
+    <loc>https://gracecondition.github.io/tags/privilege-escalation/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/</loc>
+    <loc>https://gracecondition.github.io/tags/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/vulnerability/</loc>
+    <loc>https://gracecondition.github.io/tags/vulnerability/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/xnu/</loc>
+    <loc>https://gracecondition.github.io/tags/xnu/</loc>
     <lastmod>2026-06-25T12:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/ctf/</loc>
+    <loc>https://gracecondition.github.io/tags/ctf/</loc>
     <lastmod>2025-12-22T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/ctf/</loc>
+    <loc>https://gracecondition.github.io/ctf/</loc>
     <lastmod>2025-12-22T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/pwnable/</loc>
+    <loc>https://gracecondition.github.io/tags/pwnable/</loc>
     <lastmod>2025-12-22T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/write-what-where/</loc>
+    <loc>https://gracecondition.github.io/tags/write-what-where/</loc>
     <lastmod>2025-12-22T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/ctf/pwnable.kr/wtf-writeup/</loc>
+    <loc>https://gracecondition.github.io/ctf/pwnable.kr/wtf-writeup/</loc>
     <lastmod>2025-12-22T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/analysis/</loc>
+    <loc>https://gracecondition.github.io/tags/analysis/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/posts/paragowned/</loc>
+    <loc>https://gracecondition.github.io/posts/paragowned/</loc>
     <lastmod>2025-12-03T06:59:55+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/tags/binary-analysis/</loc>
+    <loc>https://gracecondition.github.io/tags/binary-analysis/</loc>
     <lastmod>2025-10-10T14:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/posts/machsec-documentation/</loc>
+    <loc>https://gracecondition.github.io/posts/machsec-documentation/</loc>
     <lastmod>2025-10-10T14:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/ctf/picoctf/</loc>
+    <loc>https://gracecondition.github.io/ctf/picoctf/</loc>
     <lastmod>2025-01-01T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/ctf/pwnable.kr/passcode/</loc>
+    <loc>https://gracecondition.github.io/ctf/pwnable.kr/passcode/</loc>
     <lastmod>2024-11-15T10:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/about/</loc>
+    <loc>https://gracecondition.github.io/about/</loc>
     <lastmod>2024-09-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/ctf/pwnable.kr/</loc>
+    <loc>https://gracecondition.github.io/ctf/pwnable.kr/</loc>
     <lastmod>2024-01-20T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://192.168.1.120:1313/categories/</loc>
+    <loc>https://gracecondition.github.io/categories/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

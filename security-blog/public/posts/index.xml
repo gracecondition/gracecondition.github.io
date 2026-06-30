@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on gracecondition</title>
-    <link>http://192.168.1.120:1313/posts/</link>
+    <link>https://gracecondition.github.io/posts/</link>
     <description>Recent content in Posts on gracecondition</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 25 Jun 2026 12:00:00 +0000</lastBuildDate>
-    <atom:link href="http://192.168.1.120:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gracecondition.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>DirtySlide - root on macOS from one missing bounds check</title>
-      <link>http://192.168.1.120:1313/posts/dirtyslide/</link>
+      <link>https://gracecondition.github.io/posts/dirtyslide/</link>
       <pubDate>Thu, 25 Jun 2026 12:00:00 +0000</pubDate>
-      <guid>http://192.168.1.120:1313/posts/dirtyslide/</guid>
+      <guid>https://gracecondition.github.io/posts/dirtyslide/</guid>
       <description>Unprivileged to root on macOS 26.5, no entitlements, Developer Mode off, through one unbounded loop in the dyld shared-cache slide walker. Fixed in macOS 26.5.2.</description>
     </item>
     <item>
       <title>ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone</title>
-      <link>http://192.168.1.120:1313/posts/paragowned/</link>
+      <link>https://gracecondition.github.io/posts/paragowned/</link>
       <pubDate>Wed, 03 Dec 2025 06:59:55 +0200</pubDate>
-      <guid>http://192.168.1.120:1313/posts/paragowned/</guid>
+      <guid>https://gracecondition.github.io/posts/paragowned/</guid>
       <description>How the paragon iMessage exploit worked.</description>
     </item>
     <item>
       <title>machsec - detecting XNU binary mitigations</title>
-      <link>http://192.168.1.120:1313/posts/machsec-documentation/</link>
+      <link>https://gracecondition.github.io/posts/machsec-documentation/</link>
       <pubDate>Fri, 10 Oct 2025 14:00:00 +0000</pubDate>
-      <guid>http://192.168.1.120:1313/posts/machsec-documentation/</guid>
+      <guid>https://gracecondition.github.io/posts/machsec-documentation/</guid>
       <description>This article explains my new mitigation detection tool machsec, for iOS/macOS, alongside binary mitigations available on XNU</description>
     </item>
   </channel>

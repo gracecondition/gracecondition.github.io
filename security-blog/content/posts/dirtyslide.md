@@ -15,6 +15,14 @@ summary: "Unprivileged to root on macOS 26.5, no entitlements, Developer Mode of
 
 **PoC:** [github.com/gracecondition/DirtySlide](https://github.com/gracecondition/DirtySlide)
 
+> **Scope: the root demo is virtual-machine only.** The out-of-bounds read/write is in shared
+> XNU and exists on real hardware, but the privilege escalation shown here (forging a
+> page-table entry and walking it up to root) only works on an Apple Virtualization (VMAPPLE)
+> guest. On physical Apple Silicon, **SPTM** (Secure Page Table Monitor) and **TXM** (Trusted
+> Execution Monitor) hold the page tables, so an EL1 write can't forge a PTE and the
+> weaponization step is blocked. The bug is a kernel OOB R/W everywhere; the demonstrated
+> uid-0 is VMAPPLE-only.
+
 # One missing `if`
 
 The bug is in `vm_shared_region_slide_page_v5()`, in `osfmk/vm/vm_shared_region.c`.

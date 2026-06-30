@@ -159,8 +159,8 @@
             <h4 class="toc-subtitle">Details</h4>
             <div class="article-info">
                 <div class="info-item"><span class="info-label">Published</span><time class="info-value">Jun 25, 2026</time></div>
-                <div class="info-item"><span class="info-label">Read time</span><span class="info-value">15 min</span></div>
-                <div class="info-item"><span class="info-label">Words</span><span class="info-value">3124</span></div>
+                <div class="info-item"><span class="info-label">Read time</span><span class="info-value">16 min</span></div>
+                <div class="info-item"><span class="info-label">Words</span><span class="info-value">3212</span></div>
                 <div class="info-item"><span class="info-label">Category</span><span class="info-value">Research</span></div>
                 
                 
@@ -193,7 +193,7 @@
                 <time datetime="2026-06-25">June 25, 2026</time>
                 
                 <span> • </span>
-                <span>15 min read</span>
+                <span>16 min read</span>
                 
                 
                 <span> • </span>
@@ -220,6 +220,15 @@
 <p>Note: This bug was disclosed to apple and someone had beat me to it. However, You might find the way I exploited it insightful.</p>
 </blockquote>
 <p><strong>PoC:</strong> <a href="https://github.com/gracecondition/DirtySlide">github.com/gracecondition/DirtySlide</a></p>
+<blockquote>
+<p><strong>Scope: the root demo is virtual-machine only.</strong> The out-of-bounds read/write is in shared
+XNU and exists on real hardware, but the privilege escalation shown here (forging a
+page-table entry and walking it up to root) only works on an Apple Virtualization (VMAPPLE)
+guest. On physical Apple Silicon, <strong>SPTM</strong> (Secure Page Table Monitor) and <strong>TXM</strong> (Trusted
+Execution Monitor) hold the page tables, so an EL1 write can&rsquo;t forge a PTE and the
+weaponization step is blocked. The bug is a kernel OOB R/W everywhere; the demonstrated
+uid-0 is VMAPPLE-only.</p>
+</blockquote>
 <h1 id="one-missing-if">One missing <code>if</code></h1>
 <p>The bug is in <code>vm_shared_region_slide_page_v5()</code>, in <code>osfmk/vm/vm_shared_region.c</code>.</p>
 <p>That function takes a page of the dyld shared cache and applies the ASLR slide to it. It walks a chain of pointers inside the page and rebases each one. Other places in XNU that walk an attacker-influenced chain like this check, on every step, that the pointer is still inside the page before they dereference it. The v4 path checks. The dyld chained-fixup pager checks. The v5 path does not.</p>

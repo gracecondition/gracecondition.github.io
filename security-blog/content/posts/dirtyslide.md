@@ -221,7 +221,7 @@ Darwin ... root:xnu-12377.120.72.0.4~13/RELEASE_ARM64_VMAPPLE arm64
 
 # (Un)Reliability 
 
-The trigger itself is reliable and the uid-0 cred patch is reproducible. The physical scan is not: it rewrites a live PTE hundreds of times and reads arbitrary frames, which destabilizes the pmap and panics on about half of runs. End to end, an attempt lands about one time in eight.
+The trigger itself is reliable and the uid-0 cred patch is reproducible. The physical scan is not: it rewrites a live PTE hundreds of times and reads arbitrary frames, which destabilizes the pmap and panics the kernel on nearly every run. The success rate is low, on the order of 10 percent.
 
 The reason is that the exploit runs blind. It never learns a real kernel address. It grooms until a page table is probably the neighbour, fires the OOB write where it should be, and sweeps physical memory for the credential. Each of those guesses is a place a run can panic. The missing primitive is an information leak: anything that returns a real kernel pointer, or tells me where a page-table page landed. With a leak to aim by, the grooming collapses into one deterministic write at a known target, and one-in-eight becomes close to certain.
 An additional kernel infoleak primitive would massivley improve reliability.
@@ -309,10 +309,6 @@ I reported this to Apple Product Security on 6/20, report `OE1106480813741`, "Ke
 
 {{< figure src="/images/dirtyslide/apple-report.png" width="100%" align="center" caption="Apple closed the report as already fixed: 'it was fixed in the beta before your report.'" >}}
 
-Apple could not reproduce it on the macOS 26.6 betas and asked for proof on a current build. There was none. It was already patched. Someone reported the same unbounded v5 walk before me, and it was fixed in a beta that shipped before my report. No CVE, no credit, beyond "it was fixed in the beta before your report."
-
-A single missing `if` in a well-trodden file is the kind of thing two people find in the same window. The reachability work and the page-table weaponization are mine. The bug had a shorter shelf life than the exploit.
-
 {{< mermaid >}}
 flowchart TD
     A["≤ 26.5 beta · 25F5042g<br/>xnu-12377.120.72 · vulnerable"] --> B["26.5.2 · 25F84<br/>xnu-12377.121.10 · fixed<br/>(built Jun 9)"]
@@ -325,12 +321,6 @@ flowchart TD
     style B fill:#14401e,stroke:#4ad06a,color:#cdf5d6
     style F fill:#3a2f12,stroke:#d9b45c,color:#f0e9d8
 {{< /mermaid >}}
-
-# Why it happened
-
-The page-table weaponization leans on an EL1 page-table write that works on the VMAPPLE guest and may be rejected on physical Apple Silicon, where SPTM/PPL hold page tables read-only. The bug itself is the unbounded slide: an OOB read and write into adjacent kernel data frames, which exists regardless of how you cash it out. Where page-table writes are blocked, the same primitive is still usable through data victims.
-
-Five routines do the same job. Four of them, and the chained-fixup pager, carry the "is `rebaseLocation` still inside the page?" check. v5, the newest and the one a live arm64 cache uses, shipped without it. A format gets a new version, the new walker is written fresh, and the one invariant the older siblings enforce does not make it into the copy. The fix puts it back.
 
 # Can this be used to jailbreak the iPhone?
 

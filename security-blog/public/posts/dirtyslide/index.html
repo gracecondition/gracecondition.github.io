@@ -147,7 +147,6 @@
     <li><a href="#unreliability">(Un)Reliability</a></li>
     <li><a href="#the-fix-apple-shipped">The fix Apple shipped</a></li>
     <li><a href="#beaten-to-the-patch">Beaten to the patch</a></li>
-    <li><a href="#why-it-happened">Why it happened</a></li>
     <li><a href="#can-this-be-used-to-jailbreak-the-iphone">Can this be used to jailbreak the iPhone?</a></li>
   </ul>
 </nav>
@@ -159,8 +158,8 @@
             <h4 class="toc-subtitle">Details</h4>
             <div class="article-info">
                 <div class="info-item"><span class="info-label">Published</span><time class="info-value">Jun 25, 2026</time></div>
-                <div class="info-item"><span class="info-label">Read time</span><span class="info-value">15 min</span></div>
-                <div class="info-item"><span class="info-label">Words</span><span class="info-value">3138</span></div>
+                <div class="info-item"><span class="info-label">Read time</span><span class="info-value">14 min</span></div>
+                <div class="info-item"><span class="info-label">Words</span><span class="info-value">2900</span></div>
                 <div class="info-item"><span class="info-label">Category</span><span class="info-value">Research</span></div>
                 
                 
@@ -193,7 +192,7 @@
                 <time datetime="2026-06-25">June 25, 2026</time>
                 
                 <span> • </span>
-                <span>15 min read</span>
+                <span>14 min read</span>
                 
                 
                 <span> • </span>
@@ -386,7 +385,7 @@ flowchart TD
 </span></span><span class="line"><span class="cl">sh-3.2# uname -a
 </span></span><span class="line"><span class="cl">Darwin ... root:xnu-12377.120.72.0.4~13/RELEASE_ARM64_VMAPPLE arm64
 </span></span></code></pre></div><h1 id="unreliability">(Un)Reliability</h1>
-<p>The trigger itself is reliable and the uid-0 cred patch is reproducible. The physical scan is not: it rewrites a live PTE hundreds of times and reads arbitrary frames, which destabilizes the pmap and panics on about half of runs. End to end, an attempt lands about one time in eight.</p>
+<p>The trigger itself is reliable and the uid-0 cred patch is reproducible. The physical scan is not: it rewrites a live PTE hundreds of times and reads arbitrary frames, which destabilizes the pmap and panics the kernel on nearly every run. The success rate is low, on the order of 10 percent.</p>
 <p>The reason is that the exploit runs blind. It never learns a real kernel address. It grooms until a page table is probably the neighbour, fires the OOB write where it should be, and sweeps physical memory for the credential. Each of those guesses is a place a run can panic. The missing primitive is an information leak: anything that returns a real kernel pointer, or tells me where a page-table page landed. With a leak to aim by, the grooming collapses into one deterministic write at a known target, and one-in-eight becomes close to certain.
 An additional kernel infoleak primitive would massivley improve reliability.</p>
 <p>There is also collateral in the panics. The slide spray leaves my marker value in the empty slots of other page tables, and an async kernel walk occasionally reads one as a malformed compressed PTE and panics at <code>pmap.c:5189</code>. While I hold physical R/W I also scrub: sweep RAM and zero every qword equal to the marker before it is misread. The value is a <code>-0x4000</code> sentinel, so nothing live looks like it.</p>
@@ -461,8 +460,6 @@ An additional kernel infoleak primitive would massivley improve reliability.</p>
     </figcaption>
 </figure>
 
-<p>Apple could not reproduce it on the macOS 26.6 betas and asked for proof on a current build. There was none. It was already patched. Someone reported the same unbounded v5 walk before me, and it was fixed in a beta that shipped before my report. No CVE, no credit, beyond &ldquo;it was fixed in the beta before your report.&rdquo;</p>
-<p>A single missing <code>if</code> in a well-trodden file is the kind of thing two people find in the same window. The reachability work and the page-table weaponization are mine. The bug had a shorter shelf life than the exploit.</p>
 <div class="mermaid-wrapper" >
     <div class="mermaid">
 flowchart TD
@@ -479,9 +476,6 @@ flowchart TD
     </div>
 </div>
 
-<h1 id="why-it-happened">Why it happened</h1>
-<p>The page-table weaponization leans on an EL1 page-table write that works on the VMAPPLE guest and may be rejected on physical Apple Silicon, where SPTM/PPL hold page tables read-only. The bug itself is the unbounded slide: an OOB read and write into adjacent kernel data frames, which exists regardless of how you cash it out. Where page-table writes are blocked, the same primitive is still usable through data victims.</p>
-<p>Five routines do the same job. Four of them, and the chained-fixup pager, carry the &ldquo;is <code>rebaseLocation</code> still inside the page?&rdquo; check. v5, the newest and the one a live arm64 cache uses, shipped without it. A format gets a new version, the new walker is written fresh, and the one invariant the older siblings enforce does not make it into the copy. The fix puts it back.</p>
 <h1 id="can-this-be-used-to-jailbreak-the-iphone">Can this be used to jailbreak the iPhone?</h1>
 <p>In its current state, probably not. Triggering <code>536</code> in the vulnerable context needs an application sandbox bypass.</p>
 <p>It also needs an <a href="https://support.apple.com/guide/security/operating-system-integrity-sec8b776536b/web">SPTM</a> (Secure Page Table Monitor) bypass, and there is little public information on bypassing SPTM. Even before the patch, this exploit only worked on macOS virtual machines.</p>

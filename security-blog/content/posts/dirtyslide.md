@@ -12,6 +12,9 @@ summary: "Unprivileged to root on macOS 26.5, no entitlements, Developer Mode of
 {{< figure src="/images/dirtyslide/dirtyslide.png" width="70%" align="center" >}}
 
 > Note: This bug was disclosed to apple and someone had beat me to it. However, You might find the way I exploited it insightful.
+
+**PoC:** [github.com/gracecondition/DirtySlide](https://github.com/gracecondition/DirtySlide)
+
 # One missing `if`
 
 The bug is in `vm_shared_region_slide_page_v5()`, in `osfmk/vm/vm_shared_region.c`.

@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
+    
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <title>404 Page not found - gracecondition</title>
     <meta name="description" content="OS internals, binary exploitation, and low-level security research">
     <meta name="author" content="gracecondition">
@@ -12,25 +25,25 @@
 
     
     <meta property="og:type" content="website">
-    <meta property="og:url" content="http://localhost:1313/404.html">
+    <meta property="og:url" content="http://192.168.1.120:1313/404.html">
     <meta property="og:title" content="404 Page not found">
     <meta property="og:description" content="OS internals, binary exploitation, and low-level security research">
     
-    <meta property="og:image" content="http://localhost:1313/images/default-preview.svg">
+    <meta property="og:image" content="http://192.168.1.120:1313/images/default-preview.svg">
     
     
 
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="http://localhost:1313/404.html">
+    <meta name="twitter:url" content="http://192.168.1.120:1313/404.html">
     <meta name="twitter:title" content="404 Page not found">
     <meta name="twitter:description" content="OS internals, binary exploitation, and low-level security research">
     
-    <meta name="twitter:image" content="http://localhost:1313/images/default-preview.svg">
+    <meta name="twitter:image" content="http://192.168.1.120:1313/images/default-preview.svg">
     
 
     
-    <link rel="canonical" href="http://localhost:1313/404.html">
+    <link rel="canonical" href="http://192.168.1.120:1313/404.html">
 
     
     <script type="application/ld+json">
@@ -39,38 +52,44 @@
         "@type": "WebSite",
         
         "name": "gracecondition",
-        "url": "http:\/\/localhost:1313\/",
+        "url": "http:\/\/192.168.1.120:1313\/",
         "description": "OS internals, binary exploitation, and low-level security research"
         
     }
     </script>
 
-    <link rel="stylesheet" href="http://localhost:1313/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..560&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="http://192.168.1.120:1313/css/style.css">
+    <link rel="stylesheet" href="http://192.168.1.120:1313/css/chroma.css">
 
     
-    <link rel="icon" href="http://localhost:1313/favicon.png">
+    <link rel="icon" href="http://192.168.1.120:1313/favicon.png">
     
 
     
 </head>
 <body>
-    <canvas id="wave-gradient-canvas"></canvas>
     <div class="site-container">
         <header class="site-header">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="http://localhost:1313/" class="nav-brand">
+            <a href="http://192.168.1.120:1313/" class="nav-brand">
+                <span class="brand-mark" aria-hidden="true"></span>
                 <h1>gracecondition</h1>
             </a>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="http://localhost:1313/" class="nav-link">Home</a>
+                <a href="http://192.168.1.120:1313/" class="nav-link">Home</a>
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle day / night">
+                    <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+                    <span class="toggle-label-day">Day</span>
+                    <span class="toggle-label-night">Night</span>
+                </button>
             </div>
 
             <div class="nav-toggle" id="nav-toggle">
@@ -108,20 +127,12 @@
             <h4>Quick Links</h4>
             <ul>
                 <li><a href="/posts/">Posts</a></li>
-                <li><a href="/articles/">Articles</a></li>
                 <li><a href="/ctf/">CTF Solutions</a></li>
                 <li><a href="/about/">About</a></li>
             </ul>
         </div>
 
-        <div class="footer-section">
-            <h4>Connect</h4>
-            <div class="social-links">
-                
-                
-                
-            </div>
-        </div>
+        
     </div>
 
     <div class="footer-bottom">
@@ -130,55 +141,38 @@
 </footer>
     </div>
 
-    <script type="module">
-        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
-
-        const canvas = document.getElementById('wave-gradient-canvas');
-        if (canvas) {
-            const gradient = new WaveGradient(canvas, {
-                colors: ['#0b0b0b', '#111111', '#151515', '#1b1b1b', '#141414', '#0b0b0b'],
-                fps: 30,
-                seed: 42,
-                speed: 1.0,
-                amplitude: 320,
-            });
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
         
-        const isMobile = window.innerWidth <= 768;
+        (function () {
+            var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+            var fresco = dark
+                ? { bg: '#1F1A12', node: '#241E15', text: '#F0E9D8', border: '#D9B45C', line: '#7A7160', alt: '#191510' }
+                : { bg: '#FFFFFF', node: '#FBF9F2', text: '#211E18', border: '#B28A4A', line: '#A39B8A', alt: '#F5F1E8' };
 
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'dark',
-            themeVariables: {
-                darkMode: true,
-                background: '#0b0b0b',
-                primaryColor: '#171717',
-                primaryTextColor: '#e0e0e0',
-                primaryBorderColor: '#2c2c2c',
-                lineColor: '#3a3a3a',
-                secondaryColor: '#1f1f1f',
-                tertiaryColor: '#121212',
-                fontSize: '14px',
-                fontFamily: 'IBM Plex Sans, Space Grotesk, sans-serif'
-            },
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'basis'
-            },
-            sequence: {
-                useMaxWidth: true
-            },
-            gantt: {
-                useMaxWidth: true
-            }
-        });
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                themeVariables: {
+                    darkMode: dark,
+                    background: fresco.bg,
+                    primaryColor: fresco.node,
+                    primaryTextColor: fresco.text,
+                    primaryBorderColor: fresco.border,
+                    lineColor: fresco.line,
+                    secondaryColor: fresco.alt,
+                    tertiaryColor: fresco.bg,
+                    fontSize: '14px',
+                    fontFamily: 'Hanken Grotesk, ui-sans-serif, system-ui, sans-serif'
+                },
+                flowchart: { useMaxWidth: true, htmlLabels: false, curve: 'basis' },
+                sequence: { useMaxWidth: true },
+                gantt: { useMaxWidth: true }
+            });
+        })();
     </script>
-    <script src="http://localhost:1313/js/waves.js"></script>
-    <script src="http://localhost:1313/js/main.js"></script>
+    <script src="http://192.168.1.120:1313/js/oculus.js"></script>
+    <script src="http://192.168.1.120:1313/js/main.js"></script>
     
 </body>
 </html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
+    <title>DirtySlide - root on macOS from one missing bounds check - gracecondition</title>
+    <meta name="description" content="OS internals, binary exploitation, and low-level security research">
+    <meta name="author" content="gracecondition">
+    <meta name="keywords" content="security research, binary exploitation, OS internals, vulnerability analysis, reverse engineering">
+
+    
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://192.168.1.120:1313/posts/dirtyslide/">
+    <meta property="og:title" content="DirtySlide - root on macOS from one missing bounds check">
+    <meta property="og:description" content="Unprivileged to root on macOS 26.5, no entitlements, Developer Mode off, through one unbounded loop in the dyld shared-cache slide walker. Fixed in macOS 26.5.2.">
+    
+    <meta property="og:image" content="http://192.168.1.120:1313/images/dirtyslide/dirtyslide.png">
+    
+    
+    <meta property="article:published_time" content="2026-06-25T12:00:00Z">
+    <meta property="article:modified_time" content="2026-06-25T12:00:00Z">
+    
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://192.168.1.120:1313/posts/dirtyslide/">
+    <meta name="twitter:title" content="DirtySlide - root on macOS from one missing bounds check">
+    <meta name="twitter:description" content="Unprivileged to root on macOS 26.5, no entitlements, Developer Mode off, through one unbounded loop in the dyld shared-cache slide walker. Fixed in macOS 26.5.2.">
+    
+    <meta name="twitter:image" content="http://192.168.1.120:1313/images/dirtyslide/dirtyslide.png">
+    
+
+    
+    <link rel="canonical" href="http://192.168.1.120:1313/posts/dirtyslide/">
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        
+        "headline": "DirtySlide - root on macOS from one missing bounds check",
+        "description": "Unprivileged to root on macOS 26.5, no entitlements, Developer Mode off, through one unbounded loop in the dyld shared-cache slide walker. Fixed in macOS 26.5.2.",
+        "author": {
+            "@type": "Person",
+            "name": "gracecondition"
+        },
+        "datePublished": "2026-06-25T12:00:00Z",
+        "dateModified": "2026-06-25T12:00:00Z",
+        
+        "image": "http:\/\/192.168.1.120:1313\/images\/dirtyslide\/dirtyslide.png",
+        
+        "publisher": {
+            "@type": "Organization",
+            "name": "gracecondition",
+            "url": "http:\/\/192.168.1.120:1313\/"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/192.168.1.120:1313\/posts\/dirtyslide\/"
+        }
+        
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..560&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="http://192.168.1.120:1313/css/style.css">
+    <link rel="stylesheet" href="http://192.168.1.120:1313/css/chroma.css">
+
+    
+    <link rel="icon" href="http://192.168.1.120:1313/favicon.png">
+    
+
+    
+</head>
+<body>
+    <div class="site-container">
+        <header class="site-header">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="http://192.168.1.120:1313/" class="nav-brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <h1>gracecondition</h1>
+            </a>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="http://192.168.1.120:1313/" class="nav-link">Home</a>
+                <a href="/posts/" class="nav-link">Posts</a>
+                <a href="/ctf/" class="nav-link">CTF Solutions</a>
+                <a href="/about/" class="nav-link">About</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle day / night">
+                    <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+                    <span class="toggle-label-day">Day</span>
+                    <span class="toggle-label-night">Night</span>
+                </button>
+            </div>
+
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+</header>
+
+        <main class="main-content">
+            
+<div class="content-with-toc">
+    <aside class="toc-sidebar">
+    <div class="toc-content">
+        <div class="toc-section">
+            <h3 class="toc-title">Contents</h3>
+            <nav class="toc-nav" id="toc-nav">
+                
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#one-missing-if">One missing <code>if</code></a>
+      <ul>
+        <li><a href="#why-there-are-five-of-these">Why there are five of these</a></li>
+      </ul>
+    </li>
+    <li><a href="#what-the-slide-walker-is-for">What the slide walker is for</a></li>
+    <li><a href="#the-guard-that-isnt-there">The guard that isn&rsquo;t there</a></li>
+    <li><a href="#reaching-the-bug-unprivileged">Reaching the bug unprivileged</a></li>
+    <li><a href="#from-8-bytes-to-all-of-physical-memory">From 8 bytes to all of physical memory</a></li>
+    <li><a href="#the-exploit-end-to-end">The exploit, end to end</a></li>
+    <li><a href="#finding-the-credential">Finding the credential</a></li>
+    <li><a href="#keeping-root-without-panicking">Keeping root without panicking</a></li>
+    <li><a href="#unreliability">(Un)Reliability</a></li>
+    <li><a href="#the-fix-apple-shipped">The fix Apple shipped</a></li>
+    <li><a href="#beaten-to-the-patch">Beaten to the patch</a></li>
+    <li><a href="#why-it-happened">Why it happened</a></li>
+    <li><a href="#can-this-be-used-to-jailbreak-the-iphone">Can this be used to jailbreak the iPhone?</a></li>
+  </ul>
+</nav>
+                
+            </nav>
+        </div>
+
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Details</h4>
+            <div class="article-info">
+                <div class="info-item"><span class="info-label">Published</span><time class="info-value">Jun 25, 2026</time></div>
+                <div class="info-item"><span class="info-label">Read time</span><span class="info-value">15 min</span></div>
+                <div class="info-item"><span class="info-label">Words</span><span class="info-value">3122</span></div>
+                <div class="info-item"><span class="info-label">Category</span><span class="info-value">Research</span></div>
+                
+                
+                
+            </div>
+        </div>
+
+        <div class="toc-section">
+            <h4 class="toc-subtitle">Progress</h4>
+            <div class="reading-progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text"><span id="progress-percentage">0%</span><span class="progress-label">completed</span></div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+
+    <article class="single-post">
+        <header class="post-header">
+            <div class="post-meta-badge">
+                
+                    <span class="research-badge">Research</span>
+                
+            </div>
+
+            <h1 class="post-title-single">DirtySlide - root on macOS from one missing bounds check</h1>
+
+            <div class="post-meta-single">
+                <time datetime="2026-06-25">June 25, 2026</time>
+                
+                <span> • </span>
+                <span>15 min read</span>
+                
+                
+                <span> • </span>
+                <div class="inline-tags">
+                    
+                    <span class="inline-tag">#xnu</span>
+                    
+                    <span class="inline-tag">#vulnerability</span>
+                    
+                    <span class="inline-tag">#privilege escalation</span>
+                    
+                    <span class="inline-tag">#macos</span>
+                    
+                </div>
+                
+            </div>
+        </header>
+
+        <div class="post-body" id="post-content">
+            <figure><img src="/images/dirtyslide/dirtyslide.png" width="70%">
+</figure>
+
+<blockquote>
+<p>Note: This bug was disclosed to apple and someone had beat me to it. However, You might find the way I exploited it insightful.</p>
+</blockquote>
+<h1 id="one-missing-if">One missing <code>if</code></h1>
+<p>The bug is in <code>vm_shared_region_slide_page_v5()</code>, in <code>osfmk/vm/vm_shared_region.c</code>.</p>
+<p>That function takes a page of the dyld shared cache and applies the ASLR slide to it. It walks a chain of pointers inside the page and rebases each one. Other places in XNU that walk an attacker-influenced chain like this check, on every step, that the pointer is still inside the page before they dereference it. The v4 path checks. The dyld chained-fixup pager checks. The v5 path does not.</p>
+<h2 id="why-there-are-five-of-these">Why there are five of these</h2>
+<p><code>vm_shared_region_slide_page()</code> is a dispatcher. It reads the <code>version</code> field from the cache&rsquo;s slide-info and calls one of five routines, <code>vm_shared_region_slide_page_v1()</code> through <code>..._v5()</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">switch</span> <span class="p">(</span><span class="n">si</span><span class="o">-&gt;</span><span class="n">si_slide_info_entry</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="mi">1</span><span class="o">:</span> <span class="k">return</span> <span class="nf">vm_shared_region_slide_page_v1</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">vaddr</span><span class="p">,</span> <span class="n">pageIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="mi">2</span><span class="o">:</span> <span class="k">return</span> <span class="nf">vm_shared_region_slide_page_v2</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">vaddr</span><span class="p">,</span> <span class="n">pageIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="mi">3</span><span class="o">:</span> <span class="k">return</span> <span class="nf">vm_shared_region_slide_page_v3</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">vaddr</span><span class="p">,</span> <span class="n">uservaddr</span><span class="p">,</span> <span class="n">pageIndex</span><span class="p">,</span> <span class="n">jop_key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="mi">4</span><span class="o">:</span> <span class="k">return</span> <span class="nf">vm_shared_region_slide_page_v4</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">vaddr</span><span class="p">,</span> <span class="n">pageIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="mi">5</span><span class="o">:</span> <span class="k">return</span> <span class="nf">vm_shared_region_slide_page_v5</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">vaddr</span><span class="p">,</span> <span class="n">uservaddr</span><span class="p">,</span> <span class="n">pageIndex</span><span class="p">,</span> <span class="n">jop_key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">default</span><span class="o">:</span> <span class="k">return</span> <span class="n">KERN_FAILURE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>There are five because the format dyld uses to encode which words on a page are pointers, and how to get from one to the next, has changed across architectures and OS releases. The kernel has to handle every format a live cache might be built with:</p>
+<ul>
+<li><strong>v1</strong>: a table-of-contents plus a bitmap marking which slots need sliding. No chaining.</li>
+<li><strong>v2</strong>: compressed delta chains for 64-bit caches. Each page has a start offset, and each pointer&rsquo;s spare bits encode the delta to the next one.</li>
+<li><strong>v3</strong>: the arm64e variant. It adds PAC-signed pointers, so chain entries carry ptrauth key and diversity metadata and the kernel re-signs each pointer as it rebases it.</li>
+<li><strong>v4</strong>: a v2-shaped scheme for small (&lt;= 1 GB) 32-bit caches, with narrower chains.</li>
+<li><strong>v5</strong>: the modern arm64 format. Each slot is a <code>dyld_chained_ptr</code>-style word: a 34-bit runtime offset, an 8-bit high byte, an optional auth bit, and an 11-bit <code>next</code> field giving the 8-byte stride to the following pointer. This is the format whose <code>page_starts[]</code> and chain bytes the attacker supplies.</li>
+</ul>
+<p>All five walk an attacker-influenced chain. The question is which of them check that the walk stays inside the page on each step. v1 through v4 and the chained-fixup pager do. v5 did not.</p>
+<div class="mermaid-wrapper" >
+    <div class="mermaid">
+flowchart TD
+    D["vm_shared_region_slide_page()<br/>reads version, dispatches"]
+    D --> V1["v1 · ToC + bitmap"]
+    D --> V2["v2 · delta chains"]
+    D --> V3["v3 · arm64e + PAC"]
+    D --> V4["v4 · small 32-bit"]
+    D --> V5["v5 · modern arm64"]
+    V1 --> OK1["bound-checked ✓"]
+    V2 --> OK2["bound-checked ✓"]
+    V3 --> OK3["bound-checked ✓"]
+    V4 --> OK4["bound-checked ✓"]
+    V5 --> BAD["no page bound ✗<br/>walks off the page"]
+    OK1 --> SAFE["stays inside the page"]
+    OK2 --> SAFE
+    OK3 --> SAFE
+    OK4 --> SAFE
+    BAD --> OOB["8-byte OOB read+write<br/>into the next frame"]
+    style BAD fill:#5a1414,stroke:#ff5a5a,color:#ffd7d7
+    style OOB fill:#5a1414,stroke:#ff5a5a,color:#ffd7d7
+
+    </div>
+</div>
+
+<h1 id="what-the-slide-walker-is-for">What the slide walker is for</h1>
+<blockquote>
+<p>New to the dyld shared cache? The primer is Apple&rsquo;s own source: the <a href="https://github.com/apple-oss-distributions/dyld">dyld repository</a>, and the <a href="https://github.com/apple-oss-distributions/dyld/blob/main/include/mach-o/dyld_cache_format.h"><code>dyld_cache_format.h</code></a> header, where every <code>dyld_cache_slide_info</code> version is defined.</p>
+</blockquote>
+<p>When a process launches, dyld maps the shared cache (one blob of all the system libraries) and the kernel slides it to a random base. The pointers baked into the cache can&rsquo;t be absolute, so they are stored as a chain: each page carries a starting offset, and at that offset is a value whose high bits encode the distance to the next pointer to fix up. The kernel walks the chain, adds the slide amount to each pointer, and writes it back. When the chain ends, the page is done.</p>
+<p>The metadata that drives this is the slide-info. Version 5 is the arm64 one, and its layout is what an unprivileged caller supplies. This is the real definition from <code>osfmk/vm/vm_shared_region_xnu.h</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">vm_shared_region_slide_info_entry_v5</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span>    <span class="n">version</span><span class="p">;</span>        <span class="c1">// currently 5
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uint32_t</span>    <span class="n">page_size</span><span class="p">;</span>      <span class="c1">// 16384
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uint32_t</span>    <span class="n">page_starts_count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span>    <span class="n">value_add</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span>    <span class="n">page_starts</span><span class="p">[]</span> <span class="cm">/* page_starts_count */</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p><code>page_starts[i]</code> is where the walk begins on page <code>i</code>. It is a raw <code>uint16_t</code> copied in from userspace.</p>
+<h1 id="the-guard-that-isnt-there">The guard that isn&rsquo;t there</h1>
+<p>This is the rebase loop, verbatim from the <code>xnu-12377.120.72</code> source (<code>vm_shared_region_slide_page_v5</code>, ptrauth bitfield comments removed for length):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">rebaseLocation</span> <span class="o">=</span> <span class="n">page_content</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint64_t</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">page_entry</span><span class="p">;</span>                 <span class="c1">// page_starts[pageIndex], attacker-controlled u16
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">rebaseLocation</span> <span class="o">+=</span> <span class="n">delta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">rebaseLocation</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">delta</span> <span class="o">=</span> <span class="p">((</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0x7FF0000000000000ULL</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">52</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span>    <span class="n">high8</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="mi">22</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF00000000000000ULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span>        <span class="n">isAuthenticated</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1ULL</span> <span class="o">&lt;&lt;</span> <span class="mi">63</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0x3FFFFFFFFULL</span><span class="p">)</span> <span class="o">+</span> <span class="n">value_add</span> <span class="o">+</span> <span class="n">slide_amount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">isAuthenticated</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* ... PAC re-sign, then ... */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">memcpy</span><span class="p">(</span><span class="n">rebaseLocation</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">value</span> <span class="o">+=</span> <span class="n">high8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">memcpy</span><span class="p">(</span><span class="n">rebaseLocation</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">delta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span>
+</span></span></code></pre></div><p><code>rebaseLocation</code> starts at <code>page_content</code>. The first <code>delta</code> is <code>page_starts[pageIndex]</code>, attacker-controlled. Every later <code>delta</code> is decoded from the eight bytes the loop just read, and those bytes live in the page I supplied, so they are attacker-controlled too. Nothing in the loop checks that <code>rebaseLocation</code> is still inside <code>[page_content, page_content + PAGE_SIZE)</code>.</p>
+<p>So I can put the first hop near the end of the page, set a value whose high bits say &ldquo;keep going&rdquo;, and the loop steps <code>rebaseLocation</code> past the page and does its read-modify-write in whatever kernel frame sits next door. That is an out-of-bounds read and write, 8 bytes at a time, into adjacent kernel memory, with the written value mostly under my control.</p>
+<p>For comparison, the chained-fixup pager (<code>osfmk/vm/vm_dyld_pager.c</code>, <code>fixupPage64</code>) does the bound check, verbatim:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">((</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chain</span> <span class="o">&lt;</span> <span class="n">contents</span> <span class="o">||</span> <span class="p">(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chain</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">chain</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">end_contents</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s(): chain 0x%llx out of range 0x%llx..0x%llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">chain</span><span class="p">,</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">contents</span><span class="p">,</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">end_contents</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">KERN_FAILURE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>That is the bug. v5 was missing this <code>if</code>.</p>
+<h1 id="reaching-the-bug-unprivileged">Reaching the bug unprivileged</h1>
+<p>The first time I drove this path, it was through a route only the development kernel exposes. That proves the bug exists but says nothing about reachability on a stock machine, so on its own it is not an unprivileged bug. The part that makes it unprivileged came after: an ordinary, ad-hoc-signed, unentitled process can reach the same code by shimming out libSystem.</p>
+<p>The slide walker is reachable from syscall <code>536</code>, <code>shared_region_map_and_slide_2_np</code>, in <code>bsd/vm/vm_unix.c</code>. There is no <code>suser</code> check, no <code>priv_check</code>, and no entitlement gate. It <code>copyin()</code>s the slide-info from the caller, and in the vulnerable build it only checks the structure, never the <code>page_starts[]</code> values against the page. Any process can call it.</p>
+<p>There is one catch. <code>vm_shared_region_map_file()</code> only accepts a mapping into a region whose <code>sr_first_mapping == -1</code>, a fresh region that nothing has populated. A normally-launched process already inherited a cache-populated region, so its <code>536</code> bounces. I needed a process that reaches the syscall with a fresh region.</p>
+<p>The way to do that is to make dyld never map the real cache. The PoC spawns its child with two shim dylibs, a hand-rolled <code>fake_libdyld.cpp</code> (just enough of the dyld4 ABI to satisfy the loader) and a minimal <code>fake_libsystem.c</code>, and points <code>DYLD_SHARED_CACHE_DIR</code> at a path that doesn&rsquo;t exist. dyld resolves libSystem and libdyld from the shims, finds no cache to map, and leaves the reslide region empty. Spawning the child with <code>_POSIX_SPAWN_RESLIDE</code> makes its own call to <code>536</code> land in a fresh region, and the OOB fires.</p>
+<p>The child is a plain, ad-hoc-signed binary with no entitlements. No debugger, no <code>task_for_pid</code>, no Developer Mode.</p>
+<h1 id="from-8-bytes-to-all-of-physical-memory">From 8 bytes to all of physical memory</h1>
+<p>An 8-byte OOB write into the next frame is not root by itself. You have to decide what is in that frame and make the write count.</p>
+<p>On arm64 the target is a page-table page. If I groom the kernel so a leaf page-table page lands physically adjacent to the slide destination, the OOB write lands on a page-table entry instead of on data. A PTE I control maps a virtual page I own onto a physical frame I choose.</p>
+<p>So: groom until a page-table page is the neighbour, build the v5 slide-info so the OOB write forges a controlled PTE, and now one of my virtual pages points at arbitrary physical RAM. Rewrite that PTE repeatedly, moving the aperture across physical memory in 32 MB windows, and I have read/write over all of physical memory through one virtual page.</p>
+<div class="mermaid-wrapper" >
+    <div class="mermaid">
+flowchart TB
+    subgraph SP["my slide page (attacker-supplied)"]
+        direction TB
+        start["page_starts[i] · first hop"] --> chain["chain value<br/>next bits say 'keep going'"]
+    end
+    subgraph PT["neighbour frame: a leaf page table"]
+        direction TB
+        p0["PTE"] --> p1["PTE"] --> forged["⟪ forged PTE ⟫"] --> p2["PTE …"]
+    end
+    chain -->|"walk steps off the end of the page"| forged
+    forged -->|"maps a vaddr I own onto"| phys["arbitrary physical frame"]
+    style forged fill:#5a4412,stroke:#ffb000,color:#ffe9b0
+    style chain fill:#143a5a,stroke:#5aa8ff,color:#d7ecff
+
+    </div>
+</div>
+
+<h1 id="the-exploit-end-to-end">The exploit, end to end</h1>
+<p>A full run is nine steps:</p>
+<ol>
+<li><strong>Reach the syscall.</strong> Spawn a child with the shim dylibs (<code>fake_libdyld</code> / <code>fake_libsystem</code>) and <code>DYLD_SHARED_CACHE_DIR</code> pointed at a path that doesn&rsquo;t exist, so dyld maps no real cache and the reslide region stays empty. The child is plain, ad-hoc-signed, unentitled.</li>
+<li><strong>Get a fresh region.</strong> Spawn with <code>_POSIX_SPAWN_RESLIDE</code> so the child&rsquo;s call to <code>536</code> (<code>shared_region_map_and_slide_2_np</code>) lands in a region whose <code>sr_first_mapping == -1</code>.</li>
+<li><strong>Slide off the page.</strong> Build v5 slide-info whose <code>page_starts[i]</code> puts the first hop near the end of the page, with a chain value carrying a non-zero <code>next</code>, so the walker steps <code>rebaseLocation</code> past <code>page_content + PAGE_SIZE</code> and does its read-modify-write in the next frame.</li>
+<li><strong>Make the neighbour a page table.</strong> Groom kernel allocations so a leaf page-table page lands physically adjacent to the slide destination.</li>
+<li><strong>Forge a PTE.</strong> Pick the written value so the clobbered PTE maps a virtual page I own onto a physical frame I choose.</li>
+<li><strong>Get full physical R/W.</strong> Rewrite that PTE, moving the aperture across physical memory in 32 MB windows.</li>
+<li><strong>Find the credential.</strong> Sweep physical RAM through the aperture for the <code>posix_cred</code> with my <code>uid == ruid == svuid == 501</code>.</li>
+<li><strong>Set uid 0.</strong> Zero the uid/gid fields in place.</li>
+<li><strong>Hold the win.</strong> Park the corrupted process in <code>select()</code> so its pmap is never torn down, and <code>chown</code> + <code>chmod 04755</code> a clean <code>suidwrap</code> helper so a fresh process can exec a root shell.</li>
+</ol>
+<div class="mermaid-wrapper" >
+    <div class="mermaid">
+flowchart TD
+    A["shim out libSystem<br/>(fake dyld, no cache)"] --> B["_POSIX_SPAWN_RESLIDE<br/>→ fresh shared region"]
+    B --> C["syscall 536 · v5 slide-info<br/>first hop near page end"]
+    C --> D["walk steps off the page<br/>8-byte OOB read+write"]
+    D --> E["groom: leaf page table<br/>is the neighbour frame"]
+    E --> F["OOB write forges a PTE<br/>→ controlled mapping"]
+    F --> G["march PTE in 32 MB windows<br/>→ full physical R/W"]
+    G --> H["scan RAM for my posix_cred<br/>(uid==ruid==svuid==501)"]
+    H --> I["zero uid/gid in place<br/>→ uid 0"]
+    I --> J["park in select(); chmod 04755 suidwrap<br/>→ clean root shell"]
+    style D fill:#5a1414,stroke:#ff5a5a,color:#ffd7d7
+    style F fill:#5a4412,stroke:#ffb000,color:#ffe9b0
+    style I fill:#14401e,stroke:#4ad06a,color:#cdf5d6
+    style J fill:#14401e,stroke:#4ad06a,color:#cdf5d6
+
+    </div>
+</div>
+
+<p>The grooming primitive, spray counts, PTE bit layout, and window-stepping loop for steps 4 to 6 are in the exploit source. I am not transcribing offsets into prose here.</p>
+<h1 id="finding-the-credential">Finding the credential</h1>
+<p>With physical read/write, the target is small: my own process credential. On XNU that is a <a href="https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/ucred.h"><code>posix_cred</code></a>, the <code>cr_posix</code> sub-structure of <code>struct ucred</code>, and mine has <code>uid == ruid == svuid == 501</code>, the default first user on macOS.</p>
+<p>I scan physical RAM through the PTE aperture, 32 MB at a time, for the credential matching that uid triple. When the scan finds it, I zero the uid and gid fields in place. The process is now uid 0. The PoC prints <code>oracle post getuid=0x0000000000000000</code>.</p>
+<h1 id="keeping-root-without-panicking">Keeping root without panicking</h1>
+<p>By the time the write lands, my address space is corrupt. I have forged PTEs in my pmap for hundreds of writes; the moment the process exits, execs, or unmaps anything, the kernel walks that pmap to tear it down, reads a forged entry as a real PTE, and panics. Winning and touching anything are the same action.</p>
+<p>Two things solve it. First, the winning process does not tear itself down: it calls <code>select(0, NULL, NULL, NULL, NULL)</code> and blocks, holding its pmap open. Second, the root shell goes to a clean process. While briefly uid 0, the exploit <code>chown</code>s and <code>chmod 04755</code>s a small staged helper (<code>suidwrap</code>), making it setuid-root on disk. A fresh uid-501 process that execs that helper gets a real root credential from the kernel, with none of the corruption.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sh-3.2# id
+</span></span><span class="line"><span class="cl">uid=0(root) gid=0(wheel) groups=0(wheel),1(daemon),...,204(_developer)...
+</span></span><span class="line"><span class="cl">sh-3.2# uname -a
+</span></span><span class="line"><span class="cl">Darwin ... root:xnu-12377.120.72.0.4~13/RELEASE_ARM64_VMAPPLE arm64
+</span></span></code></pre></div><h1 id="unreliability">(Un)Reliability</h1>
+<p>The trigger itself is reliable and the uid-0 cred patch is reproducible. The physical scan is not: it rewrites a live PTE hundreds of times and reads arbitrary frames, which destabilizes the pmap and panics on about half of runs. End to end, an attempt lands about one time in eight.</p>
+<p>The reason is that the exploit runs blind. It never learns a real kernel address. It grooms until a page table is probably the neighbour, fires the OOB write where it should be, and sweeps physical memory for the credential. Each of those guesses is a place a run can panic. The missing primitive is an information leak: anything that returns a real kernel pointer, or tells me where a page-table page landed. With a leak to aim by, the grooming collapses into one deterministic write at a known target, and one-in-eight becomes close to certain.
+An additional kernel infoleak primitive would massivley improve reliability.</p>
+<p>There is also collateral in the panics. The slide spray leaves my marker value in the empty slots of other page tables, and an async kernel walk occasionally reads one as a malformed compressed PTE and panics at <code>pmap.c:5189</code>. While I hold physical R/W I also scrub: sweep RAM and zero every qword equal to the marker before it is misread. The value is a <code>-0x4000</code> sentinel, so nothing live looks like it.</p>
+<h1 id="the-fix-apple-shipped">The fix Apple shipped</h1>
+<p>I checked <code>26.5.2</code> (<code>25F84</code>, <code>xnu-12377.121.10</code>) by pulling the release kernelcache with <a href="https://github.com/blacktop/ipsw"><code>ipsw</code></a> and reversing the slide path out of the stripped binary. The bug is closed in two places.</p>
+<p><strong>The per-step bound, now in the walk.</strong> This is the v5 walk as it ships in <code>26.5.2</code>, verbatim reverse-engineered Hex-Rays output (locals renamed, otherwise unedited):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">delta</span> <span class="o">=</span> <span class="o">*</span><span class="n">page_starts_ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span> <span class="n">delta</span> <span class="o">!=</span> <span class="mh">0xFFFF</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">page_offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">value_add_slide</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">slide_info</span> <span class="o">+</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="o">*</span><span class="n">si</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">kva_to_uva</span> <span class="o">=</span> <span class="n">uservaddr</span> <span class="o">-</span> <span class="n">page_content</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">page_offset</span> <span class="o">+=</span> <span class="n">delta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">page_offset</span> <span class="o">&gt;</span> <span class="mh">0x3FF8</span> <span class="p">)</span>           <span class="c1">// 0x4000 (16K page) - 8
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">return</span> <span class="mi">5</span><span class="p">;</span>                         <span class="c1">// KERN_FAILURE
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">rebaseLocation</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="o">*</span><span class="p">)(</span><span class="n">page_content_base</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">page_offset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">page_offset</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">page_offset</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">rebaseLocation</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="o">*</span><span class="p">)((</span><span class="n">page_content_base</span> <span class="o">+</span> <span class="n">page_offset</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFFFFFFLL</span>
+</span></span><span class="line"><span class="cl">                                                <span class="o">|</span> <span class="mh">0x2BAD000000000000LL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">value</span> <span class="o">=</span> <span class="o">*</span><span class="n">rebaseLocation</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">rebased</span> <span class="o">=</span> <span class="n">value_add_slide</span> <span class="o">+</span> <span class="p">(</span><span class="o">*</span><span class="n">rebaseLocation</span> <span class="o">&amp;</span> <span class="mh">0x3FFFFFFFFLL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="o">*</span><span class="n">rebaseLocation</span> <span class="o">&amp;</span> <span class="mh">0x8000000000000000LL</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// ... auth / PAC re-sign branch ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="o">*</span><span class="n">rebaseLocation</span> <span class="o">=</span> <span class="n">rebased</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="o">*</span><span class="n">rebaseLocation</span> <span class="o">=</span> <span class="n">rebased</span> <span class="o">+</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="mi">34</span> <span class="o">&lt;&lt;</span> <span class="mi">56</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="mi">49</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x3FF8</span><span class="p">;</span>       <span class="c1">// next hop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">delta</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><code>page_offset</code> is the running distance from the start of the page. It is checked against <code>0x3FF8</code> (<code>PAGE_SIZE - 8</code>) before every dereference. As soon as the chain tries to step past the last 8-byte slot, the walker returns <code>KERN_FAILURE</code>. The v3 path got the same treatment, bounded against <code>0xFF8</code> for its 4 KB page.</p>
+<p><strong>The <code>page_starts[]</code> check at map time.</strong> <code>vm_shared_region_slide_sanity_check_v5</code> now iterates the start table and rejects any entry that points out of the page or is misaligned, before the walker runs. Heres The IDA output:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">page_starts_count</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">slide_buf</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">page_starts_count</span> <span class="o">+</span> <span class="mi">24</span> <span class="o">&gt;</span> <span class="n">slide_info_size</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;vm_shared_region_slide_sanity_check_v5: required_size != slide_info_size 0x%llx != 0x%llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">LABEL_61</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">_DWORD</span><span class="p">)</span><span class="n">page_starts_count</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">page_starts_count</span> <span class="o">!=</span> <span class="n">j</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">start</span> <span class="o">=</span> <span class="o">*</span><span class="p">((</span><span class="kt">unsigned</span> <span class="kr">__int16</span> <span class="o">*</span><span class="p">)</span><span class="n">slide_buf</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">12</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">start</span> <span class="o">!=</span> <span class="mh">0xFFFF</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="mh">0x3FF9</span> <span class="p">)</span>            <span class="c1">// must point inside the 16K page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;vm_shared_region_slide_sanity_check_v5: page_starts[%u] exceeds valid range. %u &gt; %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">goto</span> <span class="n">LABEL_61</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">start</span> <span class="o">&amp;</span> <span class="mi">7</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">)</span>           <span class="c1">// must be 8-byte aligned
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;vm_shared_region_slide_sanity_check_v5: page_starts[%u] is not aligned. %u</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">goto</span> <span class="n">LABEL_61</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Neither check exists in the vulnerable source, and neither string is in the <code>xnu-12377.120.x</code> / <code>.121.6</code> kernels I tested. Both appear for the first time in the <code>25F84</code> kernelcache. The walk bound alone closes the OOB; the <code>page_starts[]</code> check rejects a bad first hop before the walk starts.</p>
+<h1 id="beaten-to-the-patch">Beaten to the patch</h1>
+<p>I reported this to Apple Product Security on 6/20, report <code>OE1106480813741</code>, &ldquo;Kernel: LPE via physmap OOB-write in <code>vm_shared_region_slide_page_v5</code>&rdquo;.</p>
+<figure><img src="/images/dirtyslide/apple-report.png"
+    alt="Apple closed the report as already fixed: &lsquo;it was fixed in the beta before your report.&rsquo;" width="100%"><figcaption>
+      <p>Apple closed the report as already fixed: &lsquo;it was fixed in the beta before your report.&rsquo;</p>
+    </figcaption>
+</figure>
+
+<p>Apple could not reproduce it on the macOS 26.6 betas and asked for proof on a current build. There was none. It was already patched. Someone reported the same unbounded v5 walk before me, and it was fixed in a beta that shipped before my report. No CVE, no credit, beyond &ldquo;it was fixed in the beta before your report.&rdquo;</p>
+<p>A single missing <code>if</code> in a well-trodden file is the kind of thing two people find in the same window. The reachability work and the page-table weaponization are mine. The bug had a shorter shelf life than the exploit.</p>
+<div class="mermaid-wrapper" >
+    <div class="mermaid">
+flowchart TD
+    A["≤ 26.5 beta · 25F5042g<br/>xnu-12377.120.72 · vulnerable"] --> B["26.5.2 · 25F84<br/>xnu-12377.121.10 · fixed<br/>(built Jun 9)"]
+    B --> C["6/20 · I file OE1106480813741"]
+    C --> D["6/22 · Apple: can't repro on 26.6 beta"]
+    D --> E["6/23 · me: looks already patched.<br/>did someone beat me to it?"]
+    E --> F["6/23 · Apple: fixed in a beta<br/>before your report"]
+    F --> G["6/30 · Fix released today "]
+    style A fill:#5a1414,stroke:#ff5a5a,color:#ffd7d7
+    style B fill:#14401e,stroke:#4ad06a,color:#cdf5d6
+    style F fill:#3a2f12,stroke:#d9b45c,color:#f0e9d8
+
+    </div>
+</div>
+
+<h1 id="why-it-happened">Why it happened</h1>
+<p>The page-table weaponization leans on an EL1 page-table write that works on the VMAPPLE guest and may be rejected on physical Apple Silicon, where SPTM/PPL hold page tables read-only. The bug itself is the unbounded slide: an OOB read and write into adjacent kernel data frames, which exists regardless of how you cash it out. Where page-table writes are blocked, the same primitive is still usable through data victims.</p>
+<p>Five routines do the same job. Four of them, and the chained-fixup pager, carry the &ldquo;is <code>rebaseLocation</code> still inside the page?&rdquo; check. v5, the newest and the one a live arm64 cache uses, shipped without it. A format gets a new version, the new walker is written fresh, and the one invariant the older siblings enforce does not make it into the copy. The fix puts it back.</p>
+<h1 id="can-this-be-used-to-jailbreak-the-iphone">Can this be used to jailbreak the iPhone?</h1>
+<p>In its current state, probably not. Triggering <code>536</code> in the vulnerable context needs an application sandbox bypass.</p>
+<p>It also needs an <a href="https://support.apple.com/guide/security/operating-system-integrity-sec8b776536b/web">SPTM</a> (Secure Page Table Monitor) bypass, and there is little public information on bypassing SPTM. Even before the patch, this exploit only worked on macOS virtual machines.</p>
+<hr>
+<p>*Vulnerable build exploited: macOS 26.5 beta (<code>25F5042g</code>), <code>xnu-12377.120.72.0.4~13/RELEASE_ARM64_VMAPPLE</code>, arm64. Fix verified in: macOS 26.5.2 (<code>25F84</code>), <code>xnu-12377.121.10</code>.</p>
+
+        </div>
+
+        
+        <footer class="post-footer">
+            <div class="post-tags">
+                <h4>Tags</h4>
+                <div class="tag-list">
+                    
+                    <span class="tag">#xnu</span>
+                    
+                    <span class="tag">#vulnerability</span>
+                    
+                    <span class="tag">#privilege escalation</span>
+                    
+                    <span class="tag">#macos</span>
+                    
+                </div>
+            </div>
+        </footer>
+        
+
+        
+
+<section class="article-related">
+    <h3 class="eyebrow"><span class="cat-mark cat-gold sm" aria-hidden="true"></span>Related</h3>
+    <div class="related-grid">
+        
+        
+        <a href="http://192.168.1.120:1313/posts/paragowned/" class="related-card">
+            <span class="r-cat"><span class="cat-mark cat-analysis sm" aria-hidden="true"></span>
+analysis</span>
+            <span class="r-title">ParagOWNED - how CVE-2025-43200 likely abused Apple Intelligence to take control of an iPhone</span>
+            <span class="r-date">Dec 3, 2025</span>
+        </a>
+        
+    </div>
+</section>
+
+
+    </article>
+</div>
+
+        </main>
+
+        <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>gracecondition</h3>
+            <p>OS internals, binary exploitation, and low-level security research</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/posts/">Posts</a></li>
+                <li><a href="/ctf/">CTF Solutions</a></li>
+                <li><a href="/about/">About</a></li>
+            </ul>
+        </div>
+
+        
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2026 gracecondition. All rights reserved.</p>
+    </div>
+</footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        
+        (function () {
+            var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+            var fresco = dark
+                ? { bg: '#1F1A12', node: '#241E15', text: '#F0E9D8', border: '#D9B45C', line: '#7A7160', alt: '#191510' }
+                : { bg: '#FFFFFF', node: '#FBF9F2', text: '#211E18', border: '#B28A4A', line: '#A39B8A', alt: '#F5F1E8' };
+
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                themeVariables: {
+                    darkMode: dark,
+                    background: fresco.bg,
+                    primaryColor: fresco.node,
+                    primaryTextColor: fresco.text,
+                    primaryBorderColor: fresco.border,
+                    lineColor: fresco.line,
+                    secondaryColor: fresco.alt,
+                    tertiaryColor: fresco.bg,
+                    fontSize: '14px',
+                    fontFamily: 'Hanken Grotesk, ui-sans-serif, system-ui, sans-serif'
+                },
+                flowchart: { useMaxWidth: true, htmlLabels: false, curve: 'basis' },
+                sequence: { useMaxWidth: true },
+                gantt: { useMaxWidth: true }
+            });
+        })();
+    </script>
+    <script src="http://192.168.1.120:1313/js/oculus.js"></script>
+    <script src="http://192.168.1.120:1313/js/main.js"></script>
+    
+</body>
+</html>

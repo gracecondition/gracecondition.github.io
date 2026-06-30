@@ -19,7 +19,19 @@
       running: false,
       retryFrames: 0,
       resizeObserver: null,
+      stroke: '224, 188, 104',  // gilt contour lines
+      alphaMul: 1,
     };
+
+    // EMPYREAN: the waves are faint gold leaf — brighter to glow on the
+    // obsidian Nocturne, a touch stronger (and deeper) to read on Day marble.
+    const applyTheme = () => {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      state.stroke = light ? '178, 138, 74' : '224, 188, 104';
+      state.alphaMul = light ? 1.5 : 1;
+    };
+    applyTheme();
+    window.addEventListener('themechange', applyTheme);
 
     const config = {
       xGap: 9,
@@ -142,8 +154,8 @@
 
       state.lines.forEach((line) => {
         const bubbleLine = Math.pow(bubbleField(line.baseX, centerY, t), 1.4);
-        const alpha = config.alphaBase + bubbleLine * config.alphaBoost;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+        const alpha = (config.alphaBase + bubbleLine * config.alphaBoost) * state.alphaMul;
+        ctx.strokeStyle = `rgba(${state.stroke}, ${alpha})`;
         ctx.lineWidth = 0.45 + bubbleLine * 1.9;
         ctx.beginPath();
 

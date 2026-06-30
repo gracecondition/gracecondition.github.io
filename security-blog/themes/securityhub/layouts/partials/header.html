@@ -2,6 +2,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="{{ .Site.BaseURL }}" class="nav-brand">
+                <span class="brand-mark" aria-hidden="true"></span>
                 <h1>{{ .Site.Title }}</h1>
             </a>
 
@@ -10,6 +11,11 @@
                 <a href="/posts/" class="nav-link">Posts</a>
                 <a href="/ctf/" class="nav-link">CTF Solutions</a>
                 <a href="/about/" class="nav-link">About</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle day / night">
+                    <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+                    <span class="toggle-label-day">Day</span>
+                    <span class="toggle-label-night">Night</span>
+                </button>
             </div>
 
             <div class="nav-toggle" id="nav-toggle">

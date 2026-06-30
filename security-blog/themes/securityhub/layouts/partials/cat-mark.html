@@ -1,0 +1,6 @@
+{{- /* EMPYREAN: the Oculus — a disc of light, colored by category (fresco
+       pigment). Usage: {{ partial "cat-mark.html" (dict "cat" $cat "size" "lg") }}
+       size is optional ("sm" | "lg"). */ -}}
+{{- $cat := .cat | default "security" | lower -}}
+{{- $size := .size | default "" -}}
+<span class="cat-mark cat-{{ $cat }}{{ with $size }} {{ . }}{{ end }}" aria-hidden="true"></span>

@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
+    <!-- EMPYREAN: set the time of day before first paint (Nocturne is default) -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t !== 'light' && t !== 'dark') t = 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} - {{ .Site.Title }}{{ end }}</title>
     <meta name="description" content="{{ if .Description }}{{ .Description }}{{ else }}{{ .Site.Params.description }}{{ end }}">
     <meta name="author" content="{{ if .Params.author }}{{ .Params.author }}{{ else }}{{ .Site.Params.author }}{{ end }}">
@@ -73,10 +86,11 @@
     }
     </script>
 
-    <link rel="stylesheet" href="{{ "css/style.css" | absURL }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..560&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ "css/style.css" | absURL }}">
+    <link rel="stylesheet" href="{{ "css/chroma.css" | absURL }}">
 
     {{ if .Site.Params.favicon }}
     <link rel="icon" href="{{ .Site.Params.favicon | absURL }}">
@@ -85,7 +99,6 @@
     {{ block "head" . }}{{ end }}
 </head>
 <body>
-    <canvas id="wave-gradient-canvas"></canvas>
     <div class="site-container">
         {{ partial "header.html" . }}
 
@@ -96,54 +109,37 @@
         {{ partial "footer.html" . }}
     </div>
 
-    <script type="module">
-        import { WaveGradient } from 'https://unpkg.com/wave-gradient@0.1.0/dist/wave-gradient.js';
-
-        const canvas = document.getElementById('wave-gradient-canvas');
-        if (canvas) {
-            const gradient = new WaveGradient(canvas, {
-                colors: ['#0b0b0b', '#111111', '#151515', '#1b1b1b', '#141414', '#0b0b0b'],
-                fps: 30,
-                seed: 42,
-                speed: 1.0,
-                amplitude: 320,
-            });
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
-        // Simple mobile-friendly Mermaid config
-        const isMobile = window.innerWidth <= 768;
+        // EMPYREAN Mermaid — fresco diagrams that follow the time of day.
+        (function () {
+            var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+            var fresco = dark
+                ? { bg: '#1F1A12', node: '#241E15', text: '#F0E9D8', border: '#D9B45C', line: '#7A7160', alt: '#191510' }
+                : { bg: '#FFFFFF', node: '#FBF9F2', text: '#211E18', border: '#B28A4A', line: '#A39B8A', alt: '#F5F1E8' };
 
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'dark',
-            themeVariables: {
-                darkMode: true,
-                background: '#0b0b0b',
-                primaryColor: '#171717',
-                primaryTextColor: '#e0e0e0',
-                primaryBorderColor: '#2c2c2c',
-                lineColor: '#3a3a3a',
-                secondaryColor: '#1f1f1f',
-                tertiaryColor: '#121212',
-                fontSize: '14px',
-                fontFamily: 'IBM Plex Sans, Space Grotesk, sans-serif'
-            },
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'basis'
-            },
-            sequence: {
-                useMaxWidth: true
-            },
-            gantt: {
-                useMaxWidth: true
-            }
-        });
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                themeVariables: {
+                    darkMode: dark,
+                    background: fresco.bg,
+                    primaryColor: fresco.node,
+                    primaryTextColor: fresco.text,
+                    primaryBorderColor: fresco.border,
+                    lineColor: fresco.line,
+                    secondaryColor: fresco.alt,
+                    tertiaryColor: fresco.bg,
+                    fontSize: '14px',
+                    fontFamily: 'Hanken Grotesk, ui-sans-serif, system-ui, sans-serif'
+                },
+                flowchart: { useMaxWidth: true, htmlLabels: false, curve: 'basis' },
+                sequence: { useMaxWidth: true },
+                gantt: { useMaxWidth: true }
+            });
+        })();
     </script>
-    <script src="{{ "js/waves.js" | absURL }}"></script>
+    <script src="{{ "js/oculus.js" | absURL }}"></script>
     <script src="{{ "js/main.js" | absURL }}"></script>
     {{ block "scripts" . }}{{ end }}
 </body>

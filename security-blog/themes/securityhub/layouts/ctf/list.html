@@ -1,103 +1,79 @@
 {{ define "main" }}
-<div class="content-with-sidebar">
-    {{ partial "sidebar.html" . }}
-
-    <div class="main-column">
-        <header class="ctf-list-header">
-            {{ if .Params.image }}
-            <div class="ctf-logo-header">
-                <img src="{{ .Params.image }}" alt="{{ .Title }} logo" class="ctf-logo">
-            </div>
-            {{ end }}
-
-            <div class="ctf-meta">
-                <span class="ctf-badge">🚩 {{ .Params.ctf_name | default .Title }}</span>
-                {{ if .Params.ctf_date }}
-                <span class="ctf-date">{{ .Params.ctf_date }}</span>
-                {{ end }}
-            </div>
-
-            <h1 class="list-title">{{ .Title }}</h1>
-
-            {{ if .Params.description }}
-            <p class="list-subtitle">{{ .Params.description }}</p>
-            {{ end }}
-
-            {{ if or .Params.team .Params.placement }}
-            <div class="ctf-competition-info">
-                {{ if .Params.team }}
-                <div class="competition-stat">
-                    <span class="stat-label">Team:</span>
-                    <span class="stat-value">{{ .Params.team }}</span>
-                </div>
-                {{ end }}
-                {{ if .Params.placement }}
-                <div class="competition-stat">
-                    <span class="stat-label">Placement:</span>
-                    <span class="stat-value placement-{{ .Params.placement }}">{{ .Params.placement }}</span>
-                </div>
-                {{ end }}
-            </div>
-            {{ end }}
-        </header>
-
-        {{ if .Content }}
-        <div class="list-content">
-            {{ .Content }}
+<div class="list-page">
+    <header class="page-head">
+        {{ if .Params.image }}
+        <div class="ctf-logo-header" style="justify-content: flex-start;">
+            <img src="{{ .Params.image }}" alt="{{ .Title }} logo" class="ctf-logo">
         </div>
         {{ end }}
-
-        <section class="ctf-challenges">
-            <h2>Challenges</h2>
-            {{ if .Pages }}
-            <div class="challenges-grid">
-                {{ range .Pages.ByWeight.ByDate.Reverse }}
-                <article class="challenge-card">
-                    <a href="{{ .Permalink }}">
-                        {{ if .Params.image }}
-                        <div class="challenge-image {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), {{ end }}url('{{ .Params.image }}');"></div>
-                        {{ end }}
-                        <div class="challenge-header">
-                            {{ if not .IsSection }}
-                            <div class="challenge-category category-{{ .Params.challenge_category | default "misc" }}">
-                                {{ .Params.challenge_category | default "misc" | upper }}
-                            </div>
-                            {{ else }}
-                            <div class="challenge-category category-ctf">
-                                {{ .Params.ctf_type | default "CTF" | upper }}
-                            </div>
-                            {{ end }}
-                            {{ if eq (.Params.tags | jsonify) ("[\"first-blood\"]" | jsonify) }}
-                            <div class="first-blood-indicator">🩸</div>
-                            {{ end }}
-                        </div>
-
-                        <div class="challenge-content">
-                            <h3 class="challenge-title">{{ .Title }}</h3>
-                            <p class="challenge-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 120 }}{{ else }}{{ .Summary | truncate 120 }}{{ end }}</p>
-
-                            <div class="challenge-stats">
-                                {{ if .IsSection }}
-                                <span class="challenge-points">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
-                                {{ else }}
-                                {{ if .Params.challenge_points }}
-                                <span class="challenge-points">{{ .Params.challenge_points }} pts</span>
-                                {{ end }}
-                                {{ if .Params.challenge_solves }}
-                                <span class="challenge-solves">{{ .Params.challenge_solves }} solves</span>
-                                {{ end }}
-                                {{ end }}
-                            </div>
-                        </div>
-                    </a>
-                </article>
-                {{ end }}
-            </div>
-            {{ else }}
-            <p class="no-challenges">No writeups available yet for this competition.</p>
+        <div class="eyebrow"><span class="cat-mark cat-gold sm" aria-hidden="true"></span>CTF{{ if .Params.ctf_date }} &middot; {{ .Params.ctf_date }}{{ end }}</div>
+        <h1 class="page-title">{{ .Title }}</h1>
+        {{ if .Params.description }}<p class="page-sub">{{ .Params.description }}</p>{{ end }}
+        {{ if or .Params.team .Params.placement }}
+        <div class="page-head-meta">
+            {{ if .Params.team }}
+            <span class="competition-stat"><span class="stat-label">Team:</span><span class="stat-value">{{ .Params.team }}</span></span>
             {{ end }}
-        </section>
-    </div>
+            {{ if .Params.placement }}
+            <span class="competition-stat"><span class="stat-label">Placement:</span><span class="stat-value">{{ .Params.placement }}</span></span>
+            {{ end }}
+        </div>
+        {{ end }}
+    </header>
 
+    {{ if .Content }}
+    <div class="list-content">
+        {{ .Content }}
+    </div>
+    {{ end }}
+
+    <section class="ctf-challenges">
+        <h2>Challenges</h2>
+        {{ if .Pages }}
+        <div class="challenges-grid">
+            {{ range .Pages.ByWeight.ByDate.Reverse }}
+            <article class="challenge-card">
+                <a href="{{ .Permalink }}">
+                    {{ if .Params.image }}
+                    <div class="challenge-image {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(160deg, rgba(18,13,6,0.32), rgba(18,13,6,0.58)), {{ end }}url('{{ .Params.image }}');"></div>
+                    {{ end }}
+                    <div class="challenge-header">
+                        {{ if not .IsSection }}
+                        <div class="challenge-category category-{{ .Params.challenge_category | default "misc" }}">
+                            {{ .Params.challenge_category | default "misc" | upper }}
+                        </div>
+                        {{ else }}
+                        <div class="challenge-category category-ctf">
+                            {{ .Params.ctf_type | default "CTF" | upper }}
+                        </div>
+                        {{ end }}
+                        {{ if eq (.Params.tags | jsonify) ("[\"first-blood\"]" | jsonify) }}
+                        <div class="first-blood-indicator"><span class="cat-mark sm" aria-hidden="true"></span></div>
+                        {{ end }}
+                    </div>
+                    <div class="challenge-content">
+                        <h3 class="challenge-title">{{ .Title }}</h3>
+                        <p class="challenge-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 120 }}{{ else }}{{ .Summary | truncate 120 }}{{ end }}</p>
+                        <div class="challenge-stats">
+                            {{ if .IsSection }}
+                            <span class="challenge-points">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
+                            {{ else }}
+                            {{ if .Params.challenge_points }}
+                            <span class="challenge-points">{{ .Params.challenge_points }} pts</span>
+                            {{ end }}
+                            {{ if .Params.challenge_solves }}
+                            <span class="challenge-solves">{{ .Params.challenge_solves }} solves</span>
+                            {{ end }}
+                            {{ end }}
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {{ end }}
+        </div>
+        {{ else }}
+        <p class="no-challenges">No writeups available yet for this competition.</p>
+        {{ end }}
+    </section>
 </div>
 {{ end }}

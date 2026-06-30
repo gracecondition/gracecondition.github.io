@@ -2,7 +2,7 @@
     <div class="sidebar-content">
         <!-- BULLETPROOF SEARCH -->
         <div class="sidebar-section">
-            <h3 class="sidebar-title">🔍 Search</h3>
+            <h3 class="sidebar-title">Search</h3>
             <div class="search-container-robust">
                 <input type="text" id="search-input-robust" class="search-input-robust" placeholder="Type to search..." autocomplete="off">
                 <button id="search-clear-robust" class="search-clear-robust">×</button>
@@ -25,11 +25,11 @@
         <div class="sidebar-section">
             <h3 class="sidebar-title">Categories</h3>
             <div class="category-filters">
-                <button class="category-filter active" data-category="all">All Posts</button>
-                <button class="category-filter" data-category="research">🔬 Research</button>
-                <button class="category-filter" data-category="analysis">🔍 Analysis</button>
-                <button class="category-filter" data-category="tutorial">📚 Tutorial</button>
-                <button class="category-filter" data-category="ctf">🚩 CTF</button>
+                <button class="category-filter active" data-category="all">{{ partial "cat-mark.html" (dict "cat" "gold" "size" "sm") }}All Posts</button>
+                <button class="category-filter" data-category="research">{{ partial "cat-mark.html" (dict "cat" "research" "size" "sm") }}Research</button>
+                <button class="category-filter" data-category="analysis">{{ partial "cat-mark.html" (dict "cat" "analysis" "size" "sm") }}Analysis</button>
+                <button class="category-filter" data-category="tutorial">{{ partial "cat-mark.html" (dict "cat" "tutorial" "size" "sm") }}Tutorial</button>
+                <button class="category-filter" data-category="ctf">{{ partial "cat-mark.html" (dict "cat" "ctf" "size" "sm") }}CTF</button>
             </div>
         </div>
 
@@ -42,11 +42,7 @@
                     <a href="{{ .Permalink }}" class="recent-post-link">
                         <div class="recent-post-meta">
                             <span class="recent-post-category category-{{ .Params.category | default "security" }}">
-                                {{ if eq .Params.category "ctf" }}🚩
-                                {{ else if eq .Params.category "research" }}🔬
-                                {{ else if eq .Params.category "analysis" }}🔍
-                                {{ else if eq .Params.category "tutorial" }}📚
-                                {{ else }}🔐{{ end }}
+                                {{ partial "cat-mark.html" (dict "cat" (.Params.category | default "security") "size" "sm") }}
                             </span>
                             <time class="recent-post-date">{{ .Date.Format "Jan 2" }}</time>
                         </div>
@@ -68,10 +64,11 @@
             <div class="ctf-category-group">
                 {{ if .Key }}
                 <h4 class="ctf-category-title">
-                    {{ if eq .Key "wargame" }}🎯 Wargames
-                    {{ else if eq .Key "competition" }}🏆 Competitions
-                    {{ else if eq .Key "practice" }}💪 Practice
-                    {{ else }}🚩 {{ .Key | title }}{{ end }}
+                    {{ partial "cat-mark.html" (dict "cat" "gold" "size" "sm") }}
+                    {{ if eq .Key "wargame" }}Wargames
+                    {{ else if eq .Key "competition" }}Competitions
+                    {{ else if eq .Key "practice" }}Practice
+                    {{ else }}{{ .Key | title }}{{ end }}
                 </h4>
                 {{ end }}
                 <div class="ctf-competitions">
@@ -79,7 +76,7 @@
                     <article class="ctf-competition-item">
                         <a href="{{ .Permalink }}" class="ctf-competition-link">
                             <div class="ctf-competition-meta">
-                                <span class="ctf-badge-small">🚩</span>
+                                <span class="ctf-badge-small">{{ partial "cat-mark.html" (dict "cat" "ctf" "size" "sm") }}</span>
                                 {{ if .Params.ctf_date }}
                                 <time class="ctf-date-small">{{ .Params.ctf_date }}</time>
                                 {{ end }}
@@ -108,7 +105,7 @@
                 {{ if $ctfChallenges }}
                 <div class="category-group">
                     <h4 class="category-group-title">
-                        🚩 CTF Challenges
+                        {{ partial "cat-mark.html" (dict "cat" "ctf" "size" "sm") }}CTF Challenges
                         <span class="post-count">({{ len $ctfChallenges }})</span>
                     </h4>
                     <ul class="category-post-list">
@@ -133,11 +130,11 @@
                 {{ range $posts.GroupByParam "category" }}
                 <div class="category-group">
                     <h4 class="category-group-title">
-                        {{ if eq .Key "ctf" }}🚩 CTF
-                        {{ else if eq .Key "research" }}🔬 Research
-                        {{ else if eq .Key "analysis" }}🔍 Analysis
-                        {{ else if eq .Key "tutorial" }}📚 Tutorial
-                        {{ else }}🔐 {{ .Key | title }}{{ end }}
+                        {{ if eq .Key "ctf" }}{{ partial "cat-mark.html" (dict "cat" "ctf" "size" "sm") }}CTF
+                        {{ else if eq .Key "research" }}{{ partial "cat-mark.html" (dict "cat" "research" "size" "sm") }}Research
+                        {{ else if eq .Key "analysis" }}{{ partial "cat-mark.html" (dict "cat" "analysis" "size" "sm") }}Analysis
+                        {{ else if eq .Key "tutorial" }}{{ partial "cat-mark.html" (dict "cat" "tutorial" "size" "sm") }}Tutorial
+                        {{ else }}{{ partial "cat-mark.html" (dict "cat" (.Key | default "security") "size" "sm") }}{{ .Key | title }}{{ end }}
                         <span class="post-count">({{ len .Pages }})</span>
                     </h4>
                     <ul class="category-post-list">

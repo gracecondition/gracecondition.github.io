@@ -1,0 +1,11 @@
+{{- /* EMPYREAN: the small gilt-framed thumbnail at the head of an entry row.
+       Usage: {{ partial "entry-thumb.html" (dict "page" . "cat" $cat) }}
+       Falls back to the category Oculus when the page has no image. */ -}}
+{{- $page := .page -}}
+{{- $cat := .cat | default "security" -}}
+{{- $contain := eq $page.Params.image_fit "contain" -}}
+{{- if $page.Params.image -}}
+<span class="entry-thumb{{ if $contain }} entry-thumb-contain{{ end }}" style="background-image: url('{{ $page.Params.image }}');" aria-hidden="true"></span>
+{{- else -}}
+<span class="entry-thumb entry-thumb-empty" aria-hidden="true">{{ partial "cat-mark.html" (dict "cat" $cat "size" "lg") }}</span>
+{{- end -}}

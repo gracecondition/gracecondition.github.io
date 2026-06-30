@@ -1,0 +1,17 @@
+{{- /* Related posts, rendered at the foot of an article. */ -}}
+{{ $related := .Site.RegularPages.Related . | first 3 }}
+{{ with $related }}
+<section class="article-related">
+    <h3 class="eyebrow"><span class="cat-mark cat-gold sm" aria-hidden="true"></span>Related</h3>
+    <div class="related-grid">
+        {{ range . }}
+        {{ $cat := .Params.category | default (cond (eq .Type "ctf") "ctf" "security") }}
+        <a href="{{ .Permalink }}" class="related-card">
+            <span class="r-cat">{{ partial "cat-mark.html" (dict "cat" $cat "size" "sm") }}{{ $cat }}</span>
+            <span class="r-title">{{ .Title }}</span>
+            <span class="r-date">{{ .Date.Format "Jan 2, 2006" }}</span>
+        </a>
+        {{ end }}
+    </div>
+</section>
+{{ end }}

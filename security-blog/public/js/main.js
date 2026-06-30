@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Day / Nocturne theme toggle (pre-paint default is set in baseof.html)
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const root = document.documentElement;
+            const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            root.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+            // tell the hero waves to re-gild for the new time of day
+            window.dispatchEvent(new Event('themechange'));
+        });
+    }
+
     // Mobile navigation toggle
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
@@ -230,7 +243,7 @@ function initializeBulletproofSearch() {
     function highlightTerm(text, term) {
         if (!text || !term) return text;
         const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, '<strong style="background: var(--accent-color); color: white; padding: 1px 3px; border-radius: 2px;">$1</strong>');
+        return text.replace(regex, '<strong style="background: color-mix(in srgb, var(--gold) 24%, transparent); color: var(--ink); padding: 1px 3px; border-radius: 3px;">$1</strong>');
     }
 
     // Event listeners
@@ -1015,7 +1028,7 @@ function initializeMobileMermaid() {
             img.style.height = 'auto';
             img.style.display = 'block';
             img.style.margin = '0';
-            img.style.backgroundColor = '#0a0a0a';
+            img.style.backgroundColor = (getComputedStyle(document.documentElement).getPropertyValue('--marble') || '#1F1A12').trim();
             img.style.padding = '16px';
             img.style.borderRadius = '8px';
             img.style.boxSizing = 'border-box';

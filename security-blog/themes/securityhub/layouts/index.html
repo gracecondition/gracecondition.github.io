@@ -1,6 +1,6 @@
 {{ define "main" }}
 <section class="hero-section">
-    <canvas id="hero-wave-canvas" class="hero-waves" aria-hidden="true"></canvas>
+    <canvas id="hero-oculus-canvas" class="hero-oculus" aria-hidden="true"></canvas>
     <div class="hero-content">
         <h1 class="hero-title">{{ .Site.Params.hero.title | default "Security Research & Analysis" }}</h1>
         <p class="hero-subtitle">{{ .Site.Params.hero.subtitle | default "Exploring cybersecurity through research, analysis, and hands-on techniques" }}</p>
@@ -9,64 +9,52 @@
 </section>
 
 <section class="content-section">
-    <div class="section-container">
+    <div class="section-container narrow">
         <h2 class="section-title">Latest Content</h2>
-        <div class="posts-grid">
+        <div class="entry-list">
             {{ $pages := where .Site.RegularPages "Kind" "page" }}
             {{ range first 6 $pages }}
-            <article class="post-card">
-                <a href="{{ .Permalink }}">
-                    <div class="post-image post-image-{{ .Params.category | default (cond (eq .Type "ctf") "ctf" "security") }} {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" {{ if .Params.image }}style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), {{ end }}url('{{ .Params.image }}');"{{ end }}>
-                        {{ if not .Params.image }}
-                        <span class="post-icon">
-                            {{ if eq .Type "ctf" }}🚩
-                            {{ else if eq .Params.category "research" }}🔬
-                            {{ else if eq .Params.category "analysis" }}🔍
-                            {{ else if eq .Params.category "tutorial" }}📚
-                            {{ else if eq .Params.category "writeup" }}📝
-                            {{ else }}🔐{{ end }}
-                        </span>
-                        {{ end }}
+            {{ $cat := .Params.category | default (cond (eq .Type "ctf") "ctf" "security") }}
+            <a class="entry" href="{{ .Permalink }}">
+                {{ partial "entry-thumb.html" (dict "page" . "cat" $cat) }}
+                <div class="entry-body">
+                    <div class="entry-eyebrow">
+                        <span class="cat-mark cat-{{ $cat }} sm" aria-hidden="true"></span>
+                        <span>{{ if eq .Type "ctf" }}CTF{{ else }}{{ $cat }}{{ end }}</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ .Date.Format "Jan 2, 2006" }}</span>
                     </div>
-                    <div class="post-content">
-                        <h3 class="post-title">{{ .Title }}</h3>
-                        <p class="post-excerpt">{{ .Summary | truncate 160 }}</p>
-                        <div class="post-meta">
-                            <span class="post-date">{{ .Date.Format "Jan 2, 2006" }}</span>
-                            <span class="post-category">{{ if eq .Type "ctf" }}CTF{{ else }}{{ .Params.category | default "security" }}{{ end }}</span>
-                        </div>
-                    </div>
-                </a>
-            </article>
+                    <h3 class="entry-title">{{ .Title }}</h3>
+                    <p class="entry-summary">{{ .Summary | truncate 160 }}</p>
+                </div>
+            </a>
             {{ end }}
         </div>
     </div>
 </section>
 
 <section class="content-section" style="background-color: var(--background-secondary);">
-    <div class="section-container">
+    <div class="section-container narrow">
         <h2 class="section-title">CTF Writeups</h2>
-        <div class="posts-grid">
+        <div class="entry-list">
             {{ $ctfSection := .Site.GetPage "/ctf" }}
             {{ range $ctfSection.Pages }}
             {{ if .IsSection }}
-            <article class="post-card ctf-competition-card">
-                <a href="{{ .Permalink }}">
-                    <div class="post-image post-image-ctf" {{ if .Params.image }}style="background-image: url('{{ .Params.image }}');"{{ end }}>
-                        {{ if not .Params.image }}
-                        <span class="post-icon">🚩</span>
-                        {{ end }}
+            <a class="entry" href="{{ .Permalink }}">
+                {{ partial "entry-thumb.html" (dict "page" . "cat" "ctf") }}
+                <div class="entry-body">
+                    <div class="entry-eyebrow">
+                        <span class="cat-mark cat-ctf sm" aria-hidden="true"></span>
+                        <span>CTF</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
                     </div>
-                    <div class="post-content">
-                        <h3 class="post-title">{{ .Title }}</h3>
-                        <p class="post-excerpt">{{ .Params.description | default .Summary | truncate 140 }}</p>
-                        <div class="post-meta">
-                            <span class="post-date">{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
-                            <span class="post-category">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
-                        </div>
-                    </div>
-                </a>
-            </article>
+                    <h3 class="entry-title">{{ .Title }}</h3>
+                    <p class="entry-summary">{{ .Params.description | default .Summary | truncate 140 }}</p>
+                </div>
+            </a>
             {{ end }}
             {{ end }}
         </div>

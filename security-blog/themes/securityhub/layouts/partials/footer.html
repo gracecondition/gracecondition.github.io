@@ -9,12 +9,12 @@
             <h4>Quick Links</h4>
             <ul>
                 <li><a href="/posts/">Posts</a></li>
-                <li><a href="/articles/">Articles</a></li>
                 <li><a href="/ctf/">CTF Solutions</a></li>
                 <li><a href="/about/">About</a></li>
             </ul>
         </div>
 
+        {{ if or .Site.Params.twitter .Site.Params.github .Site.Params.linkedin }}
         <div class="footer-section">
             <h4>Connect</h4>
             <div class="social-links">
@@ -29,6 +29,7 @@
                 {{ end }}
             </div>
         </div>
+        {{ end }}
     </div>
 
     <div class="footer-bottom">

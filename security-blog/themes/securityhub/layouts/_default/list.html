@@ -1,59 +1,46 @@
 {{ define "main" }}
-<div class="content-with-sidebar">
-    {{ partial "sidebar.html" . }}
+<div class="list-page">
+    <header class="page-head">
+        <div class="eyebrow"><span class="cat-mark cat-gold sm" aria-hidden="true"></span>{{ len .Pages }} {{ cond (eq (len .Pages) 1) "entry" "entries" }}</div>
+        <h1 class="page-title">{{ .Title }}</h1>
+        {{ if .Params.description }}<p class="page-sub">{{ .Params.description }}</p>{{ end }}
+    </header>
 
-    <div class="main-column">
-        <header class="list-header">
-            <h1 class="list-title">{{ .Title }}</h1>
-            {{ if .Params.description }}
-            <p class="list-subtitle">{{ .Params.description }}</p>
-            {{ end }}
-        </header>
-
-        {{ if .Content }}
-        <div class="list-content">
-            {{ .Content }}
-        </div>
-        {{ end }}
-
-        <section class="posts-section">
-            <div class="posts-grid">
-                {{ range .Pages }}
-                {{ if or (ne .Section "ctf") .IsSection }}
-                <article class="post-card {{ if .IsSection }}ctf-competition-card{{ end }}">
-                    <a href="{{ .Permalink }}">
-                        <div class="post-image post-image-{{ if .IsSection }}ctf{{ else }}{{ .Params.category | default "security" }}{{ end }} {{ if eq .Params.image_fit "contain" }}contain-image{{ end }}" {{ if .Params.image }}{{ if .IsSection }}style="background-image: url('{{ .Params.image }}');"{{ else }}style="--bg-image: url('{{ .Params.image }}'); background-image: {{ if ne .Params.image_fit "contain" }}linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), {{ end }}url('{{ .Params.image }}');"{{ end }}{{ end }}>
-                            {{ if not .Params.image }}
-                            <span class="post-icon">
-                                {{ if .IsSection }}🚩
-                                {{ else if eq .Params.category "ctf" }}🚩
-                                {{ else if eq .Params.category "research" }}🔬
-                                {{ else if eq .Params.category "analysis" }}🔍
-                                {{ else if eq .Params.category "tutorial" }}📚
-                                {{ else if eq .Params.category "writeup" }}📝
-                                {{ else }}🔐{{ end }}
-                            </span>
-                            {{ end }}
-                        </div>
-                        <div class="post-content">
-                            <h3 class="post-title">{{ .Title }}</h3>
-                            <p class="post-excerpt">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 160 }}{{ else }}{{ .Summary | truncate 160 }}{{ end }}</p>
-                            <div class="post-meta">
-                                {{ if .IsSection }}
-                                <span class="post-date">{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
-                                <span class="post-category">{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
-                                {{ else }}
-                                <span class="post-date">{{ .Date.Format "Jan 2, 2006" }}</span>
-                                <span class="post-category">{{ .Params.category | default "security" }}</span>
-                                {{ end }}
-                            </div>
-                        </div>
-                    </a>
-                </article>
-                {{ end }}
-                {{ end }}
-            </div>
-        </section>
+    {{ if .Content }}
+    <div class="list-content">
+        {{ .Content }}
     </div>
+    {{ end }}
+
+    <section class="posts-section">
+        <div class="entry-list">
+            {{ range .Pages }}
+            {{ if or (ne .Section "ctf") .IsSection }}
+            {{ $cat := cond .IsSection "ctf" (.Params.category | default "security") }}
+            <a class="entry" href="{{ .Permalink }}">
+                {{ partial "entry-thumb.html" (dict "page" . "cat" $cat) }}
+                <div class="entry-body">
+                    <div class="entry-eyebrow">
+                        <span class="cat-mark cat-{{ $cat }} sm" aria-hidden="true"></span>
+                        {{ if .IsSection }}
+                        <span>CTF</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ .Params.ctf_date | default (.Date.Format "Jan 2, 2006") }}</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ len .Pages }} challenge{{ if ne (len .Pages) 1 }}s{{ end }}</span>
+                        {{ else }}
+                        <span>{{ $cat }}</span>
+                        <span class="sep" aria-hidden="true">&middot;</span>
+                        <span>{{ .Date.Format "Jan 2, 2006" }}</span>
+                        {{ end }}
+                    </div>
+                    <h3 class="entry-title">{{ .Title }}</h3>
+                    <p class="entry-summary">{{ if .IsSection }}{{ .Params.description | default .Summary | truncate 160 }}{{ else }}{{ .Summary | truncate 160 }}{{ end }}</p>
+                </div>
+            </a>
+            {{ end }}
+            {{ end }}
+        </div>
+    </section>
 </div>
 {{ end }}

@@ -14,8 +14,11 @@ theme = 'securityhub'
     guessSyntax = true
     lineNos = false
     lineNumbersInTable = false
-    noClasses = true
-    style = "monokai"
+    # Emit CSS classes (not inline colors) so code blocks can be theme-aware.
+    # Palettes live in themes/securityhub/static/css/chroma.css — regenerate with
+    #   hugo gen chromastyles --style=monokai   (dark / Nocturne)
+    #   hugo gen chromastyles --style=tango     (light / Day)
+    noClasses = false
     tabWidth = 4
 
 [params]
@@ -43,3 +46,20 @@ theme = 'securityhub'
 [outputs]
   home = ["HTML", "RSS"]
   section = ["HTML", "RSS"]
+
+# Related content (powers the "Related" block at the foot of articles).
+# Tuned for a small site: match on shared tags/category, include newer posts,
+# and a lower threshold so relations actually surface.
+[related]
+  includeNewer = true
+  threshold = 40
+  toLower = true
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+  [[related.indices]]
+    name = "category"
+    weight = 70
+  [[related.indices]]
+    name = "date"
+    weight = 10
